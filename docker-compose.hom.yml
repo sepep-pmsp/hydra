@@ -1,0 +1,180 @@
+version: "3.7"
+
+services:
+  # This service runs the postgres DB used by dagster for run storage, schedule storage,
+  # and event log storage.
+  dagster_db:
+    image: postgres:11
+    container_name: ${DAGSTER_PG_HOST}
+    environment:
+      POSTGRES_USER: ${DAGSTER_PG_USERNAME}
+      POSTGRES_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      POSTGRES_DB: ${DAGSTER_PG_DB}
+    networks:
+      - dagster_network
+
+  # This service runs the gRPC server that loads your user code, in both dagster-webserver
+  # and dagster-daemon. By setting DAGSTER_CURRENT_IMAGE to its own image, we tell the
+  # run launcher to use this same image when launching runs in a new container as well.
+  # Multiple containers like this can be deployed separately - each just needs to run on
+  # its own port, and have its own entry in the workspace.yaml file that's loaded by the
+  # webserver.
+  dagster_grpc:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_gRPC
+      args:
+        DAGSTER_HOME: ${DAGSTER_HOME}
+        DAGSTER_MODULE_NAME: ${DAGSTER_MODULE_NAME}
+    container_name: dagster_grpc
+    image: dagster_grpc
+    environment:
+      DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
+      DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
+      DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      DAGSTER_PG_DB: ${DAGSTER_PG_DB}
+      DAGSTER_CURRENT_IMAGE: "dagster_grpc"
+      DAGSTER_GRPC_HOST: "0.0.0.0"
+      DAGSTER_GRPC_PORT: "4000"
+      DAGSTER_WORKING_DIRECTORY: $DAGSTER_HOME
+      DAGSTER_MODULE_NAME: $DAGSTER_MODULE_NAME
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BRONZE_BUCKET_NAME: ${MINIO_BRONZE_BUCKET_NAME}
+      MINIO_SILVER_BUCKET_NAME: ${MINIO_SILVER_BUCKET_NAME}
+      MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
+      GOLD_DB_HOST: ${GOLD_DB_HOST}
+      GOLD_DB_PORT: ${GOLD_DB_PORT}
+      GOLD_DB_USER: ${GOLD_DB_USER}
+      GOLD_DB_PASSWORD: ${GOLD_DB_PASSWORD}
+      GOLD_DB_NAME: ${GOLD_DB_NAME}
+    volumes:
+      - ./${DAGSTER_MODULE_NAME}:${DAGSTER_HOME}${DAGSTER_MODULE_NAME}
+    entrypoint:
+      - dagster
+      - api
+      - grpc
+    restart: always
+    networks:
+      - dagster_network
+      - datalake_network
+
+  # This service runs dagster-webserver, which loads your user code from the user code container.
+  # Since our instance uses the QueuedRunCoordinator, any runs submitted from the webserver will be put on
+  # a queue and later dequeued and launched by dagster-daemon.
+  dagster_webserver:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_dagster
+    entrypoint:
+      - dagster-webserver
+      - -h
+      - "0.0.0.0"
+      - -p
+      - "3000"
+      - -w
+      - workspace.yaml
+    container_name: dagster_webserver
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    environment:
+      DAGSTER_HOME: ${DAGSTER_HOME}
+      DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
+      DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
+      DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      DAGSTER_PG_DB: ${DAGSTER_PG_DB}
+    volumes: # Make docker client accessible so we can terminate containers from the webserver
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/io_manager_storage:/tmp/io_manager_storage
+    networks:
+      - dagster_network
+    depends_on:
+      - dagster_db
+      - dagster_grpc
+      - minio
+      - gold_db
+
+  # This service runs dagster-webserver, which loads your user code from the user code container.
+  # Since our instance uses the QueuedRunCoordinator, any runs submitted from the webserver will be put on
+  # a queue and later dequeued and launched by dagster-daemon.
+  dagster_daemon:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_dagster
+    entrypoint:
+      - dagster-daemon
+      - run
+    container_name: dagster_daemon
+    environment:
+      DAGSTER_HOME: ${DAGSTER_HOME}
+      DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
+      DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
+      DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      DAGSTER_PG_DB: ${DAGSTER_PG_DB}
+    volumes: # Make docker client accessible so we can terminate containers from the webserver
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/io_manager_storage:/tmp/io_manager_storage
+    networks:
+      - dagster_network
+    depends_on:
+      - dagster_db
+      - dagster_grpc
+
+  # minio for bronze and silver tier database
+  minio:
+    image: minio/minio
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - 9000:9000
+    networks:
+      - datalake_network
+    command:
+      - server
+      - /data
+
+# minio client for the creation of bronze and silver tier buckets
+  createbuckets:
+    image: minio/mc
+    container_name: createbuckets
+    depends_on:
+      - minio
+    networks:
+      - datalake_network
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set minio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc mb minio/${MINIO_BRONZE_BUCKET_NAME};
+      /usr/bin/mc version enable minio/${MINIO_BRONZE_BUCKET_NAME};
+      /usr/bin/mc mb minio/${MINIO_SILVER_BUCKET_NAME};
+      /usr/bin/mc version enable minio/${MINIO_SILVER_BUCKET_NAME};
+      exit 0;
+      "
+
+# postgres for gold tier database
+  gold_db:
+    image: postgres:11
+    container_name: ${GOLD_DB_HOST}
+    environment:
+      POSTGRES_USER: ${GOLD_DB_USER}
+      POSTGRES_PASSWORD: ${GOLD_DB_PASSWORD}
+      POSTGRES_DB: ${GOLD_DB_NAME}
+    networks:
+      - datalake_network
+    expose:
+      - "${GOLD_DB_PORT}"
+    ports:
+      - "${GOLD_DB_PORT}:${GOLD_DB_PORT}"
+    command: -p ${GOLD_DB_PORT}
+            
+networks:
+  dagster_network:
+    driver: bridge
+    name: dagster_network
+  datalake_network:
+    driver: bridge
+    name: datalake_network

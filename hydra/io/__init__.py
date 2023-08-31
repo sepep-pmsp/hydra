@@ -1,0 +1,1 @@
+from .postgres_pandas_io_manager import postgres_pandas_io_manager
