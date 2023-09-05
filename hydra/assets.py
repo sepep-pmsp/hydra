@@ -87,14 +87,3 @@ def municipios_silver(
     )
 
     return mun_df.to_parquet()  # return df and the I/O manager will save it
-
-
-@asset(
-    io_manager_key="bronze_io_manager",
-)
-def distritos(
-    context: AssetExecutionContext,
-    geosampa_client: GeosampaClient
-) -> dict:
-
-    return geosampa_client.get_feature('distrito_municipal')
