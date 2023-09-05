@@ -10,7 +10,8 @@ RUN pip install \
     pyarrow \
     dagster_aws \
     httpx \
-    tenacity
+    tenacity \
+    xmltodict
 
 ARG DAGSTER_HOME
 
