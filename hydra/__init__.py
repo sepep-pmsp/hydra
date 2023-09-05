@@ -12,7 +12,7 @@ from dagster_aws.s3 import (
 )
 
 from . import assets
-from .resources import IBGE_api
+from .resources import IBGE_api, GeosampaClient
 from .io import postgres_pandas_io_manager
 
 all_assets = load_assets_from_modules([assets])
@@ -24,6 +24,8 @@ municipios_schedule = ScheduleDefinition(
 )
 
 ibge_api = IBGE_api()
+
+geosampa_client = GeosampaClient()
 
 gold_io_manager = postgres_pandas_io_manager.configured(
     {
@@ -54,6 +56,7 @@ defs = Definitions(
                 ), s3_bucket=EnvVar('MINIO_SILVER_BUCKET_NAME')
         ),
         'gold_io_manager': gold_io_manager,
-        'ibge_api': ibge_api
+        'ibge_api': ibge_api,
+        'geosampa_client': geosampa_client
     },
 )
