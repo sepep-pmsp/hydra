@@ -66,6 +66,8 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile_dagster
+      args:
+        DAGSTER_HOME: ${DAGSTER_HOME}
     entrypoint:
       - dagster-webserver
       - -h
@@ -103,6 +105,8 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile_dagster
+      args:
+        DAGSTER_HOME: ${DAGSTER_HOME}
     entrypoint:
       - dagster-daemon
       - run
