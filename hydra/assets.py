@@ -1,9 +1,12 @@
 import pandas as pd  # Add new imports to the top of `assets.py`
 from dagster import (
     AssetExecutionContext,
+    AssetOut,
     MetadataValue,
+    Output,
     asset,
     get_dagster_logger,
+    multi_asset,
 )  # import the `dagster` library
 
 from .resources import IBGE_api, GeosampaClient
@@ -87,3 +90,26 @@ def municipios_silver(
     )
 
     return mun_df.to_parquet()  # return df and the I/O manager will save it
+
+
+@multi_asset(
+    outs={
+        "distrito_municipal": AssetOut(
+            io_manager_key="bronze_io_manager",
+            dagster_type=dict,
+            is_required=False
+        ),
+        "setor_censitario_2010": AssetOut(
+            io_manager_key="bronze_io_manager",
+            dagster_type=dict,
+            is_required=False
+        )
+    },
+    can_subset=True
+)
+def camadas_geosampa(
+    context: AssetExecutionContext,
+    geosampa_client: GeosampaClient
+):
+    for camada in context.selected_output_names:
+        yield Output(geosampa_client.get_feature(camada), output_name=camada)
