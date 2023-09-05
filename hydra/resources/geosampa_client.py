@@ -1,9 +1,9 @@
 from dagster import ConfigurableResource
 
-from hydra.utils.geosampa_client import get_client
+from hydra.utils.geosampa_client import get_client, GeoSampaWfs
 
 class GeosampaClient(ConfigurableResource):
-    client = None
+    client : GeoSampaWfs = None
 
     def __init__(self):
         self.client = get_client()
