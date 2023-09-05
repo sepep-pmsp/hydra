@@ -1,6 +1,6 @@
 from dagster import ConfigurableResource
 
-from utils.geosampa_client import get_client
+from hydra.utils.geosampa_client import get_client
 
 class GeosampaClient(ConfigurableResource):
 
