@@ -25,6 +25,16 @@ municipios_schedule = ScheduleDefinition(
 
 ibge_api = IBGE_api()
 
+geosampa_job = define_asset_job(
+    'geosampa_job',
+    selection=AssetSelection.groups('geosampa_bronze', 'geosampa_silver')
+)
+
+geosampa_schedule = ScheduleDefinition(
+    job=geosampa_job, cron_schedule="0 4 * * *"  # diariamente às 04h00
+)
+
+
 geosampa_client = GeosampaClient()
 
 gold_io_manager = postgres_pandas_io_manager.configured(
