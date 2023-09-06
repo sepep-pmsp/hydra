@@ -92,18 +92,22 @@ def municipios_silver(
     return mun_df.to_parquet()  # return df and the I/O manager will save it
 
 
+# Método auxiliar para criar as definições de assets com valores padrão
+def default_geosampa_bronze(**kwargs) -> AssetOut:
+    default = dict(
+        group_name="geosampa_bronze",
+        io_manager_key="bronze_io_manager",
+        dagster_type=dict,
+        is_required=False
+    )
+    default.update(kwargs)
+    return AssetOut(**default)
+
+
 @multi_asset(
     outs={
-        "distrito_municipal": AssetOut(
-            io_manager_key="bronze_io_manager",
-            dagster_type=dict,
-            is_required=False
-        ),
-        "setor_censitario_2010": AssetOut(
-            io_manager_key="bronze_io_manager",
-            dagster_type=dict,
-            is_required=False
-        )
+        "distrito_municipal": default_geosampa_bronze(),
+        "setor_censitario_2010": default_geosampa_bronze()
     },
     can_subset=True
 )
