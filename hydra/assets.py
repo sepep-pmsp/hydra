@@ -8,6 +8,7 @@ from dagster import (
     get_dagster_logger,
     multi_asset,
 )  # import the `dagster` library
+import json
 
 from .resources import IBGE_api, GeosampaClient
 
@@ -115,5 +116,11 @@ def camadas_geosampa(
     context: AssetExecutionContext,
     geosampa_client: GeosampaClient
 ):
-    for camada in context.selected_output_names:
-        yield Output(geosampa_client.get_feature(camada), output_name=camada)
+    for nome_camada in context.selected_output_names:
+        camada = geosampa_client.get_feature(nome_camada)
+        yield Output(
+            camada,
+            output_name=nome_camada,
+            metadata={
+                'núm. features': len(camada['features'])
+            })
