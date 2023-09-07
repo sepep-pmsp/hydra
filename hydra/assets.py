@@ -8,10 +8,11 @@ from dagster import (
     get_dagster_logger,
     multi_asset,
 )  # import the `dagster` library
-import json
 
 from .resources import IBGE_api, GeosampaClient
+from .utils.io.files import read_json
 
+CAMADAS = read_json(file='camadas.json', path='./hydra')
 
 @asset(
     io_manager_key="bronze_io_manager",
@@ -93,7 +94,7 @@ def municipios_silver(
     return mun_df.to_parquet()  # return df and the I/O manager will save it
 
 
-# Método auxiliar para criar as definições de assets com valores padrão
+# Função auxiliar para criar as definições de assets com valores padrão
 def default_geosampa_bronze(**kwargs) -> AssetOut:
     default = dict(
         group_name="geosampa_bronze",
@@ -106,10 +107,7 @@ def default_geosampa_bronze(**kwargs) -> AssetOut:
 
 
 @multi_asset(
-    outs={
-        "distrito_municipal": default_geosampa_bronze(),
-        "setor_censitario_2010": default_geosampa_bronze()
-    },
+    outs={out: default_geosampa_bronze() for out in CAMADAS},
     can_subset=True
 )
 def camadas_geosampa(
