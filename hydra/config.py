@@ -1,4 +1,3 @@
-
 class Config:
     
     @staticmethod
@@ -13,7 +12,10 @@ class Config:
     @staticmethod
     def _censo_file_list() -> list:
         files = [
-            'Basico_SP1'
+            CensoFiles.BASICO
         ]
         return files
     
+class CensoFiles:
+    _SUFFIX = '_SP1'
+    BASICO = f'Basico{_SUFFIX}'
