@@ -4,10 +4,13 @@ from dagster import (
     MetadataValue,
     asset,
     get_dagster_logger,
+    load_assets_from_modules,
 )  # import the `dagster` library
 
 from .resources import IBGE_api
+from . import censo_assets as _censo_assets
 
+censo_assets = load_assets_from_modules([_censo_assets])
 
 @asset(
     io_manager_key="bronze_io_manager",
