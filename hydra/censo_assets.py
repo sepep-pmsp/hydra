@@ -2,15 +2,17 @@ from dagster import (
     AssetExecutionContext,
     AssetIn,
     AssetOut,
+    MetadataValue,
     Output,
     asset,
     multi_asset,
 )
 import requests
 from zipfile import ZipFile
-from io import BytesIO
+from io import BytesIO, StringIO
+import pandas as pd
 
-from .config import Config
+from .config import Config, CensoFiles
 
 # Função auxiliar para criar as definições de assets com valores padrão
 @staticmethod
@@ -60,3 +62,27 @@ def arquivos_censo(
                 f'primeiras {n} linhas': '\n'.join(peek)
             })
         
+
+@asset(
+        io_manager_key="bronze_io_manager",
+        ins={"csv_string": AssetIn(key=CensoFiles.BASICO)},
+        group_name="censo_bronze",
+)
+def basico_digest (
+    context: AssetExecutionContext, 
+    csv_string: str
+) -> pd.DataFrame:
+    context.log.info(f'Carregando o csv {CensoFiles.BASICO}')
+    
+    df = pd.read_csv(StringIO(csv_string), sep=';', decimal=',')
+    
+    n = 10
+
+    context.add_output_metadata(
+        metadata={
+            'registros': df.shape[0],
+            f'amostra de {n} linhas': MetadataValue.md(df.sample(n).to_markdown()),
+        }
+    )
+
+    return df
