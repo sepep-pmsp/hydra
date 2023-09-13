@@ -12,10 +12,12 @@ class Config:
     @staticmethod
     def _censo_file_list() -> list:
         files = [
-            CensoFiles.BASICO
+            CensoFiles.BASICO,
+            CensoFiles.DOMICILIO
         ]
         return files
     
 class CensoFiles:
     _SUFFIX = '_SP1'
     BASICO = f'Basico{_SUFFIX}'
+    DOMICILIO = f'Domicilio01{_SUFFIX}'
