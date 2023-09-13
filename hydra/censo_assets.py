@@ -15,7 +15,6 @@ import pandas as pd
 from .config import Config, CensoFiles
 
 # Função auxiliar para criar as definições de assets com valores padrão
-@staticmethod
 def _default_censo_bronze(**kwargs) -> AssetOut:
     default = dict(
         group_name="censo_bronze",
@@ -26,19 +25,34 @@ def _default_censo_bronze(**kwargs) -> AssetOut:
     default.update(kwargs)
     return AssetOut(**default)
 
-@multi_asset(
-    outs={asset_.get('name'): _default_censo_bronze() for asset_ in Config.get_asset_config().get('censo')},
-    can_subset=True
+
+@asset(
+        io_manager_key="bronze_io_manager",
+        group_name="censo_bronze",
 )
-def arquivos_censo(
+def arquivo_zip_censo(
     context: AssetExecutionContext
-):
+    ) -> bytes:
+
     url = 'https://ftp.ibge.gov.br/Censos/Censo_Demografico_2010/Resultados_do_Universo/Agregados_por_Setores_Censitarios/SP_Capital_20190823.zip'
     
     context.log.info(f'Baixando o arquivo zip de {url}')
     r = requests.get(url)
     context.log.info('Arquivo baixado')
-    zip_file = ZipFile(BytesIO(r.content))
+
+    return r.content
+
+
+@multi_asset(
+    outs={asset_.get('name'): _default_censo_bronze() for asset_ in Config.get_asset_config().get('censo')},
+    can_subset=True
+)
+def arquivos_csv_censo(
+    context: AssetExecutionContext,
+    arquivo_zip_censo: bytes
+):
+    context.log.info('Lendo o conteúdo do arquivo')
+    zip_file = ZipFile(BytesIO(arquivo_zip_censo))
 
     for nome_arquivo in context.selected_output_names:
 
