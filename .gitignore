@@ -1,4 +1,10 @@
 env
 .env
 **/**.pyc
+**/__pycache__/**
 **/**.vscode
+# Local dagster files
+logs
+.logs_queue
+.telemetry
+.nux
