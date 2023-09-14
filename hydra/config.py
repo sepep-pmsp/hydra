@@ -13,11 +13,11 @@ class Config:
     def _censo_file_list() -> list:
         files = [
             CensoFiles.BASICO,
-            CensoFiles.DOMICILIO
+            CensoFiles.DOMICILIO_01
         ]
         return files
     
 class CensoFiles:
     _SUFFIX = '_SP1'
     BASICO = f'Basico{_SUFFIX}'
-    DOMICILIO = f'Domicilio01{_SUFFIX}'
+    DOMICILIO_01 = f'Domicilio01{_SUFFIX}'
