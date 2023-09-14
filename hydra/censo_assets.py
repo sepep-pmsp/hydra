@@ -96,8 +96,37 @@ def basico_digest(
     # linha de cabeçalho. Primeiro removo o último ';' apenas dessa linha
     csv_string[0] = csv_string[0].rstrip(';')
 
-    df = pd.read_csv(StringIO('\n'.join(csv_string)), sep=';', decimal=',')
-    
+    dtypes = {
+        'Cod_setor': object,
+        'Cod_Grandes Regiões': object,
+        'Nome_Grande_Regiao': object,
+        'Cod_UF': object,
+        'Nome_da_UF': object,
+        'Cod_meso': object,
+        'Nome_da_meso': object,
+        'Cod_micro': object,
+        'Nome_da_micro': object,
+        'Cod_RM': object,
+        'Nome_da_RM': object,
+        'Cod_municipio': object,
+        'Nome_do_municipio': object,
+        'Cod_distrito': object,
+        'Nome_do_distrito': object,
+        'Cod_subdistrito': object,
+        'Nome_do_subdistrito': object,
+        'Cod_bairro': object,
+        'Nome_do_bairro': object,
+        'Situacao_setor': int,
+        'Tipo_setor': int,
+    }
+
+    df = pd.read_csv(
+        StringIO('\n'.join(csv_string)),
+        sep=';',
+        decimal=',',
+        dtype=dtypes
+        )
+
     n = 10
 
     context.add_output_metadata(
