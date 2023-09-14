@@ -89,6 +89,10 @@ def basico_digest (
 ) -> pd.DataFrame:
     context.log.info(f'Carregando o csv {CensoFiles.BASICO}')
     
+    # A primeira linha do csv veio com um separador sobrando no final da
+    # linha de cabeçalho. Primeiro removo o último ';' apenas dessa linha
+    csv_string[0] = csv_string[0].rstrip(';')
+
     df = pd.read_csv(StringIO('\n'.join(csv_string)), sep=';', decimal=',')
     
     n = 10
