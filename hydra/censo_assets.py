@@ -19,7 +19,7 @@ def _default_censo_bronze(**kwargs) -> AssetOut:
     default = dict(
         group_name="censo_bronze",
         io_manager_key="bronze_io_manager",
-        dagster_type=str,
+        dagster_type=list[str],
         is_required=False
     )
     default.update(kwargs)
@@ -70,9 +70,10 @@ def arquivos_csv_censo(
         
 
         yield Output(
-            '\n'.join(csv_string),
+            csv_string,
             output_name=nome_arquivo,
             metadata={
+                'número de linhas': len(csv_string),
                 f'primeiras {n} linhas': '\n'.join(peek)
             })
         
@@ -84,11 +85,11 @@ def arquivos_csv_censo(
 )
 def basico_digest (
     context: AssetExecutionContext, 
-    csv_string: str
+    csv_string: list[str]
 ) -> pd.DataFrame:
     context.log.info(f'Carregando o csv {CensoFiles.BASICO}')
     
-    df = pd.read_csv(StringIO(csv_string), sep=';', decimal=',')
+    df = pd.read_csv(StringIO('\n'.join(csv_string)), sep=';', decimal=',')
     
     n = 10
 
