@@ -7,6 +7,7 @@ from dagster import (
     asset,
     multi_asset,
 )
+import numpy as np
 import requests
 from zipfile import ZipFile
 from io import BytesIO, StringIO
@@ -125,7 +126,60 @@ def basico_digest(
         sep=';',
         decimal=',',
         dtype=dtypes
-        )
+    )
+
+    n = 10
+
+    context.add_output_metadata(
+        metadata={
+            'registros': df.shape[0],
+            f'amostra de {n} linhas': MetadataValue.md(df.sample(n).to_markdown()),
+        }
+    )
+
+    return df
+
+
+@asset(
+    io_manager_key="bronze_io_manager",
+    ins={"csv_string": AssetIn(key=CensoFiles.DOMICILIO_01)},
+    group_name="censo_bronze",
+)
+def domicilo01_digest(
+    context: AssetExecutionContext,
+    csv_string: list[str]
+) -> pd.DataFrame:
+    context.log.info(f'Carregando o csv {CensoFiles.DOMICILIO_01}')
+
+    # A primeira linha do csv veio com um separador sobrando no final da
+    # linha de cabeçalho. Primeiro removo o último ';' apenas dessa linha
+    csv_string[0] = csv_string[0].rstrip(';')
+
+    dtypes = {
+        'Cod_setor': object,
+        'Situacao_setor': int,
+    }
+
+    df = pd.read_csv(
+        StringIO('\n'.join(csv_string)),
+        sep=';',
+        decimal=',',
+        dtype=dtypes
+    )
+
+    # Esses arquivos possuem uma supressão de valores com a letra X
+    # A página 36 do arquivo BASE DE INFORMAÇÕES POR SETOR CENSTÁRIO explica em mais detalhes
+    # Por isso, precisamos tratar esses dados, que deveriam ser números inteiros
+    # Nesse momento, apenas substituo por valores nulos para facilitar o armazenamento posterior
+    df.replace('X', np.nan, inplace=True)
+    # Também substituo ',' por '.', para casos de números decimais
+    df.replace(',', '.', inplace=True)
+
+    # Por último, converto as colunas de variáveis do Censo (nomeadas V###) em float64, devido aos nulos
+    variable_columns = [col for col in df.columns if col.startswith('V')]
+    float_dtypes = {col: 'float64' for col in variable_columns}
+    dtypes.update(float_dtypes)
+    df = df.astype(dtypes)
 
     n = 10
 
