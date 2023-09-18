@@ -14,6 +14,7 @@ from io import BytesIO, StringIO
 import pandas as pd
 
 from .config import Config, CensoFiles
+from .resources import CensoResource
 
 # Função auxiliar para criar as definições de assets com valores padrão
 
@@ -34,16 +35,20 @@ def _default_censo_bronze(**kwargs) -> AssetOut:
     group_name="censo_bronze",
 )
 def arquivo_zip_censo(
-    context: AssetExecutionContext
+    context: AssetExecutionContext,
+    censo_resource: CensoResource
 ) -> bytes:
-
-    url = 'https://ftp.ibge.gov.br/Censos/Censo_Demografico_2010/Resultados_do_Universo/Agregados_por_Setores_Censitarios/SP_Capital_20190823.zip'
-
-    context.log.info(f'Baixando o arquivo zip de {url}')
-    r = requests.get(url)
+    context.log.info(f'Baixando o arquivo zip de {censo_resource.URL}')
+    file_content, file_hash = censo_resource.download_zipfile(return_hash=True)
     context.log.info('Arquivo baixado')
 
-    return r.content
+    context.add_output_metadata(
+        metadata={
+            'SHA256 Hash do arquivo': file_hash,
+        }
+    )
+
+    return file_content
 
 
 @multi_asset(
