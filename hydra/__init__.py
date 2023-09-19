@@ -11,12 +11,21 @@ from dagster_aws.s3 import (
     S3Resource
 )
 
+
 from . import assets
-from .resources import IBGE_api, GeosampaClient
+from .resources import (
+    IBGE_api,
+    GeosampaClient,
+    CensoResource,
+)
 from .io import postgres_pandas_io_manager
+from .schedules import censo_schedule
 
 all_assets = load_assets_from_modules([assets])
 
+municipios_job = define_asset_job(
+    "municipios_job", selection=AssetSelection.all()
+    )
 
 # Definições dos jobs
 geosampa_job = define_asset_job(
@@ -68,12 +77,28 @@ gold_io_manager = postgres_pandas_io_manager.configured(
 # Carregamento das definições
 defs = Definitions(
     assets=all_assets,
-    schedules=[geosampa_schedule],
+    schedules=[
+        geosampa_schedule,
+        censo_schedule,
+    ],
     resources={
-        "bronze_io_manager": bronze_io_manager,
-        "silver_io_manager": silver_io_manager,
+        "bronze_io_manager": ConfigurablePickledObjectS3IOManager(
+            s3_resource=S3Resource(
+                endpoint_url=EnvVar('MINIO_ENDPOINT_URL'),
+                aws_access_key_id=EnvVar('MINIO_ROOT_USER'),
+                aws_secret_access_key=EnvVar('MINIO_ROOT_PASSWORD'),
+            ), s3_bucket=EnvVar('MINIO_BRONZE_BUCKET_NAME')
+        ),
+        "silver_io_manager": ConfigurablePickledObjectS3IOManager(
+            s3_resource=S3Resource(
+                endpoint_url=EnvVar('MINIO_ENDPOINT_URL'),
+                aws_access_key_id=EnvVar('MINIO_ROOT_USER'),
+                aws_secret_access_key=EnvVar('MINIO_ROOT_PASSWORD'),
+            ), s3_bucket=EnvVar('MINIO_SILVER_BUCKET_NAME')
+        ),
         'gold_io_manager': gold_io_manager,
         'ibge_api': ibge_api,
-        'geosampa_client': geosampa_client
+        'geosampa_client': geosampa_client,
+        'censo_resource': CensoResource(),
     },
 )

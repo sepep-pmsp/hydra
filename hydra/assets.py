@@ -6,13 +6,21 @@ from dagster import (
     Output,
     asset,
     get_dagster_logger,
+    load_assets_from_modules,
     multi_asset,
 )  # import the `dagster` library
 
-from .resources import IBGE_api, GeosampaClient
+from .resources import (
+    IBGE_api,
+    GeosampaClient,
+    )
+from . import censo_assets as _censo_assets
+
 from .utils.io.files import read_json
 
 CAMADAS = read_json(file='camadas.json', path='./hydra')
+
+censo_assets = load_assets_from_modules([_censo_assets])
 
 @asset(
     io_manager_key="bronze_io_manager",
