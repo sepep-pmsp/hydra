@@ -8,7 +8,10 @@ RUN pip install \
     dagster-postgres \
     pandas \
     pyarrow \
-    dagster_aws
+    dagster_aws \
+    httpx \
+    tenacity \
+    xmltodict
 
 ARG DAGSTER_HOME
 

@@ -13,20 +13,56 @@ from dagster_aws.s3 import (
 
 
 from . import assets
-from .resources import IBGE_api, CensoResource
+from .resources import (
+    IBGE_api,
+    GeosampaClient,
+    CensoResource,
+)
 from .io import postgres_pandas_io_manager
 from .schedules import censo_schedule
 
 all_assets = load_assets_from_modules([assets])
 
 municipios_job = define_asset_job(
-    "municipios_job", selection=AssetSelection.all())
+    "municipios_job", selection=AssetSelection.all()
+    )
 
-municipios_schedule = ScheduleDefinition(
-    job=municipios_job, cron_schedule="*/10 * * * *"  # every 10 minutes
+# Definições dos jobs
+geosampa_job = define_asset_job(
+    'geosampa_job',
+    selection=AssetSelection.groups('geosampa_bronze', 'geosampa_silver')
 )
 
+
+# Definições dos schedules
+geosampa_schedule = ScheduleDefinition(
+    job=geosampa_job, cron_schedule="0 4 * * *"  # diariamente às 04h00
+)
+
+
+# Definições dos resources
+geosampa_client = GeosampaClient()
+
 ibge_api = IBGE_api()
+
+
+# Definições dos managers
+
+bronze_io_manager = ConfigurablePickledObjectS3IOManager(
+    s3_resource=S3Resource(
+        endpoint_url=EnvVar('MINIO_ENDPOINT_URL'),
+        aws_access_key_id=EnvVar('MINIO_ROOT_USER'),
+        aws_secret_access_key=EnvVar('MINIO_ROOT_PASSWORD'),
+    ), s3_bucket=EnvVar('MINIO_BRONZE_BUCKET_NAME')
+)
+
+silver_io_manager = ConfigurablePickledObjectS3IOManager(
+    s3_resource=S3Resource(
+        endpoint_url=EnvVar('MINIO_ENDPOINT_URL'),
+        aws_access_key_id=EnvVar('MINIO_ROOT_USER'),
+        aws_secret_access_key=EnvVar('MINIO_ROOT_PASSWORD'),
+    ), s3_bucket=EnvVar('MINIO_SILVER_BUCKET_NAME')
+)
 
 gold_io_manager = postgres_pandas_io_manager.configured(
     {
@@ -38,10 +74,11 @@ gold_io_manager = postgres_pandas_io_manager.configured(
     }
 )
 
+# Carregamento das definições
 defs = Definitions(
     assets=all_assets,
     schedules=[
-        municipios_schedule,
+        geosampa_schedule,
         censo_schedule,
     ],
     resources={
@@ -61,6 +98,7 @@ defs = Definitions(
         ),
         'gold_io_manager': gold_io_manager,
         'ibge_api': ibge_api,
-        'censo_resource': CensoResource()
+        'geosampa_client': geosampa_client,
+        'censo_resource': CensoResource(),
     },
 )
