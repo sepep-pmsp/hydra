@@ -24,7 +24,7 @@ geosampa_schedule = ScheduleDefinition(
 
 @schedule(
     job=censo_job,
-    cron_schedule='0/3 * * * *',
+    cron_schedule='0 3 * * *',
     default_status=DefaultScheduleStatus.RUNNING
 )
 def censo_schedule(
