@@ -19,26 +19,16 @@ from .resources import (
     CensoResource,
 )
 from .io import postgres_pandas_io_manager
-from .schedules import censo_schedule
+from .schedules import (
+    censo_schedule,
+    geosampa_schedule,
+)
 
 all_assets = load_assets_from_modules([assets])
 
 municipios_job = define_asset_job(
     "municipios_job", selection=AssetSelection.all()
     )
-
-# Definições dos jobs
-geosampa_job = define_asset_job(
-    'geosampa_job',
-    selection=AssetSelection.groups('geosampa_bronze', 'geosampa_silver')
-)
-
-
-# Definições dos schedules
-geosampa_schedule = ScheduleDefinition(
-    job=geosampa_job, cron_schedule="0 4 * * *"  # diariamente às 04h00
-)
-
 
 # Definições dos resources
 geosampa_client = GeosampaClient()
