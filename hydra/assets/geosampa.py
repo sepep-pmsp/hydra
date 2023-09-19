@@ -6,11 +6,7 @@ from dagster import (
 )  # import the `dagster` library
 
 from ..resources import GeosampaClient
-
-from ..utils.io.files import read_json
-
-CAMADAS = read_json(file='camadas.json', path='./hydra')
-
+from ..config import GeosampaConfig
 
 # Função auxiliar para criar as definições de assets com valores padrão
 def default_geosampa_bronze(**kwargs) -> AssetOut:
@@ -25,7 +21,8 @@ def default_geosampa_bronze(**kwargs) -> AssetOut:
 
 
 @multi_asset(
-    outs={out: default_geosampa_bronze() for out in CAMADAS},
+    outs={asset_.get('name'): default_geosampa_bronze()
+          for asset_ in GeosampaConfig.get_asset_config().get('geosampa')},
     can_subset=True
 )
 def camadas_geosampa(

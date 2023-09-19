@@ -13,7 +13,7 @@ from zipfile import ZipFile
 from io import BytesIO, StringIO
 import pandas as pd
 
-from ..config import Config, CensoFiles
+from ..config import CensoConfig, CensoFiles
 from ..resources import CensoResource
 
 # Função auxiliar para criar as definições de assets com valores padrão
@@ -53,7 +53,7 @@ def arquivo_zip_censo(
 
 @multi_asset(
     outs={asset_.get('name'): _default_censo_bronze()
-          for asset_ in Config.get_asset_config().get('censo')},
+          for asset_ in CensoConfig.get_asset_config().get('censo')},
     can_subset=True
 )
 def arquivos_csv_censo(

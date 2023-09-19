@@ -1,10 +1,12 @@
-class Config:
+
+
+class CensoConfig:
     
     @staticmethod
     def get_asset_config() -> dict:
         
         asset_config ={
-            'censo': [dict(name=name_) for name_ in Config._censo_file_list()],
+            'censo': [dict(name=name_) for name_ in CensoConfig._censo_file_list()],
         }
             
         return asset_config
