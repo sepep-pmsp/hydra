@@ -1,5 +1,6 @@
 from dagster import (
     AssetKey,
+    ScheduleDefinition,
     DefaultScheduleStatus,
     RunRequest,
     ScheduleEvaluationContext,
@@ -8,12 +9,22 @@ from dagster import (
 )
 
 from .resources import CensoResource
-from .jobs import censo_job
+from .jobs import (
+    censo_job,
+    geosampa_job,
+)
+
+
+geosampa_schedule = ScheduleDefinition(
+    job=geosampa_job,
+    cron_schedule="0 4 * * *",
+    default_status=DefaultScheduleStatus.RUNNING
+)
 
 
 @schedule(
     job=censo_job,
-    cron_schedule='0/3 * * * *',
+    cron_schedule='0 3 * * *',
     default_status=DefaultScheduleStatus.RUNNING
 )
 def censo_schedule(
