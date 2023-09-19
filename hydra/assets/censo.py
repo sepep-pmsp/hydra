@@ -13,8 +13,8 @@ from zipfile import ZipFile
 from io import BytesIO, StringIO
 import pandas as pd
 
-from .config import Config, CensoFiles
-from .resources import CensoResource
+from ..config import Config, CensoFiles
+from ..resources import CensoResource
 
 # Função auxiliar para criar as definições de assets com valores padrão
 
