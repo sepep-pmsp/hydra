@@ -15,6 +15,7 @@ import pandas as pd
 
 from ..config import CensoConfig, CensoFiles
 from ..resources import CensoResource
+from ..utils.io.files import generate_file_hash
 
 # Função auxiliar para criar as definições de assets com valores padrão
 
@@ -39,16 +40,19 @@ def arquivo_zip_censo(
     censo_resource: CensoResource
 ) -> bytes:
     context.log.info(f'Baixando o arquivo zip de {censo_resource.URL}')
-    file_content, file_hash = censo_resource.download_zipfile(return_hash=True)
+
+    zip_content = censo_resource.download_zipfile()
+    zip_hash = generate_file_hash(zip_content)
+
     context.log.info('Arquivo baixado')
 
     context.add_output_metadata(
         metadata={
-            'SHA256 Hash do arquivo': file_hash,
+            'SHA256 Hash do arquivo': zip_hash,
         }
     )
 
-    return file_content
+    return zip_content
 
 
 @multi_asset(

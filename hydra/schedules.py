@@ -13,6 +13,7 @@ from .jobs import (
     censo_job,
     geosampa_job,
 )
+from .utils.io.files import generate_file_hash
 
 
 geosampa_schedule = ScheduleDefinition(
@@ -31,7 +32,8 @@ def censo_schedule(
         context: ScheduleEvaluationContext,
         censo_resource: CensoResource,
 ):
-    zip_content, zip_hash = censo_resource.download_zipfile(return_hash=True)
+    zip_content = censo_resource.download_zipfile()
+    zip_hash = generate_file_hash(zip_content)
 
     materialization_event = context.instance.get_latest_materialization_event(
         AssetKey(['arquivo_zip_censo'])
