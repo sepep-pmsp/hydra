@@ -95,6 +95,9 @@ services:
       DAGSTER_PG_DB: ${DAGSTER_PG_DB}
       DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR: ${DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR}
       DAGSTER_COMPUTE_LOGS_BUCKET: ${DAGSTER_COMPUTE_LOGS_BUCKET}
+      MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     volumes: # Make docker client accessible so we can terminate containers from the webserver
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/io_manager_storage:/tmp/io_manager_storage
@@ -128,6 +131,9 @@ services:
       DAGSTER_PG_DB: ${DAGSTER_PG_DB}
       DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR: ${DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR}
       DAGSTER_COMPUTE_LOGS_BUCKET: ${DAGSTER_COMPUTE_LOGS_BUCKET}
+      MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     volumes: # Make docker client accessible so we can terminate containers from the webserver
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/io_manager_storage:/tmp/io_manager_storage
