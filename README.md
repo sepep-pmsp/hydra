@@ -17,9 +17,11 @@ Este projeto visa criar um ambiente robusto para coleta, conformação, armazena
 
 ### Estrutura do Diretório
 
+- `requirements.txt`: arquivo requirements do pip para o ambiente de desenvolvimento;
 - `docker-compose.dev.yml`: arquivo compose do ambiente de desenvolvimento;
 - `docker-compose.hom.yml`: arquivo compose do ambiente de homologação;
-- `docker-compose.prod.yml`: arquivo compose do ambiente de produção;
+- `hydra`: módulo principal com os arquivos responsáveis pelos fluxos de dados;
+- `hydra_tests`: módulo de testes unitários;
 - `README.md`: Este arquivo.
 
 ### Configuração do Ambiente
@@ -35,11 +37,19 @@ Este projeto visa criar um ambiente robusto para coleta, conformação, armazena
    ```bash
    docker-compose -f [arquivo do ambiente escolhido] up -d
    ```
-   
+
+#### Configuração Adicional do Ambiente de Desenvolvimento
+
+Para permitir a execução local do dagster e a utilização de um debugger, são necessários alguns passos adicionais.
+
+1. **Instalação das dependências python**: Instale as dependências localmente com `pip install -r requirements.txt`;
+
+2. **Executar o dagster em modo de desenvolvimento**: Executar o `dagster` localmente em modo de desenvolvimento com o comando `dagster dev -m hydra`.
+
 ### Acesso aos Serviços
 
 - **Dagster**: Acesse a interface do Dagster em `http://localhost:3000`.
-- **MinIO**: O MinIO estará disponível em `http://localhost:9000`, onde você pode acessar os buckets de dados.
-- **Postgres/PostGIS**: Configure suas ferramentas de gerenciamento de banco de dados para se conectar à instância Postgres, usando as credenciais fornecidas no arquivo `.env`.
+- **MinIO**: O MinIO estará disponível em `http://localhost:9000`, onde você pode acessar os serviços de dados do MinIO.
+- **MinIO Console**: O MinIO Console estará disponível em `http://localhost:9001`, onde você pode acessar o console de gerenciamento do MinIO.
 
 Se você tiver dúvidas ou precisar de ajuda, fique à vontade para criar uma **Issue** neste repositório. 🚀🌊🗺️

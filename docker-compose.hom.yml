@@ -30,19 +30,24 @@ services:
     image: dagster_grpc
     environment:
       DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
+      DAGSTER_PG_PORT: ${DAGSTER_PG_PORT}
       DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
       DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
       DAGSTER_PG_DB: ${DAGSTER_PG_DB}
       DAGSTER_CURRENT_IMAGE: "dagster_grpc"
       DAGSTER_GRPC_HOST: "0.0.0.0"
       DAGSTER_GRPC_PORT: "4000"
-      DAGSTER_WORKING_DIRECTORY: $DAGSTER_HOME
-      DAGSTER_MODULE_NAME: $DAGSTER_MODULE_NAME
+      DAGSTER_WORKING_DIRECTORY: ${DAGSTER_HOME}
+      DAGSTER_MODULE_NAME: ${DAGSTER_MODULE_NAME}
+      DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR: ${DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR}
+      DAGSTER_COMPUTE_LOGS_BUCKET: ${DAGSTER_COMPUTE_LOGS_BUCKET}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_BRONZE_BUCKET_NAME: ${MINIO_BRONZE_BUCKET_NAME}
       MINIO_SILVER_BUCKET_NAME: ${MINIO_SILVER_BUCKET_NAME}
       MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       GOLD_DB_HOST: ${GOLD_DB_HOST}
       GOLD_DB_PORT: ${GOLD_DB_PORT}
       GOLD_DB_USER: ${GOLD_DB_USER}
@@ -78,15 +83,21 @@ services:
       - workspace.yaml
     container_name: dagster_webserver
     expose:
-      - "3000"
+      - 3000
     ports:
-      - "3000:3000"
+      - 3000:3000
     environment:
       DAGSTER_HOME: ${DAGSTER_HOME}
       DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
+      DAGSTER_PG_PORT: ${DAGSTER_PG_PORT}
       DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
       DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
       DAGSTER_PG_DB: ${DAGSTER_PG_DB}
+      DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR: ${DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR}
+      DAGSTER_COMPUTE_LOGS_BUCKET: ${DAGSTER_COMPUTE_LOGS_BUCKET}
+      MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     volumes: # Make docker client accessible so we can terminate containers from the webserver
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/io_manager_storage:/tmp/io_manager_storage
@@ -114,9 +125,15 @@ services:
     environment:
       DAGSTER_HOME: ${DAGSTER_HOME}
       DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
+      DAGSTER_PG_PORT: ${DAGSTER_PG_PORT}
       DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
       DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
       DAGSTER_PG_DB: ${DAGSTER_PG_DB}
+      DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR: ${DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR}
+      DAGSTER_COMPUTE_LOGS_BUCKET: ${DAGSTER_COMPUTE_LOGS_BUCKET}
+      MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     volumes: # Make docker client accessible so we can terminate containers from the webserver
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/io_manager_storage:/tmp/io_manager_storage
@@ -133,13 +150,19 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    expose:
+      - 9000
+      - 9001
     ports:
       - 9000:9000
+      - 9001:9001
     networks:
       - datalake_network
     command:
       - server
       - /data
+      - --console-address
+      - :9001
 
 # minio client for the creation of bronze and silver tier buckets
   createbuckets:
@@ -151,7 +174,8 @@ services:
       - datalake_network
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc alias set minio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc alias set minio ${MINIO_ENDPOINT_URL} ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc mb minio/${DAGSTER_COMPUTE_LOGS_BUCKET};
       /usr/bin/mc mb minio/${MINIO_BRONZE_BUCKET_NAME};
       /usr/bin/mc version enable minio/${MINIO_BRONZE_BUCKET_NAME};
       /usr/bin/mc mb minio/${MINIO_SILVER_BUCKET_NAME};
@@ -170,9 +194,9 @@ services:
     networks:
       - datalake_network
     expose:
-      - "${GOLD_DB_PORT}"
+      - ${GOLD_DB_PORT}
     ports:
-      - "${GOLD_DB_PORT}:${GOLD_DB_PORT}"
+      - ${GOLD_DB_PORT}:${GOLD_DB_PORT}
     command: -p ${GOLD_DB_PORT}
             
 networks:

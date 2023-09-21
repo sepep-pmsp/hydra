@@ -2,7 +2,6 @@ from dagster import (
     AssetSelection,
     Definitions,
     EnvVar,
-    ScheduleDefinition,
     define_asset_job,
     load_assets_from_modules,
 )

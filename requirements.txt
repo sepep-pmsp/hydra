@@ -1,0 +1,10 @@
+dagster==1.4.15
+dagster-aws==0.20.15
+dagster-graphql==1.4.15
+dagster-postgres==0.20.15
+dagster-webserver==1.4.15
+pandas==2.1.0
+pyarrow==13.0.0
+httpx==0.24.1
+tenacity==8.2.3
+xmltodict==0.13.0
