@@ -4,6 +4,7 @@ env
 **/__pycache__/**
 **/**.vscode
 # Local dagster files
+local
 logs
 .logs_queue
 .telemetry

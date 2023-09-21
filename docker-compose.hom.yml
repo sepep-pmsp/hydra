@@ -43,6 +43,8 @@ services:
       MINIO_BRONZE_BUCKET_NAME: ${MINIO_BRONZE_BUCKET_NAME}
       MINIO_SILVER_BUCKET_NAME: ${MINIO_SILVER_BUCKET_NAME}
       MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       GOLD_DB_HOST: ${GOLD_DB_HOST}
       GOLD_DB_PORT: ${GOLD_DB_PORT}
       GOLD_DB_USER: ${GOLD_DB_USER}
@@ -78,9 +80,9 @@ services:
       - workspace.yaml
     container_name: dagster_webserver
     expose:
-      - "3000"
+      - 3000
     ports:
-      - "3000:3000"
+      - 3000:3000
     environment:
       DAGSTER_HOME: ${DAGSTER_HOME}
       DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
@@ -170,9 +172,9 @@ services:
     networks:
       - datalake_network
     expose:
-      - "${GOLD_DB_PORT}"
+      - ${GOLD_DB_PORT}
     ports:
-      - "${GOLD_DB_PORT}:${GOLD_DB_PORT}"
+      - ${GOLD_DB_PORT}:${GOLD_DB_PORT}
     command: -p ${GOLD_DB_PORT}
             
 networks:
