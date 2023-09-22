@@ -3,6 +3,7 @@ env
 **/**.pyc
 **/__pycache__/**
 **/**.vscode
+**ipynb**
 # Local dagster files
 local
 logs

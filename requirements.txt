@@ -4,6 +4,8 @@ dagster-graphql==1.4.15
 dagster-postgres==0.20.15
 dagster-webserver==1.4.15
 pandas==2.1.0
+geopandas==0.14.0
+matplotli==3.8.0
 pyarrow==13.0.0
 httpx==0.24.1
 tenacity==8.2.3

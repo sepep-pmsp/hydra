@@ -7,6 +7,8 @@ RUN pip install \
     dagster \
     dagster-postgres \
     pandas \
+    geopandas \
+    matplotlib \
     pyarrow \
     dagster_aws \
     httpx \
