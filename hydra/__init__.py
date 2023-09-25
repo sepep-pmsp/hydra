@@ -71,20 +71,8 @@ defs = Definitions(
         censo_schedule,
     ],
     resources={
-        "bronze_io_manager": ConfigurablePickledObjectS3IOManager(
-            s3_resource=S3Resource(
-                endpoint_url=EnvVar('MINIO_ENDPOINT_URL'),
-                aws_access_key_id=EnvVar('MINIO_ROOT_USER'),
-                aws_secret_access_key=EnvVar('MINIO_ROOT_PASSWORD'),
-            ), s3_bucket=EnvVar('MINIO_BRONZE_BUCKET_NAME')
-        ),
-        "silver_io_manager": ConfigurablePickledObjectS3IOManager(
-            s3_resource=S3Resource(
-                endpoint_url=EnvVar('MINIO_ENDPOINT_URL'),
-                aws_access_key_id=EnvVar('MINIO_ROOT_USER'),
-                aws_secret_access_key=EnvVar('MINIO_ROOT_PASSWORD'),
-            ), s3_bucket=EnvVar('MINIO_SILVER_BUCKET_NAME')
-        ),
+        "bronze_io_manager": bronze_io_manager,
+        "silver_io_manager": silver_io_manager,
         'gold_io_manager': gold_io_manager,
         'ibge_api': ibge_api,
         'geosampa_client': geosampa_client,
