@@ -154,7 +154,7 @@ def basico_digest(
     ins={"csv_string": AssetIn(key=CensoFiles.DOMICILIO_01)},
     group_name="censo_bronze",
 )
-def domicilo01_digest(
+def domicilio01_digest(
     context: AssetExecutionContext,
     csv_string: list[str]
 ) -> pd.DataFrame:
