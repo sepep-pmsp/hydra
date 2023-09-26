@@ -35,7 +35,7 @@ def setor_censitario_enriched(
     cols = CensoConfig.get_columns_for_file(CensoFiles.DOMICILIO_01)
 
     df_censo = df_censo[list(cols.keys())]
-    
+
     # Renomeio as colunas para evitar duplicidade
     df_censo = df_censo.rename(columns=cols)
 
@@ -48,17 +48,21 @@ def setor_censitario_enriched(
     )
 
     context.log.info(
-        f'Total de registros antes do merge: {setor_censitario_2010.shape[0]}')
+        f'Total de registros antes do merge: {setor_censitario_2010.shape[0]}'
+    )
     context.log.info(
-        f'Total de registros depois do merge: {df_setor_enriched.shape[0]}')
+        f'Total de registros depois do merge: {df_setor_enriched.shape[0]}'
+    )
 
     missings = df_setor_enriched['Cod_setor'].isna()
     context.log.info(
-        f'Total de missings no merge: {df_setor_enriched[missings].shape[0]}')
+        f'Total de missings no merge: {df_setor_enriched[missings].shape[0]}'
+    )
 
     missings_supress = df_setor_enriched[CensoFiles.DOMICILIO_01 + '_V012'].isna()
     context.log.info(
-        f'Total de missings + supressão depois do merge: {df_setor_enriched[missings_supress].shape[0]}')
+        f'Total de missings + supressão depois do merge: {df_setor_enriched[missings_supress].shape[0]}'
+    )
 
     n = 10
 
