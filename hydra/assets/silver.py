@@ -50,8 +50,9 @@ def setor_censitario_enriched(
     context.log.info(
         f'Total de registros antes do merge: {setor_censitario_2010.shape[0]}'
     )
+    total_registros = df_setor_enriched.shape[0]
     context.log.info(
-        f'Total de registros depois do merge: {df_setor_enriched.shape[0]}'
+        f'Total de registros depois do merge: {total_registros}'
     )
 
     missings = df_setor_enriched['Cod_setor'].isna()
@@ -60,8 +61,13 @@ def setor_censitario_enriched(
     )
 
     missings_supress = df_setor_enriched[CensoFiles.DOMICILIO_01 + '_V012'].isna()
+    total_missing_supress = df_setor_enriched[missings_supress].shape[0]
     context.log.info(
-        f'Total de missings + supressão depois do merge: {df_setor_enriched[missings_supress].shape[0]}'
+        f'Total de missings + supressão depois do merge: {total_missing_supress}'
+    )
+
+    context.log.info(
+        f'Percentual de missings + supressão depois do merge: {total_missing_supress/total_registros:.2%}'
     )
 
     n = 10
