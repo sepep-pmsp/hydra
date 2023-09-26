@@ -32,15 +32,12 @@ def setor_censitario_enriched(
     assert setor_censitario_2010['cd_original_setor_censitario'].dtype == df_censo['Cod_setor'].dtype
 
     # Então filtro as colunas na tabela do censo
-    df_censo = df_censo[
-        ['Cod_setor'] +
-        CensoConfig.get_columns_for_file(CensoFiles.DOMICILIO_01)
-    ]
+    cols = CensoConfig.get_columns_for_file(CensoFiles.DOMICILIO_01)
+
+    df_censo = df_censo[list(cols.keys())]
     
     # Renomeio as colunas para evitar duplicidade
-    cols = [col for col in df_censo.columns if col.startswith('V')]
-    new_cols = {col: CensoFiles.DOMICILIO_01 + '_' + col for col in cols}
-    df_censo = df_censo.rename(columns=new_cols)
+    df_censo = df_censo.rename(columns=cols)
 
     # Faço o merge
     df_setor_enriched = setor_censitario_2010.merge(
