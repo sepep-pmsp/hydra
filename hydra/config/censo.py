@@ -19,6 +19,34 @@ class CensoConfig:
         ]
         return files
     
+    @staticmethod
+    def get_columns_for_file(file:str) -> dict:
+        renamed_columns = []
+        if file == CensoFiles.DOMICILIO_01:
+            columns = [
+                'V001',
+                'V002',
+                'V012',
+                'V013',
+                'V014',
+                'V017',
+                'V018',
+                'V019',
+                'V020',
+                'V021',
+                'V035',
+                'V039',
+                'V040',
+                'V041'
+            ]
+        original_columns = ['Cod_setor']
+        renamed_columns = {col: file + '_' + col for col in columns}
+
+        all_columns = {col: col for col in original_columns}
+        all_columns.update(renamed_columns)
+
+        return  all_columns
+    
 class CensoFiles:
     _SUFFIX = '_SP1'
     BASICO = f'Basico{_SUFFIX}'
