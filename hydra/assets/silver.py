@@ -15,6 +15,24 @@ from hydra.config.censo import (
     CensoFiles,
 )
 
+def get_log_masssages_setor_censitario(df: gpd.GeoDataFrame) -> str:
+    df = df.copy()
+    assert 'missing' in df.columns
+    assert 'supressed' in df.columns
+
+    logs = []
+    total_registros = df.shape[0]
+    logs.append(f'Total de registros depois do merge: {total_registros}')
+
+    total_missing = df[df['missing'] == True].shape[0]
+    logs.append(f'Total de missings no merge: {total_missing}')
+    logs.append(f'Percentual de missings depois do merge: {total_missing/total_registros:.2%}')
+
+    total_supress = df[df['supressed'] == True].shape[0]
+    logs.append( f'Total de suprimidos depois do merge: {total_supress}')
+    logs.append(f'Percentual de suprimidos depois do merge: {total_supress/total_registros:.2%}')
+
+    return '\n'.join(logs)
 
 @asset(
     io_manager_key="gpd_silver_io_manager",
@@ -50,24 +68,16 @@ def setor_censitario_enriched(
     context.log.info(
         f'Total de registros antes do merge: {setor_censitario_2010.shape[0]}'
     )
-    total_registros = df_setor_enriched.shape[0]
-    context.log.info(
-        f'Total de registros depois do merge: {total_registros}'
-    )
 
-    missings = df_setor_enriched['Cod_setor'].isna()
-    context.log.info(
-        f'Total de missings no merge: {df_setor_enriched[missings].shape[0]}'
-    )
+    # Crio as colunas de missing e supressed
 
-    missings_supress = df_setor_enriched[CensoFiles.DOMICILIO_01 + '_V012'].isna()
-    total_missing_supress = df_setor_enriched[missings_supress].shape[0]
-    context.log.info(
-        f'Total de missings + supressão depois do merge: {total_missing_supress}'
-    )
+    df_setor_enriched['missing'] = df_setor_enriched['Cod_setor'].isna()
+    df_setor_enriched['supressed'] = (df_setor_enriched['missing']==False) & (df_setor_enriched[CensoFiles.DOMICILIO_01 + '_V012'].isna())
+
+    # Exibo as informações no log
 
     context.log.info(
-        f'Percentual de missings + supressão depois do merge: {total_missing_supress/total_registros:.2%}'
+        get_log_masssages_setor_censitario(df_setor_enriched)
     )
 
     n = 10
