@@ -9,6 +9,7 @@ RUN pip install \
     pandas \
     geopandas \
     matplotlib \
+    seaborn==0.12.2 \
     pyarrow \
     dagster_aws \
     httpx \
