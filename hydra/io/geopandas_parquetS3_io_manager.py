@@ -14,8 +14,8 @@ class GeoPandasParquetS3IOManager(IOManager):
     '''
     IO manager para salvar os GeoDataFrames como arquivos parquet num bucket S3.
 
-    A princípio, funciona apenas pegando as configurações de acesso (endpoint, access key e secret) das variáveis de ambiente.
-    Futuramente, pode ser modificado para construir uma sessão personalizada com configurações diferentes.
+    A princípio, funciona apenas recebendo todas as configurações de acesso (endpoint, access key e secret) nas configurações iniciais.
+    Futuramente, pode ser modificado para construir uma sessão com os valores padrão caso não receba os parâmetros.
     '''
 
     def __init__(
