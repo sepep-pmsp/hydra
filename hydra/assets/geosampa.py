@@ -9,6 +9,7 @@ from dagster import (
 )  # import the `dagster` library
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from ..resources import GeosampaClient
 from ..config import GeosampaConfig
@@ -23,6 +24,23 @@ def default_geosampa_bronze(**kwargs) -> AssetOut:
     )
     default.update(kwargs)
     return AssetOut(**default)
+
+def get_md_preview_plot(gdf: gpd.GeoDataFrame, nome_camada:str) -> str:
+    # Defino o seaborn theme
+    sns.set_theme(rc={'patch.linewidth': 0.1})
+
+    # Ploto o dataframe
+    gdf.plot()
+    plt.axis('off')
+    plt.title(f'Features da camada {nome_camada}')
+
+    # Converto a imagem em um formato decodificável
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    image_data = base64.b64encode(buffer.getvalue())
+
+    # Converto a imagem em markdown
+    return f"![img](data:image/png;base64,{image_data.decode()})"
 
 
 @multi_asset(
@@ -42,18 +60,14 @@ def camadas_geosampa(
         gdf = gpd.GeoDataFrame.from_features(camada['features'])
         gdf = gdf.set_crs(camada['crs'].get('properties').get('name'))
         gdf = gdf.to_crs(epsg=31983)
-        gdf.plot()
-        plt.axis('off')
-        plt.title(f'Features da camada {nome_camada}')
-        plt.show()
+        
+        # Recebo a imagem de prévia em markdown
+        md_preview = get_md_preview_plot(gdf, nome_camada)
+        
+        # Extraio algumas linhas como amostra
+        n = 10 if gdf.shape[0] > 10 else gdf.shape[0]
 
-        # Convert the image to a saveable format
-        buffer = BytesIO()
-        plt.savefig(buffer, format="png")
-        image_data = base64.b64encode(buffer.getvalue())
-
-        # Convert the image to Markdown to preview it within Dagster
-        md_preview = f"![img](data:image/png;base64,{image_data.decode()})"
+        peek = gdf.drop(columns=['geometry']).sample(n)
         
         context.log.info(f'Camada {nome_camada} lida')
         yield Output(
@@ -61,5 +75,6 @@ def camadas_geosampa(
             output_name=nome_camada,
             metadata={
                 'núm. features': len(camada['features']),
-                'prévia em gráfico': MetadataValue.md(md_preview)
+                'prévia em gráfico': MetadataValue.md(md_preview),
+                f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
             })
