@@ -17,7 +17,10 @@ from .resources import (
     GeosampaClient,
     CensoResource,
 )
-from .io import postgres_pandas_io_manager
+from .io import (
+    postgres_pandas_io_manager,
+    geo_pandas_parquets3_io_manager
+)
 from .schedules import (
     censo_schedule,
     geosampa_schedule,
@@ -27,7 +30,7 @@ all_assets = load_assets_from_modules([assets])
 
 municipios_job = define_asset_job(
     "municipios_job", selection=AssetSelection.all()
-    )
+)
 
 # Definições dos resources
 geosampa_client = GeosampaClient()
@@ -53,6 +56,15 @@ silver_io_manager = ConfigurablePickledObjectS3IOManager(
     ), s3_bucket=EnvVar('MINIO_SILVER_BUCKET_NAME')
 )
 
+gpd_silver_io_manager = geo_pandas_parquets3_io_manager.configured(
+    {
+        'bucket_name': {'env': 'MINIO_SILVER_BUCKET_NAME'},
+        'access_key': {'env': 'MINIO_ROOT_USER'},
+        'secret_key': {'env': 'MINIO_ROOT_PASSWORD'},
+        'endpoint': {'env': 'MINIO_ENDPOINT_URL'},
+    }
+)
+
 gold_io_manager = postgres_pandas_io_manager.configured(
     {
         'server': {'env': 'GOLD_DB_HOST'},
@@ -73,6 +85,7 @@ defs = Definitions(
     resources={
         "bronze_io_manager": bronze_io_manager,
         "silver_io_manager": silver_io_manager,
+        'gpd_silver_io_manager': gpd_silver_io_manager,
         'gold_io_manager': gold_io_manager,
         'ibge_api': ibge_api,
         'geosampa_client': geosampa_client,

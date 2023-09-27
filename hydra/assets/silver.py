@@ -17,7 +17,7 @@ from hydra.config.censo import (
 
 
 @asset(
-    io_manager_key="silver_io_manager",
+    io_manager_key="gpd_silver_io_manager",
     ins={"df_censo": AssetIn(key='domicilio01_digest')},
     group_name="silver",
 )
