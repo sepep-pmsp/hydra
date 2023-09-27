@@ -40,6 +40,8 @@ def camadas_geosampa(
 
         context.log.info(f'Lendo a camada {nome_camada}')
         gdf = gpd.GeoDataFrame.from_features(camada['features'])
+        gdf = gdf.set_crs(camada['crs'].get('properties').get('name'))
+        gdf = gdf.to_crs(epsg=31983)
         gdf.plot()
         plt.axis('off')
         plt.title(f'Features da camada {nome_camada}')
