@@ -57,16 +57,23 @@ def setor_censitario_enriched(
     # Renomeio as colunas para evitar duplicidade
     df_censo = df_censo.rename(columns=cols)
 
+    context.log.info(
+        f'Total de registros antes do merge: {setor_censitario_2010.shape[0]}'
+    )
+
+    # Dissolvo os registros do geosampa para que o dataset contenha apenas uma linha
+    # por setor sensitário de acordo com o código original do censo
+    setor_censitario_2010 = setor_censitario_2010.dissolve(
+        by='cd_original_setor_censitario',
+        as_index=False
+    )[['cd_original_setor_censitario', 'geometry']]
+
     # Faço o merge
     df_setor_enriched = setor_censitario_2010.merge(
         df_censo,
         how='left',
         left_on='cd_original_setor_censitario',
         right_on='Cod_setor'
-    )
-
-    context.log.info(
-        f'Total de registros antes do merge: {setor_censitario_2010.shape[0]}'
     )
 
     # Crio as colunas de missing e supressed
