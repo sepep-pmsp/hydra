@@ -15,24 +15,51 @@ from hydra.config.censo import (
     CensoFiles,
 )
 
-def get_log_masssages_setor_censitario(df: gpd.GeoDataFrame) -> str:
+
+def _get_log_masssages_setor_censitario(
+        df: gpd.GeoDataFrame,
+        missing_col: str = 'missing',
+        supressed_col: str = 'supressed'
+) -> str:
     df = df.copy()
-    assert 'missing' in df.columns
-    assert 'supressed' in df.columns
+    assert missing_col in df.columns
+    assert supressed_col in df.columns
 
     logs = []
     total_registros = df.shape[0]
     logs.append(f'Total de registros depois do merge: {total_registros}')
 
-    total_missing = df[df['missing'] == True].shape[0]
+    total_missing = df[df[missing_col] == True].shape[0]
     logs.append(f'Total de missings no merge: {total_missing}')
-    logs.append(f'Percentual de missings depois do merge: {total_missing/total_registros:.2%}')
+    logs.append(
+        f'Percentual de missings depois do merge: {total_missing/total_registros:.2%}')
 
-    total_supress = df[df['supressed'] == True].shape[0]
-    logs.append( f'Total de suprimidos depois do merge: {total_supress}')
-    logs.append(f'Percentual de suprimidos depois do merge: {total_supress/total_registros:.2%}')
+    total_supress = df[df[supressed_col] == True].shape[0]
+    logs.append(f'Total de suprimidos depois do merge: {total_supress}')
+    logs.append(
+        f'Percentual de suprimidos depois do merge: {total_supress/total_registros:.2%}')
 
     return '\n'.join(logs)
+
+def _fill_na_by_buffer(
+        gdf_to_fill: gpd.GeoDataFrame,
+        columns_to_fill: list[str],
+        gdf_fill_from: gpd.GeoDataFrame,
+        geometry_column: str = 'geometry',
+        buffer_size:int = 5
+) -> gpd.GeoDataFrame:
+    new_gdf_to_fill = gdf_to_fill.copy()
+    new_gdf_fill_from = gdf_fill_from.copy()
+
+    for i, row in new_gdf_to_fill.iterrows():
+
+        buffer = row[geometry_column].buffer(buffer_size)
+        prox = new_gdf_fill_from[geometry_column].intersects(buffer)
+        mapper = new_gdf_fill_from[prox][columns_to_fill].mean().to_dict()
+        for col, val in mapper.items():
+            new_gdf_to_fill.loc[i, col] = val
+    
+    return new_gdf_to_fill
 
 @asset(
     io_manager_key="gpd_silver_io_manager",
@@ -79,13 +106,32 @@ def setor_censitario_enriched(
     # Crio as colunas de missing e supressed
 
     df_setor_enriched['missing'] = df_setor_enriched['Cod_setor'].isna()
-    df_setor_enriched['supressed'] = (df_setor_enriched['missing']==False) & (df_setor_enriched[CensoFiles.DOMICILIO_01 + '_V012'].isna())
+    df_setor_enriched['supressed'] = (df_setor_enriched['missing'] == False) & (
+        df_setor_enriched[CensoFiles.DOMICILIO_01 + '_V012'].isna())
 
     # Exibo as informações no log
 
     context.log.info(
-        get_log_masssages_setor_censitario(df_setor_enriched)
+        _get_log_masssages_setor_censitario(df_setor_enriched)
     )
+
+    # Preencho os valores suprimidos
+    buffer_size = 5
+    sup_filter = df_setor_enriched['supressed'] == True
+    sup_cols = CensoConfig.get_columns_for_file(CensoFiles.DOMICILIO_01).items()
+    sup_cols.append('geometry')
+
+    context.log.info(
+        f'Preenchendo os valores suprimidos com base em um buffer de {buffer_size} metros'
+    )
+
+    df_setor_enriched.loc[sup_filter, sup_cols] = _fill_na_by_buffer(
+        gdf_to_fill=df_setor_enriched.loc[sup_filter, sup_cols],
+        columns_to_fill=sup_cols,
+        gdf_fill_from=df_setor_enriched.loc[~sup_filter, sup_cols]
+    )
+
+    assert df_setor_enriched[df_setor_enriched['missing']==False].isna().sum().sum() == 0
 
     n = 10
 
