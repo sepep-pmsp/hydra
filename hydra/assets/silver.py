@@ -61,6 +61,28 @@ def _fill_na_by_buffer(
     
     return new_gdf_to_fill
 
+def _fill_na_by_nearest_neighbours(
+        gdf_to_fill: gpd.GeoDataFrame,
+        columns_to_fill: list[str],
+        gdf_fill_from: gpd.GeoDataFrame,
+        geometry_column: str = 'geometry',
+        neighbours:int = 3
+) -> gpd.GeoDataFrame:
+    new_gdf_to_fill = gdf_to_fill.copy()
+
+    for i, row in new_gdf_to_fill.iterrows():
+
+        new_gdf_fill_from = gdf_fill_from.copy()
+        new_gdf_fill_from['dist'] = new_gdf_fill_from.distance(row[geometry_column])
+        new_gdf_fill_from = new_gdf_fill_from.nsmallest(neighbours, 'dist')
+
+        new_gdf_to_fill.loc[i, columns_to_fill] = new_gdf_fill_from[columns_to_fill].mean()
+
+        na_cells = new_gdf_to_fill.loc[i, columns_to_fill].isna().sum().sum()
+        assert na_cells == 0, f'A linha {i} ainda contém {na_cells} células sem dados.'
+    
+    return new_gdf_to_fill
+
 @asset(
     io_manager_key="gpd_silver_io_manager",
     ins={"df_censo": AssetIn(key='domicilio01_digest')},
