@@ -20,8 +20,7 @@ class CensoConfig:
         return files
     
     @staticmethod
-    def get_columns_for_file(file:str) -> dict:
-        renamed_columns = []
+    def get_columns_for_file(file:str, supressed_only:bool=False) -> dict:
         if file == CensoFiles.DOMICILIO_01:
             columns = [
                 'V001',
@@ -44,6 +43,13 @@ class CensoConfig:
 
         all_columns = {col: col for col in original_columns}
         all_columns.update(renamed_columns)
+
+        if supressed_only:
+            all_columns.pop('Cod_setor')
+            
+            for col in ['V001', 'V002']:
+                if col in all_columns.keys():
+                    all_columns.pop(col)
 
         return  all_columns
     
