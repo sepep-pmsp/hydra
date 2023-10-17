@@ -128,8 +128,11 @@ def setor_censitario_enriched(
     # Crio as colunas de missing e supressed
 
     df_setor_enriched['missing'] = df_setor_enriched['Cod_setor'].isna()
+    df_setor_enriched['missing'] = df_setor_enriched['missing'].fillna(False)
+
     df_setor_enriched['supressed'] = (df_setor_enriched['missing'] == False) & (
         df_setor_enriched[CensoFiles.DOMICILIO_01 + '_V012'].isna())
+    df_setor_enriched['supressed'] = df_setor_enriched['supressed'].fillna(False)
 
     # Exibo as informações no log
 
@@ -138,22 +141,31 @@ def setor_censitario_enriched(
     )
 
     # Preencho os valores suprimidos
-    buffer_size = 5
+    neighbours = 3
     sup_filter = df_setor_enriched['supressed'] == True
-    sup_cols = CensoConfig.get_columns_for_file(CensoFiles.DOMICILIO_01).items()
-    sup_cols.append('geometry')
+    miss_filter = df_setor_enriched['missing'] == True
+    sup_cols = list(CensoConfig.get_columns_for_file(CensoFiles.DOMICILIO_01, supressed_only=True).values())
+    subset_cols = sup_cols.copy()
+    subset_cols.append('geometry')
 
     context.log.info(
-        f'Preenchendo os valores suprimidos com base em um buffer de {buffer_size} metros'
+        f'Preenchendo os valores suprimidos com base nos {neighbours} vizinhos mais próximos'
     )
 
-    df_setor_enriched.loc[sup_filter, sup_cols] = _fill_na_by_buffer(
-        gdf_to_fill=df_setor_enriched.loc[sup_filter, sup_cols],
+    df_setor_enriched.loc[sup_filter, subset_cols] = _fill_na_by_nearest_neighbours(
+        gdf_to_fill=df_setor_enriched.loc[sup_filter, subset_cols],
         columns_to_fill=sup_cols,
-        gdf_fill_from=df_setor_enriched.loc[~sup_filter, sup_cols]
+        gdf_fill_from=df_setor_enriched.loc[(~sup_filter) & (~miss_filter), subset_cols],
+        neighbours=neighbours
     )
 
-    assert df_setor_enriched[df_setor_enriched['missing']==False].isna().sum().sum() == 0
+    context.log.info(
+        f'Valores preenchidos. Avaliando se ainda existem valores nulos indevidos'
+    )
+
+    na_cells = df_setor_enriched.loc[df_setor_enriched['missing']==False, sup_cols].isna().sum().sum()
+    
+    assert na_cells == 0, f'O dataset ainda contém {na_cells} células sem dados.'
 
     n = 10
 
