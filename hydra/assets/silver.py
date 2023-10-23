@@ -210,11 +210,44 @@ def setor_censitario_enriched_geosampa(
     # O import precisa estar dentro da função, porque no cabeçalho 
     # causaria referência circular
     from hydra import defs
+
+    # Primero removo os setores sem domicílios particulares
+    setor_censitario_enriched = setor_censitario_enriched[setor_censitario_enriched['missing']==False]
+
+    # Depois adapto o gdf de setores para minimizar o tamanho
+    new_setor = setor_censitario_enriched[['geometry','cd_original_setor_censitario']].copy()
+    new_setor['negative_buffer'] = new_setor['geometry'].buffer(-10)
+    new_setor = new_setor.set_geometry('negative_buffer')
+
+    # Defino a lista de camadas a agregar ao gdf de setores censitários
+    schemas_to_add = [dep_key for dep_key in context.op_def.ins.keys() if dep_key != 'setor_censitario_enriched']
     
-    for dep_key in context.op_def.ins.keys():
-        context.log.info(dep_key)
-        dep = defs.load_asset_value(dep_key)
-        context.log.info(dep)
-        break
+    for dep_key in schemas_to_add:
+        conf = GeosampaConfig.get_asset_config().get('geosampa').get(dep_key)
+        if conf.get('predicate') == "intersects":
+            context.log.info(
+                f'Agregando a camada {dep_key}'
+            )
+            camada = defs.load_asset_value(dep_key)
+            props = conf.get('properties')
+
+            camada = camada[props]
+            # camada[f'{camada}_geom'] = camada['geometry']
+
+            new_setor = new_setor.sjoin(camada, how='left', predicate='intersects')
+            new_setor = new_setor.drop(columns=['index_right'])
+
+    n = 10
+
+    peek = new_setor.drop(columns=['geometry', 'negative_buffer']).sample(n)
+    mu = new_setor.memory_usage(index=True, deep=True).sum()/10**6
+
+    context.add_output_metadata(
+        metadata={
+            'registros': new_setor.shape[0],
+            f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
+            'uso de memória (MB)': f'~{mu:.1f}MB'
+        }
+    )
     
-    return None
+    return new_setor
