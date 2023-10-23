@@ -1,17 +1,56 @@
-[
-    "area_contaminada_reabilitada_svma",
-    "area_inundavel",
-    "distrito_municipal",
-    "GEOSAMPA_cadparcs_area_protecao_apa",
-    "manancial_billings",
-    "manancial_guarapiranga",
-    "manancial_juquery",
-    "massa_d_agua",
-    "remanescente_pmma",
-    "represa_nivel_maximo",
-    "risco_ocorrencia_alagamento",
-    "risco_ocorrencia_inundacao",
-    "setor_censitario_2010",
-    "subprefeitura",
-    "transpetro_duto"
-]
+{
+    "area_contaminada_reabilitada_svma": { 
+        "properties": [
+            "geometry",
+            "cd_identificador_area_contaminada_reabilitada",
+            "dc_classificacao_area_contaminada",
+            "dc_tipo_terreno_area_contaminada",
+            "dc_uso_anterior_geral",
+            "dc_uso_pretendido_geral",
+            "tx_contaminante",
+            "tx_restricao"
+        ]
+    },
+    "area_inundavel": { 
+        "properties": []
+    },
+    "distrito_municipal": { 
+        "properties": []
+    },
+    "GEOSAMPA_cadparcs_area_protecao_apa": { 
+        "properties": []
+    },
+    "manancial_billings": { 
+        "properties": []
+    },
+    "manancial_guarapiranga": { 
+        "properties": []
+    },
+    "manancial_juquery": { 
+        "properties": []
+    },
+    "massa_d_agua": { 
+        "properties": []
+    },
+    "remanescente_pmma": { 
+        "properties": []
+    },
+    "represa_nivel_maximo": { 
+        "properties": []
+    },
+    "risco_ocorrencia_alagamento": { 
+        "properties": []
+    },
+    "risco_ocorrencia_inundacao": { 
+        "properties": []
+    },
+    "setor_censitario_2010": { 
+        "properties": []
+    },
+    "subprefeitura": { 
+        "properties": []
+    },
+    "transpetro_duto": { 
+        "properties": []
+    }
+}

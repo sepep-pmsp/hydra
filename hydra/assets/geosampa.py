@@ -44,8 +44,8 @@ def get_md_preview_plot(gdf: gpd.GeoDataFrame, nome_camada:str) -> str:
 
 
 @multi_asset(
-    outs={asset_.get('name'): default_geosampa_bronze()
-          for asset_ in GeosampaConfig.get_asset_config().get('geosampa')},
+    outs={asset_: default_geosampa_bronze()
+          for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()},
     can_subset=True
 )
 def camadas_geosampa(

@@ -193,9 +193,9 @@ def setor_censitario_enriched(
 # parâmetro único na função que define o asset. Assim, para que a lista possa ser
 # gerada dinâmicamente, precisarei definir uma lista de asset keys como string e
 # utilizar o parâmetro deps da definição
-outras_camadas = [asset_.get('name')
-                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa')
-                  if asset_.get('name') != 'setor_censitario_2010']
+outras_camadas = [asset_
+                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()
+                  if asset_ != 'setor_censitario_2010']
 
 
 @asset(
