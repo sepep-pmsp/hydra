@@ -9,12 +9,14 @@
             "dc_uso_pretendido_geral",
             "tx_contaminante",
             "tx_restricao"
-        ]
+        ],
+        "predicate": "intersects"
     },
     "area_inundavel": {
         "properties": [
             "geometry"
-        ]
+        ],
+        "predicate": "intersects"
     },
     "distrito_municipal": {
         "properties": [
@@ -23,8 +25,9 @@
             "cd_distrito_municipal",
             "cd_identificador_subprefeitura",
             "nm_distrito_municipal",
-            "sg_distrito_mnicipal"
-        ]
+            "sg_distrito_municipal"
+        ],
+        "predicate": "covered_by"
     },
     "GEOSAMPA_cadparcs_area_protecao_apa": {
         "properties": [
@@ -32,7 +35,8 @@
             "nm_esfera_administrativa",
             "nm_area_protecao_ambiental",
             "tx_instrumento_legal_criacao"
-        ]
+        ],
+        "predicate": "intersects"
     },
     "manancial_billings": {
         "properties": [
@@ -41,7 +45,8 @@
             "sg_classe",
             "dc_area_especial",
             "nm_bacia"
-        ]
+        ],
+        "predicate": "intersects"
     },
     "manancial_guarapiranga": {
         "properties": [
@@ -50,7 +55,8 @@
             "sg_classe",
             "dc_area_especial",
             "nm_bacia"
-        ]
+        ],
+        "predicate": "intersects"
     },
     "manancial_juquery": {
         "properties": [
@@ -59,45 +65,43 @@
             "sg_classe",
             "dc_area_especial",
             "nm_bacia"
-        ]
-    },
-    "massa": {
-        "properties": [
-            "geometry",
-            "cd_identificador_hidrografia_poligono",
-            "nm_acidente",
-            "cd_tipo_acidente"
-        ]
+        ],
+        "predicate": "intersects"
     },
     "remanescente_pmma": {
         "properties": [
             "geometry",
             "cd_classe_vegetacao",
             "dc_classe_vegetacao"
-        ]
+        ],
+        "predicate": "intersects"
     },
     "represa_nivel_maximo": {
         "properties": [
             "geometry",
             "nm_acidente"
-        ]
+        ],
+        "predicate": "intersects"
     },
     "risco_ocorrencia_alagamento": {
         "properties": [
             "geometry",
             "dt_ocorrencia",
             "dc_tipo_ocorrencia"
-        ]
+        ],
+        "predicate": "intersects"
     },
     "risco_ocorrencia_inundacao": {
         "properties": [
             "geometry",
             "dt_ocorrencia",
             "dc_tipo_ocorrencia"
-        ]
+        ],
+        "predicate": "intersects"
     },
     "setor_censitario_2010": {
-        "properties": []
+        "properties": [],
+        "predicate": "intersects"
     },
     "subprefeitura": {
         "properties": [
@@ -106,11 +110,13 @@
             "cd_subprefeitura",
             "nm_subprefeitura",
             "sg_subprefeitura"
-        ]
+        ],
+        "predicate": "covered_by"
     },
     "transpetro_duto": {
         "properties": [
             "geometry"
-        ]
+        ],
+        "predicate": "intersects"
     }
 }
