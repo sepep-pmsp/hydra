@@ -100,8 +100,7 @@
         "predicate": "intersects"
     },
     "setor_censitario_2010": {
-        "properties": [],
-        "predicate": "intersects"
+        "properties": []
     },
     "subprefeitura": {
         "properties": [
