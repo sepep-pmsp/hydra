@@ -1,11 +1,8 @@
 from dagster import (
     AssetExecutionContext,
     AssetIn,
-    AssetOut,
     MetadataValue,
-    Output,
     asset,
-    multi_asset,
 )  # import the `dagster` library
 import geopandas as gpd
 import pandas as pd
@@ -14,6 +11,7 @@ from hydra.config.censo import (
     CensoConfig,
     CensoFiles,
 )
+from hydra.config.geosampa import GeosampaConfig
 
 
 def _get_log_masssages_setor_censitario(
@@ -41,12 +39,13 @@ def _get_log_masssages_setor_censitario(
 
     return '\n'.join(logs)
 
+
 def _fill_na_by_buffer(
         gdf_to_fill: gpd.GeoDataFrame,
         columns_to_fill: list[str],
         gdf_fill_from: gpd.GeoDataFrame,
         geometry_column: str = 'geometry',
-        buffer_size:int = 5
+        buffer_size: int = 5
 ) -> gpd.GeoDataFrame:
     new_gdf_to_fill = gdf_to_fill.copy()
     new_gdf_fill_from = gdf_fill_from.copy()
@@ -58,30 +57,34 @@ def _fill_na_by_buffer(
         mapper = new_gdf_fill_from[prox][columns_to_fill].mean().to_dict()
         for col, val in mapper.items():
             new_gdf_to_fill.loc[i, col] = val
-    
+
     return new_gdf_to_fill
+
 
 def _fill_na_by_nearest_neighbours(
         gdf_to_fill: gpd.GeoDataFrame,
         columns_to_fill: list[str],
         gdf_fill_from: gpd.GeoDataFrame,
         geometry_column: str = 'geometry',
-        neighbours:int = 3
+        neighbours: int = 3
 ) -> gpd.GeoDataFrame:
     new_gdf_to_fill = gdf_to_fill.copy()
 
     for i, row in new_gdf_to_fill.iterrows():
 
         new_gdf_fill_from = gdf_fill_from.copy()
-        new_gdf_fill_from['dist'] = new_gdf_fill_from.distance(row[geometry_column])
+        new_gdf_fill_from['dist'] = new_gdf_fill_from.distance(
+            row[geometry_column])
         new_gdf_fill_from = new_gdf_fill_from.nsmallest(neighbours, 'dist')
 
-        new_gdf_to_fill.loc[i, columns_to_fill] = new_gdf_fill_from[columns_to_fill].mean()
+        new_gdf_to_fill.loc[i,
+                            columns_to_fill] = new_gdf_fill_from[columns_to_fill].mean()
 
         na_cells = new_gdf_to_fill.loc[i, columns_to_fill].isna().sum().sum()
         assert na_cells == 0, f'A linha {i} ainda contém {na_cells} células sem dados.'
-    
+
     return new_gdf_to_fill
+
 
 @asset(
     io_manager_key="gpd_silver_io_manager",
@@ -132,7 +135,8 @@ def setor_censitario_enriched(
 
     df_setor_enriched['supressed'] = (df_setor_enriched['missing'] == False) & (
         df_setor_enriched[CensoFiles.DOMICILIO_01 + '_V012'].isna())
-    df_setor_enriched['supressed'] = df_setor_enriched['supressed'].fillna(False)
+    df_setor_enriched['supressed'] = df_setor_enriched['supressed'].fillna(
+        False)
 
     # Exibo as informações no log
 
@@ -144,7 +148,8 @@ def setor_censitario_enriched(
     neighbours = 3
     sup_filter = df_setor_enriched['supressed'] == True
     miss_filter = df_setor_enriched['missing'] == True
-    sup_cols = list(CensoConfig.get_columns_for_file(CensoFiles.DOMICILIO_01, supressed_only=True).values())
+    sup_cols = list(CensoConfig.get_columns_for_file(
+        CensoFiles.DOMICILIO_01, supressed_only=True).values())
     subset_cols = sup_cols.copy()
     subset_cols.append('geometry')
 
@@ -155,7 +160,8 @@ def setor_censitario_enriched(
     df_setor_enriched.loc[sup_filter, subset_cols] = _fill_na_by_nearest_neighbours(
         gdf_to_fill=df_setor_enriched.loc[sup_filter, subset_cols],
         columns_to_fill=sup_cols,
-        gdf_fill_from=df_setor_enriched.loc[(~sup_filter) & (~miss_filter), subset_cols],
+        gdf_fill_from=df_setor_enriched.loc[(
+            ~sup_filter) & (~miss_filter), subset_cols],
         neighbours=neighbours
     )
 
@@ -163,8 +169,9 @@ def setor_censitario_enriched(
         f'Valores preenchidos. Avaliando se ainda existem valores nulos indevidos'
     )
 
-    na_cells = df_setor_enriched.loc[df_setor_enriched['missing']==False, sup_cols].isna().sum().sum()
-    
+    na_cells = df_setor_enriched.loc[df_setor_enriched['missing']
+                                     == False, sup_cols].isna().sum().sum()
+
     assert na_cells == 0, f'O dataset ainda contém {na_cells} células sem dados.'
 
     n = 10
@@ -179,3 +186,35 @@ def setor_censitario_enriched(
     )
 
     return df_setor_enriched
+
+
+# Não é possível definir dinâmicamente uma lista de assets como um parâmetro.
+# Cada definição em ins deve corresponder a um upstream asset único e um
+# parâmetro único na função que define o asset. Assim, para que a lista possa ser
+# gerada dinâmicamente, precisarei definir uma lista de asset keys como string e
+# utilizar o parâmetro deps da definição
+outras_camadas = [asset_.get('name')
+                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa')
+                  if asset_.get('name') != 'setor_censitario_2010']
+
+
+@asset(
+    io_manager_key="gpd_silver_io_manager",
+    deps=outras_camadas,
+    group_name="silver",
+)
+def setor_censitario_enriched_geosampa(
+    context: AssetExecutionContext,
+    setor_censitario_enriched: gpd.GeoDataFrame,
+) -> gpd.GeoDataFrame:
+    # O import precisa estar dentro da função, porque no cabeçalho 
+    # causaria referência circular
+    from hydra import defs
+    
+    for dep_key in context.op_def.ins.keys():
+        context.log.info(dep_key)
+        dep = defs.load_asset_value(dep_key)
+        context.log.info(dep)
+        break
+    
+    return None
