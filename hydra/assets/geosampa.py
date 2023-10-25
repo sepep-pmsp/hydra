@@ -34,12 +34,12 @@ def _get_md_preview_plot(gdf: GeoDataFrame, nome_camada: str) -> str:
     return f"![img](data:image/png;base64,{image_data.decode()})"
 
 
-def __build_asset(name, group_name="geosampa_bronze") -> AssetsDefinition:
+def __build_raw_asset(name, group_name="geosampa_bronze") -> AssetsDefinition:
     @asset(
         name=name,
         group_name=group_name,
         io_manager_key="bronze_io_manager",
-        dagster_type=GeoDataFrame,
+        dagster_type=dict,
     )
     def _asset(
         context: AssetExecutionContext,
@@ -47,28 +47,15 @@ def __build_asset(name, group_name="geosampa_bronze") -> AssetsDefinition:
     ):
         context.log.info(f'Baixando a camada {name}')
         camada = geosampa_client.get_feature(name)
+
+        context.log.info(f'Camada {name} baixada')
+
         assert camada["type"] == "FeatureCollection"
-
-        context.log.info(f'Lendo a camada {name}')
-        gdf = GeoDataFrame.from_features(camada['features'])
-        gdf = gdf.set_crs(camada['crs'].get('properties').get('name'))
-        gdf = gdf.to_crs(epsg=31983)
-
-        # Recebo a imagem de prévia em markdown
-        md_preview = _get_md_preview_plot(gdf, name)
-
-        # Extraio algumas linhas como amostra
-        n = 10 if gdf.shape[0] > 10 else gdf.shape[0]
-
-        peek = gdf.drop(columns=['geometry']).sample(n)
-
-        context.log.info(f'Camada {name} lida')
+        
         return Output(
-            gdf,
+            camada,
             metadata={
                 'núm. features': len(camada['features']),
-                'prévia em gráfico': MetadataValue.md(md_preview),
-                f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
             })
 
     return _asset
@@ -103,7 +90,7 @@ def __build_digested_asset(name, group_name="geosampa_bronze") -> AssetsDefiniti
         return Output(
             gdf,
             metadata={
-                'núm. linhas': len(gdf.shape[0]),
+                'núm. linhas': gdf.shape[0],
                 'prévia em gráfico': MetadataValue.md(md_preview),
                 f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
             })
@@ -111,5 +98,8 @@ def __build_digested_asset(name, group_name="geosampa_bronze") -> AssetsDefiniti
     return _asset
 
 
-globals().update({asset_.get('name'): __build_asset(asset_.get('name'))
+globals().update({asset_.get('name'): __build_raw_asset(asset_.get('name'))
+                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa')})
+
+globals().update({f'{asset_.get("name")}_digested': __build_digested_asset(asset_.get('name'))
                   for asset_ in GeosampaConfig.get_asset_config().get('geosampa')})
