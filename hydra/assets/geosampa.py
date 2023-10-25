@@ -2,6 +2,7 @@ import base64
 from io import BytesIO
 from dagster import (
     AssetExecutionContext,
+    AssetIn,
     AssetsDefinition,
     MetadataValue,
     Output,
@@ -66,6 +67,43 @@ def __build_asset(name, group_name="geosampa_bronze") -> AssetsDefinition:
             gdf,
             metadata={
                 'núm. features': len(camada['features']),
+                'prévia em gráfico': MetadataValue.md(md_preview),
+                f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
+            })
+
+    return _asset
+
+def __build_digested_asset(name, group_name="geosampa_bronze") -> AssetsDefinition:
+    @asset(
+        name=f'{name}_digested',
+        ins={"raw_asset": AssetIn(key=name)},
+        group_name=group_name,
+        io_manager_key="bronze_io_manager",
+        dagster_type=GeoDataFrame,
+    )
+    def _asset(
+        context: AssetExecutionContext,
+        raw_asset: dict
+    ):
+        context.log.info(f'Lendo a camada {name}')
+        gdf = GeoDataFrame.from_features(raw_asset['features'])
+        gdf = gdf.set_crs(raw_asset['crs'].get('properties').get('name'))
+        gdf = gdf.to_crs(epsg=31983)
+
+        # Recebo a imagem de prévia em markdown
+        md_preview = _get_md_preview_plot(gdf, name)
+
+        # Extraio algumas linhas como amostra
+        n = 10 if gdf.shape[0] > 10 else gdf.shape[0]
+
+        peek = gdf.drop(columns=['geometry']).sample(n)
+
+        context.log.info(f'Camada {name} lida')
+
+        return Output(
+            gdf,
+            metadata={
+                'núm. linhas': len(gdf.shape[0]),
                 'prévia em gráfico': MetadataValue.md(md_preview),
                 f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
             })
