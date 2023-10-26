@@ -1,14 +1,12 @@
 from dagster import (
     AssetExecutionContext,
     AssetIn,
-    AssetOut,
+    AssetsDefinition,
     MetadataValue,
     Output,
     asset,
-    multi_asset,
 )
 import numpy as np
-import requests
 from zipfile import ZipFile
 from io import BytesIO, StringIO
 import pandas as pd
@@ -17,23 +15,10 @@ from ..config import CensoConfig, CensoFiles
 from ..resources import CensoResource
 from ..utils.io.files import generate_file_hash
 
-# Função auxiliar para criar as definições de assets com valores padrão
-
-
-def _default_censo_bronze(**kwargs) -> AssetOut:
-    default = dict(
-        group_name="censo_bronze",
-        io_manager_key="bronze_io_manager",
-        dagster_type=list[str],
-        is_required=False
-    )
-    default.update(kwargs)
-    return AssetOut(**default)
-
 
 @asset(
-    io_manager_key="bronze_io_manager",
-    group_name="censo_bronze",
+    io_manager_key='bronze_io_manager',
+    group_name='censo_bronze',
 )
 def arquivo_zip_censo(
     context: AssetExecutionContext,
@@ -55,23 +40,23 @@ def arquivo_zip_censo(
     return zip_content
 
 
-@multi_asset(
-    outs={asset_.get('name'): _default_censo_bronze()
-          for asset_ in CensoConfig.get_asset_config().get('censo')},
-    can_subset=True
-)
-def arquivos_csv_censo(
-    context: AssetExecutionContext,
-    arquivo_zip_censo: bytes
-):
-    context.log.info('Lendo o conteúdo do arquivo')
-    zip_file = ZipFile(BytesIO(arquivo_zip_censo))
-
-    for nome_arquivo in context.selected_output_names:
+def __build_raw_asset(name: str, groupname: str = 'censo_bronze') -> AssetsDefinition:
+    @asset(
+        name=name,
+        group_name=groupname,
+        io_manager_key='bronze_io_manager',
+        dagster_type=list[str],
+    )
+    def _raw_asset(
+        context: AssetExecutionContext,
+        arquivo_zip_censo: bytes
+    ):
+        context.log.info('Lendo o conteúdo do arquivo')
+        zip_file = ZipFile(BytesIO(arquivo_zip_censo))
 
         base_path = 'Base informaçoes setores2010 universo SP_Capital/CSV/'
         file_format = '.csv'
-        csv_file_path = f'{base_path}{nome_arquivo}{file_format}'
+        csv_file_path = f'{base_path}{name}{file_format}'
 
         context.log.info(f'Abrindo o csv {csv_file_path}')
         csv_file = zip_file.open(csv_file_path, 'r')
@@ -82,19 +67,19 @@ def arquivos_csv_censo(
         n = 5
         peek = csv_string[:n]
 
-        yield Output(
+        return Output(
             csv_string,
-            output_name=nome_arquivo,
             metadata={
                 'número de linhas': len(csv_string),
                 f'primeiras {n} linhas': '\n'.join(peek)
             })
+    return _raw_asset
 
 
 @asset(
-    io_manager_key="bronze_io_manager",
-    ins={"csv_string": AssetIn(key=CensoFiles.BASICO)},
-    group_name="censo_bronze",
+    io_manager_key='bronze_io_manager',
+    ins={'csv_string': AssetIn(key=CensoFiles.BASICO)},
+    group_name='censo_bronze',
 )
 def basico_digest(
     context: AssetExecutionContext,
@@ -150,9 +135,9 @@ def basico_digest(
 
 
 @asset(
-    io_manager_key="bronze_io_manager",
-    ins={"csv_string": AssetIn(key=CensoFiles.DOMICILIO_01)},
-    group_name="censo_bronze",
+    io_manager_key='bronze_io_manager',
+    ins={'csv_string': AssetIn(key=CensoFiles.DOMICILIO_01)},
+    group_name='censo_bronze',
 )
 def domicilio01_digest(
     context: AssetExecutionContext,
@@ -200,3 +185,7 @@ def domicilio01_digest(
     )
 
     return df
+
+
+globals().update({_asset.get('name'): __build_raw_asset(_asset.get('name'))
+                  for _asset in CensoConfig.get_asset_config().get('censo')})
