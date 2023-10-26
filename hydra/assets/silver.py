@@ -193,7 +193,7 @@ def setor_censitario_enriched(
 # parâmetro único na função que define o asset. Assim, para que a lista possa ser
 # gerada dinâmicamente, precisarei definir uma lista de asset keys como string e
 # utilizar o parâmetro deps da definição
-outras_camadas = [asset_
+outras_camadas = [f'{asset_}_digested'
                   for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()
                   if asset_ != 'setor_censitario_2010']
 
@@ -223,10 +223,14 @@ def setor_censitario_enriched_geosampa(
     schemas_to_add = [dep_key for dep_key in context.op_def.ins.keys() if dep_key != 'setor_censitario_enriched']
     
     for dep_key in schemas_to_add:
-        conf = GeosampaConfig.get_asset_config().get('geosampa').get(dep_key)
+        schema = dep_key.removesuffix('_digested')
+        context.log.info(
+            f'Buscando configurações da camada {schema}'
+        )
+        conf = GeosampaConfig.get_asset_config().get('geosampa').get(schema)
         if conf.get('predicate') == "intersects":
             context.log.info(
-                f'Agregando a camada {dep_key}'
+                f'Agregando a camada {schema}'
             )
             camada = defs.load_asset_value(dep_key)
             props = conf.get('properties')

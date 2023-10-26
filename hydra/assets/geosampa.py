@@ -98,8 +98,8 @@ def __build_digested_asset(name, group_name="geosampa_bronze") -> AssetsDefiniti
     return _asset
 
 
-globals().update({asset_.get('name'): __build_raw_asset(asset_.get('name'))
-                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa')})
+globals().update({asset_: __build_raw_asset(asset_)
+                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()})
 
-globals().update({f'{asset_.get("name")}_digested': __build_digested_asset(asset_.get('name'))
-                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa')})
+globals().update({f'{asset_}_digested': __build_digested_asset(asset_)
+                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()})
