@@ -87,9 +87,9 @@ def _fill_na_by_nearest_neighbours(
 
 
 @asset(
-    io_manager_key="gpd_silver_io_manager",
-    ins={"df_censo": AssetIn(key='domicilio01_digest')},
-    group_name="silver",
+    io_manager_key='gpd_silver_io_manager',
+    ins={'df_censo': AssetIn(key='domicilio01_digest')},
+    group_name='silver',
 )
 def setor_censitario_enriched(
     context: AssetExecutionContext,
@@ -199,9 +199,9 @@ outras_camadas = [f'{asset_}_digested'
 
 
 @asset(
-    io_manager_key="gpd_silver_io_manager",
+    io_manager_key='gpd_silver_io_manager',
     deps=outras_camadas,
-    group_name="silver",
+    group_name='silver',
 )
 def setor_censitario_enriched_geosampa(
     context: AssetExecutionContext,
@@ -228,7 +228,7 @@ def setor_censitario_enriched_geosampa(
             f'Buscando configurações da camada {schema}'
         )
         conf = GeosampaConfig.get_asset_config().get('geosampa').get(schema)
-        if conf.get('predicate') == "intersects":
+        if conf.get('predicate') == 'intersects':
             context.log.info(
                 f'Agregando a camada {schema}'
             )
@@ -240,6 +240,54 @@ def setor_censitario_enriched_geosampa(
 
             new_setor = new_setor.sjoin(camada, how='left', predicate='intersects')
             new_setor = new_setor.drop(columns=['index_right'])
+        if conf.get('predicate') == 'covered_by':
+            context.log.info(
+                f'Agregando a camada {schema}'
+            )
+            camada = defs.load_asset_value(dep_key)
+            props = conf.get('properties')
+
+            camada = camada[props]
+
+            new_setor = new_setor.sjoin(camada, how='left', predicate='covered_by')
+
+            not_covered = new_setor['index_right'].isna()
+
+            new_setor = new_setor.drop(columns=['index_right'])
+
+            if not_covered.sum() > 0:
+                context.log.info(
+                    f'{not_covered.sum()} setores não são totalmente cobertos por nenhuma geometria. A estes setores serão atribuídas as features com maior área de interseção'
+                )
+
+                cols_before_join = [c for c in new_setor.columns if c not in camada.columns]
+                cols_before_join.append('geometry')
+                intersect = new_setor[not_covered].copy()
+                intersect = intersect[cols_before_join]
+
+                # Crio uma nova coluna de geometria no camada e faço o spatial join 
+                # com o predicate intersect, esperando que todos os setores tenham mais
+                # de um camada associado.
+                camada.loc[:, 'camada_geometry'] = camada.loc[:, 'geometry']
+                intersect = intersect.sjoin(camada, how='left', predicate='intersects')
+
+                assert intersect['index_right'].isna().sum() > 0, f'Existem setores sem nenhuma interseção com a camada {schema}'
+
+                # Crio uma nova coluna com o polígono da interseção entre o setor e o camada
+                # e calculo o percentual de interseção
+                intersect.loc[:, 'intersection'] = intersect.loc[:, 'negative_buffer'].intersection(intersect.loc[:, 'camada_geometry'])
+                intersect.loc[:, 'intersection_pct'] = intersect.loc[:, 'intersection'].area/intersect.loc[:, 'geometry'].area
+
+                # Ordeno pelo identificador dos setores e percentual de interseção
+                intersect = intersect.sort_values(['cd_original_setor_censitario', 'intersection_pct'], ascending=[True, False])
+
+                # Mantenho apenas as features com maior percentual de interseção
+                largest_inters = intersect.drop_duplicates('cd_original_setor_censitario', keep='first')
+
+                assert largest_inters.shape[0] == not_covered.sum(), 'O número de setores no dataframe baseado na maior interseção não é igual ao número de setores não cobertos por uma feature'
+
+                # Por último, crio um novo gdf concatenando os dois tipos de sjoin
+                new_setor = pd.concat([new_setor[~not_covered], largest_inters])
 
     n = 10
 
