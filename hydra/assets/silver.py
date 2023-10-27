@@ -256,12 +256,11 @@ def setor_censitario_enriched_geosampa(
                                       new_setor,
                                       camada,
                                       'cd_original_setor_censitario',
-                                      left_geometry='negative_buffer',
+                                      left_geometry='geometry',
                                       right_geometry='geometry',
                                       try_covered_by=True,
                                       keep_right_geometry=False
                                     )
-            new_setor = new_setor.drop(columns=['index_right'])
 
             rows_after_sjoin = new_setor.shape[0]
 
