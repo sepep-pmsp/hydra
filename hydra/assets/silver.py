@@ -12,6 +12,7 @@ from hydra.config.censo import (
     CensoFiles,
 )
 from hydra.config.geosampa import GeosampaConfig
+from hydra.utils.geopandas import sjoin_largest
 
 
 def _get_log_masssages_setor_censitario(
@@ -240,7 +241,7 @@ def setor_censitario_enriched_geosampa(
 
             new_setor = new_setor.sjoin(camada, how='left', predicate='intersects')
             new_setor = new_setor.drop(columns=['index_right'])
-        if conf.get('predicate') == 'covered_by':
+        if conf.get('predicate') == 'largest_intersection':
             context.log.info(
                 f'Agregando a camada {schema}'
             )
@@ -248,46 +249,29 @@ def setor_censitario_enriched_geosampa(
             props = conf.get('properties')
 
             camada = camada[props]
+            
+            rows_before_sjoin = new_setor.shape[0]
 
-            new_setor = new_setor.sjoin(camada, how='left', predicate='covered_by')
-
-            not_covered = new_setor['index_right'].isna()
-
+            new_setor = sjoin_largest(
+                                      new_setor,
+                                      camada,
+                                      'cd_original_setor_censitario',
+                                      left_geometry='negative_buffer',
+                                      right_geometry='geometry',
+                                      try_covered_by=True,
+                                      keep_right_geometry=False
+                                    )
             new_setor = new_setor.drop(columns=['index_right'])
 
-            if not_covered.sum() > 0:
-                context.log.info(
-                    f'{not_covered.sum()} setores não são totalmente cobertos por nenhuma geometria. A estes setores serão atribuídas as features com maior área de interseção'
-                )
+            rows_after_sjoin = new_setor.shape[0]
 
-                cols_before_join = [c for c in new_setor.columns if c not in camada.columns]
-                cols_before_join.append('geometry')
-                intersect = new_setor[not_covered].copy()
-                intersect = intersect[cols_before_join]
+            assert rows_before_sjoin == rows_after_sjoin, f'A relação entre setores e {schema} foi diferente de 1:1'
 
-                # Crio uma nova coluna de geometria no camada e faço o spatial join 
-                # com o predicate intersect, esperando que todos os setores tenham mais
-                # de um camada associado.
-                camada.loc[:, 'camada_geometry'] = camada.loc[:, 'geometry']
-                intersect = intersect.sjoin(camada, how='left', predicate='intersects')
+            na_after_sjoin = new_setor['index_right'].isna().sum()
 
-                assert intersect['index_right'].isna().sum() > 0, f'Existem setores sem nenhuma interseção com a camada {schema}'
+            assert na_after_sjoin == 0,  f'Existem setores sem nenhuma interseção com a camada {schema}'
 
-                # Crio uma nova coluna com o polígono da interseção entre o setor e o camada
-                # e calculo o percentual de interseção
-                intersect.loc[:, 'intersection'] = intersect.loc[:, 'negative_buffer'].intersection(intersect.loc[:, 'camada_geometry'])
-                intersect.loc[:, 'intersection_pct'] = intersect.loc[:, 'intersection'].area/intersect.loc[:, 'geometry'].area
-
-                # Ordeno pelo identificador dos setores e percentual de interseção
-                intersect = intersect.sort_values(['cd_original_setor_censitario', 'intersection_pct'], ascending=[True, False])
-
-                # Mantenho apenas as features com maior percentual de interseção
-                largest_inters = intersect.drop_duplicates('cd_original_setor_censitario', keep='first')
-
-                assert largest_inters.shape[0] == not_covered.sum(), 'O número de setores no dataframe baseado na maior interseção não é igual ao número de setores não cobertos por uma feature'
-
-                # Por último, crio um novo gdf concatenando os dois tipos de sjoin
-                new_setor = pd.concat([new_setor[~not_covered], largest_inters])
+            new_setor = new_setor.drop(columns=['index_right'])
 
     n = 10
 

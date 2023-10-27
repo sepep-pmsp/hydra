@@ -27,7 +27,7 @@
             "nm_distrito_municipal",
             "sg_distrito_municipal"
         ],
-        "predicate": "covered_by"
+        "predicate": "largest_intersection"
     },
     "GEOSAMPA_cadparcs_area_protecao_apa": {
         "properties": [
@@ -110,7 +110,7 @@
             "nm_subprefeitura",
             "sg_subprefeitura"
         ],
-        "predicate": "covered_by"
+        "predicate": "largest_intersection"
     },
     "transpetro_duto": {
         "properties": [
