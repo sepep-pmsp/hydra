@@ -4,7 +4,6 @@ from dagster import (
     EnvVar,
     define_asset_job,
     load_assets_from_modules,
-    multiprocess_executor,
 )
 from dagster_aws.s3 import (
     ConfigurablePickledObjectS3IOManager,
@@ -76,13 +75,6 @@ gold_io_manager = postgres_pandas_io_manager.configured(
     }
 )
 
-executor = multiprocess_executor.configured(
-    name='default_executor',
-    config_or_config_fn={
-        'max_concurrent': EnvVar.int('DAGSTER_EXECUTOR_MAX_CONCURRENCY'),
-    }
-)
-
 
 # Carregamento das definições
 defs = Definitions(
@@ -100,5 +92,4 @@ defs = Definitions(
         'geosampa_client': geosampa_client,
         'censo_resource': CensoResource(),
     },
-    executor=executor,
 )
