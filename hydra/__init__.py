@@ -75,6 +75,7 @@ gold_io_manager = postgres_pandas_io_manager.configured(
     }
 )
 
+
 # Carregamento das definições
 defs = Definitions(
     assets=all_assets,
