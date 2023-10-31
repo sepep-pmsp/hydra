@@ -4,7 +4,7 @@ import ssl
 
 
 class CensoResource(ConfigurableResource):
-    URL = 'https://ftp.ibge.gov.br/Censos/Censo_Demografico_2010/Resultados_do_Universo/Agregados_por_Setores_Censitarios/SP_Capital_20190823.zip'
+    URL:str = 'https://ftp.ibge.gov.br/Censos/Censo_Demografico_2010/Resultados_do_Universo/Agregados_por_Setores_Censitarios/SP_Capital_20231030.zip'
 
     def download_zipfile(self) -> bytes:
         # Cria um context inseguro. O risco é de interceptação do conteúdo,
