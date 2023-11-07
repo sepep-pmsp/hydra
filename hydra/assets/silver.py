@@ -208,21 +208,26 @@ def setor_censitario_enriched_geosampa(
     context: AssetExecutionContext,
     setor_censitario_enriched: gpd.GeoDataFrame,
 ) -> gpd.GeoDataFrame:
-    # O import precisa estar dentro da função, porque no cabeçalho 
+    # O import precisa estar dentro da função, porque no cabeçalho
     # causaria referência circular
     from hydra import defs
 
     # Primero removo os setores sem domicílios particulares
-    setor_censitario_enriched = setor_censitario_enriched[setor_censitario_enriched['missing']==False]
+    setor_censitario_enriched = setor_censitario_enriched[
+        setor_censitario_enriched['missing'] == False]
 
     # Depois adapto o gdf de setores para minimizar o tamanho
-    new_setor = setor_censitario_enriched[['geometry','cd_original_setor_censitario']].copy()
+    new_setor = setor_censitario_enriched[[
+        'geometry', 'cd_original_setor_censitario']].copy()
     new_setor['negative_buffer'] = new_setor['geometry'].buffer(-10)
     new_setor = new_setor.set_geometry('negative_buffer')
 
     # Defino a lista de camadas a agregar ao gdf de setores censitários
-    schemas_to_add = [dep_key for dep_key in context.op_def.ins.keys() if dep_key != 'setor_censitario_enriched']
-    
+    schemas_to_add = [
+        dep_key for dep_key in context.op_def.ins.keys()
+        if dep_key != 'setor_censitario_enriched'
+    ]
+
     for dep_key in schemas_to_add:
         schema = dep_key.removesuffix('_digested')
         context.log.info(
@@ -237,10 +242,31 @@ def setor_censitario_enriched_geosampa(
             props = conf.get('properties')
 
             camada = camada[props]
-            # camada[f'{camada}_geom'] = camada['geometry']
+            camada[f'{camada}_geom'] = camada['geometry']
 
-            new_setor = new_setor.sjoin(camada, how='left', predicate='intersects')
-            new_setor = new_setor.drop(columns=['index_right'])
+            new_setor = new_setor.sjoin(
+                camada, how='left', predicate='intersects')
+
+            # Crio uma nova coluna com o polígono da interseção entre o setor e o camada
+            # e calculo o percentual de interseção
+            left_geometry = 'geometry'
+            right_geometry = f'{camada}_geom'
+
+            new_setor.loc[:, 'intersection'] = \
+                new_setor.loc[:, left_geometry].intersection(
+                    new_setor.loc[:, right_geometry])
+            new_setor.loc[:, 'intersection_pct'] = \
+                new_setor.loc[:, 'intersection'].area / \
+                new_setor.loc[:, left_geometry].area
+
+            new_setor = new_setor.drop(
+                columns=[
+                    'index_right',
+                    right_geometry,
+                    'intersection'
+                ]
+            )
+
         if conf.get('predicate') == 'largest_intersection':
             context.log.info(
                 f'Agregando a camada {schema}'
@@ -249,18 +275,18 @@ def setor_censitario_enriched_geosampa(
             props = conf.get('properties')
 
             camada = camada[props]
-            
+
             rows_before_sjoin = new_setor.shape[0]
 
             new_setor = sjoin_largest(
-                                      new_setor,
-                                      camada,
-                                      'cd_original_setor_censitario',
-                                      left_geometry='geometry',
-                                      right_geometry='geometry',
-                                      try_covered_by=True,
-                                      keep_right_geometry=False
-                                    )
+                new_setor,
+                camada,
+                'cd_original_setor_censitario',
+                left_geometry='geometry',
+                right_geometry='geometry',
+                try_covered_by=True,
+                keep_right_geometry=False
+            )
 
             rows_after_sjoin = new_setor.shape[0]
 
@@ -281,8 +307,7 @@ def setor_censitario_enriched_geosampa(
         metadata={
             'registros': new_setor.shape[0],
             f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
-            'uso de memória (MB)': f'~{mu:.1f}MB'
         }
     )
-    
+
     return new_setor
