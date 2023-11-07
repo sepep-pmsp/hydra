@@ -30,6 +30,7 @@
         "predicate": "largest_intersection"
     },
     "GEOSAMPA_cadparcs_area_protecao_apa": {
+        "id_col": "nm_area_protecao_ambiental",
         "properties": [
             "geometry",
             "nm_esfera_administrativa",

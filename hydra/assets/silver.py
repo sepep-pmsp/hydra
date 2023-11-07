@@ -1,6 +1,7 @@
 from dagster import (
     AssetExecutionContext,
     AssetIn,
+    AssetsDefinition,
     MetadataValue,
     asset,
 )  # import the `dagster` library
@@ -311,3 +312,61 @@ def setor_censitario_enriched_geosampa(
     )
 
     return new_setor
+
+
+def __build_intersections_asset(name, group_name="silver") -> AssetsDefinition:
+    @asset(
+        name=f'intersection_setor_{name}',
+        ins={
+            'camada': AssetIn(key=name),
+            'setor': AssetIn(key='setor_censitario_enriched_geosampa')
+        },
+        group_name=group_name,
+        io_manager_key='gpd_silver_io_manager',
+        dagster_type=gpd.GeoDataFrame,
+    )
+    def _asset(
+        context: AssetExecutionContext,
+        camada: gpd.GeoDataFrame,
+        setor: gpd.GeoDataFrame
+    ):
+        config = GeosampaConfig.get_asset_config().get('geosampa').get(name)
+        right_id_col = config.get('id_col')
+        cols = [
+            'cd_original_setor_censitario',
+            'geometry',
+            right_id_col
+        ]
+
+        left_geometry = 'geometry_setor'
+        right_geometry = f'geometry_{name}'
+
+        df_inter = setor[cols].drop_duplicates()
+        df_inter = df_inter.rename(columns={'geometry': 'geometry_setor'})
+
+        df_inter = df_inter.merge(camada, how='left', on=right_id_col)
+        df_inter = df_inter.rename(
+            columns={'geometry': f'geometry_{name}'}
+        )
+
+        df_inter.loc[:, 'intersection'] = \
+            df_inter.loc[:, left_geometry].intersection(
+                df_inter.loc[:, right_geometry])
+        df_inter.loc[:, 'intersection_pct'] = \
+            df_inter.loc[:, 'intersection'].area / \
+            df_inter.loc[:, left_geometry].area
+
+        n = 10
+
+        df_inter = df_inter.drop(columns=[left_geometry])
+        peek = df_inter.drop(columns=[right_geometry]).sample(n)
+
+        context.add_output_metadata(
+            metadata={
+                'registros': df_inter.shape[0],
+                f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
+            }
+        )
+        return df_inter
+    return _asset
+
