@@ -243,7 +243,7 @@ def setor_censitario_enriched_geosampa(
             props = conf.get('properties')
 
             camada = camada[props]
-            camada[f'{camada}_geom'] = camada['geometry']
+            camada[f'{schema}_geom'] = camada['geometry']
 
             new_setor = new_setor.sjoin(
                 camada, how='left', predicate='intersects')
@@ -251,7 +251,7 @@ def setor_censitario_enriched_geosampa(
             # Crio uma nova coluna com o polígono da interseção entre o setor e o camada
             # e calculo o percentual de interseção
             left_geometry = 'geometry'
-            right_geometry = f'{camada}_geom'
+            right_geometry = f'{schema}_geom'
 
             new_setor.loc[:, 'intersection'] = \
                 new_setor.loc[:, left_geometry].intersection(
@@ -318,7 +318,7 @@ def __build_intersections_asset(name, group_name="silver") -> AssetsDefinition:
     @asset(
         name=f'intersection_setor_{name}',
         ins={
-            'camada': AssetIn(key=name),
+            'camada': AssetIn(key=f'{name}_digested'),
             'setor': AssetIn(key='setor_censitario_enriched_geosampa')
         },
         group_name=group_name,
