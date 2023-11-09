@@ -209,6 +209,8 @@ def setor_censitario_enriched_geosampa(
     context: AssetExecutionContext,
     setor_censitario_enriched: gpd.GeoDataFrame,
 ) -> gpd.GeoDataFrame:
+    # Infelizmente, não encontrei um modo mais elegante de carregar
+    # os assets dinamicamente
     # O import precisa estar dentro da função, porque no cabeçalho
     # causaria referência circular
     from hydra import defs
@@ -340,26 +342,37 @@ def __build_intersections_asset(name, group_name="silver") -> AssetsDefinition:
 
         left_geometry = 'geometry_setor'
         right_geometry = f'geometry_{name}'
+        inter_geometry = 'intersection'
 
-        df_inter = setor[cols].drop_duplicates()
-        df_inter = df_inter.rename(columns={'geometry': 'geometry_setor'})
+        df_inter = setor[cols].dropna(subset=right_id_col)
+        df_inter = df_inter.drop_duplicates()
+        df_inter = df_inter.rename(
+            columns={'geometry': left_geometry}
+        )
+        df_inter = df_inter.set_geometry(left_geometry)
 
         df_inter = df_inter.merge(camada, how='left', on=right_id_col)
         df_inter = df_inter.rename(
-            columns={'geometry': f'geometry_{name}'}
+            columns={'geometry': right_geometry}
         )
 
-        df_inter.loc[:, 'intersection'] = \
+        df_inter.loc[:, inter_geometry] = \
             df_inter.loc[:, left_geometry].intersection(
                 df_inter.loc[:, right_geometry])
         df_inter.loc[:, 'intersection_pct'] = \
-            df_inter.loc[:, 'intersection'].area / \
+            df_inter.loc[:, inter_geometry].area / \
             df_inter.loc[:, left_geometry].area
+        df_inter = df_inter.set_geometry(inter_geometry)
 
         n = 10
 
-        df_inter = df_inter.drop(columns=[left_geometry])
-        peek = df_inter.drop(columns=[right_geometry]).sample(n)
+        peek = df_inter.drop(
+            columns=[
+                left_geometry,
+                right_geometry,
+                inter_geometry
+            ]
+        ).sample(n)
 
         context.add_output_metadata(
             metadata={
