@@ -14,8 +14,10 @@
         "predicate": "intersects"
     },
     "area_inundavel": {
+        "id_col": "cd_identificador_area_inundavel",
         "properties": [
-            "geometry"
+            "geometry",
+            "cd_identificador_area_inundavel"
         ],
         "predicate": "intersects"
     },
@@ -32,9 +34,10 @@
         "predicate": "largest_intersection"
     },
     "GEOSAMPA_cadparcs_area_protecao_apa": {
-        "id_col": "nm_area_protecao_ambiental",
+        "id_col": "cd_identificador_cadparcs_area_protecao_apa",
         "properties": [
             "geometry",
+            "cd_identificador_cadparcs_area_protecao_apa",
             "nm_esfera_administrativa",
             "nm_area_protecao_ambiental",
             "tx_instrumento_legal_criacao"
@@ -42,8 +45,10 @@
         "predicate": "intersects"
     },
     "manancial_billings": {
+        "id_col": "cd_identificador",
         "properties": [
             "geometry",
+            "cd_identificador",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
@@ -52,8 +57,10 @@
         "predicate": "intersects"
     },
     "manancial_guarapiranga": {
+        "id_col": "cd_identificador",
         "properties": [
             "geometry",
+            "cd_identificador",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
@@ -62,8 +69,10 @@
         "predicate": "intersects"
     },
     "manancial_juquery": {
+        "id_col": "cd_identificador",
         "properties": [
             "geometry",
+            "cd_identificador",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
@@ -72,31 +81,39 @@
         "predicate": "intersects"
     },
     "remanescente_pmma": {
+        "id_col": "cd_identificador",
         "properties": [
             "geometry",
+            "cd_identificador",
             "cd_classe_vegetacao",
             "dc_classe_vegetacao"
         ],
         "predicate": "intersects"
     },
     "represa_nivel_maximo": {
+        "id_col": "cd_identificador_represa",
         "properties": [
             "geometry",
+            "cd_identificador_represa",
             "nm_acidente"
         ],
         "predicate": "intersects"
     },
     "risco_ocorrencia_alagamento": {
+        "id_col": "cd_identificador",
         "properties": [
             "geometry",
+            "cd_identificador",
             "dt_ocorrencia",
             "dc_tipo_ocorrencia"
         ],
         "predicate": "intersects"
     },
     "risco_ocorrencia_inundacao": {
+        "id_col": "cd_identificador",
         "properties": [
             "geometry",
+            "cd_identificador",
             "dt_ocorrencia",
             "dc_tipo_ocorrencia"
         ],
@@ -106,6 +123,7 @@
         "properties": []
     },
     "subprefeitura": {
+        "id_col": "cd_identificador_subprefeitura",
         "properties": [
             "geometry",
             "cd_identificador_subprefeitura",
@@ -116,8 +134,10 @@
         "predicate": "largest_intersection"
     },
     "transpetro_duto": {
+        "id_col": "cd_identificador_transpetro_duto",
         "properties": [
-            "geometry"
+            "geometry",
+            "cd_identificador_transpetro_duto"
         ],
         "predicate": "intersects"
     }
