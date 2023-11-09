@@ -383,3 +383,7 @@ def __build_intersections_asset(name, group_name="silver") -> AssetsDefinition:
         return df_inter
     return _asset
 
+
+globals().update({f'intersection_setor_{asset_}': __build_intersections_asset(asset_)
+                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()
+                  if 'id_col' in GeosampaConfig.get_asset_config().get('geosampa').get(asset_).keys()})
