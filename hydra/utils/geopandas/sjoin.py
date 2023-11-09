@@ -9,7 +9,8 @@ def sjoin_largest(
     left_geometry: str = 'geometry',
     right_geometry: str = 'geometry',
     try_covered_by: bool = True,
-    keep_right_geometry: bool = False
+    keep_right_geometry: bool = False,
+    keep_intersection_geometry: bool = False
 ) -> GeoDataFrame:
 
     assert isinstance(
@@ -102,5 +103,7 @@ def sjoin_largest(
     
     if keep_right_geometry==False:
         final_gdf.drop(columns='right_geometry', inplace=True)
+    if keep_right_geometry==False:
+        final_gdf.drop(columns='intersection', inplace=True)
 
     return final_gdf.sort_index()
