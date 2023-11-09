@@ -1,5 +1,6 @@
 {
     "area_contaminada_reabilitada_svma": {
+        "id_col": "cd_identificador_area_contaminada_reabilitada",
         "properties": [
             "geometry",
             "cd_identificador_area_contaminada_reabilitada",
@@ -19,6 +20,7 @@
         "predicate": "intersects"
     },
     "distrito_municipal": {
+        "id_col": "cd_identificador_distrito",
         "properties": [
             "geometry",
             "cd_identificador_distrito",
