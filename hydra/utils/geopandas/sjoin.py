@@ -47,6 +47,7 @@ def sjoin_largest(
     if try_covered_by == True:
         covered = left_copy.sjoin(
             right_copy, how='left', predicate='covered_by')
+        covered.loc[:, 'intersection'] = covered.loc[:, left_geometry]
         covered.loc[:, 'intersection_pct'] = 1
 
         not_covered_filter = covered['index_right'].isna()
