@@ -66,7 +66,6 @@ def sjoin_largest(
             intersect.loc[:,left_geometry].intersection(intersect.loc[:, 'right_geometry'])
     intersect.loc[:, 'intersection_pct'] = \
             intersect.loc[:, 'intersection'].area/intersect.loc[:, left_geometry].area
-    intersect  = intersect.drop(columns='intersection')
 
     # Ordeno pelo identificador dos registros e percentual de interseção
     intersect = intersect.sort_values(
@@ -103,7 +102,7 @@ def sjoin_largest(
     
     if keep_right_geometry==False:
         final_gdf.drop(columns='right_geometry', inplace=True)
-    if keep_right_geometry==False:
+    if keep_intersection_geometry==False:
         final_gdf.drop(columns='intersection', inplace=True)
 
     return final_gdf.sort_index()
