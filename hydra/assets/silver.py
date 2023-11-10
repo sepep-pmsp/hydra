@@ -225,32 +225,23 @@ def __build_intersections_asset(name, group_name="silver") -> AssetsDefinition:
                 f'Agregando a camada {name}'
             )
             props = conf.get('properties')
+            left_geometry = 'geometry'
+            right_geometry = 'right_geometry'
 
             camada = camada[props]
-            camada[f'{name}_geom'] = camada['geometry']
+            camada[right_geometry] = camada['geometry']
 
             df_inter = df_inter.sjoin(
-                camada, how='left', predicate='intersects')
+                camada, how='inner', predicate='intersects')
 
             # Crio uma nova coluna com o polígono da interseção entre o setor e o camada
             # e calculo o percentual de interseção
-            left_geometry = 'geometry'
-            right_geometry = f'{name}_geom'
-
             df_inter.loc[:, 'intersection'] = \
                 df_inter.loc[:, left_geometry].intersection(
                     df_inter.loc[:, right_geometry])
             df_inter.loc[:, 'intersection_pct'] = \
                 df_inter.loc[:, 'intersection'].area / \
                 df_inter.loc[:, left_geometry].area
-
-            df_inter = df_inter.drop(
-                columns=[
-                    'index_right',
-                    right_geometry,
-                    'intersection'
-                ]
-            )
 
         if conf.get('predicate') == 'largest_intersection':
             context.log.info(
@@ -269,7 +260,8 @@ def __build_intersections_asset(name, group_name="silver") -> AssetsDefinition:
                 left_geometry='geometry',
                 right_geometry='geometry',
                 try_covered_by=True,
-                keep_right_geometry=False
+                keep_right_geometry=True,
+                keep_intersection_geometry=True
             )
 
             rows_after_sjoin = df_inter.shape[0]
