@@ -45,7 +45,7 @@
         "predicate": "intersects"
     },
     "manancial_billings": {
-        "id_col": "cd_identificador",
+        "id_col": "cd_identificador_manancial_billings",
         "properties": [
             "geometry",
             "cd_identificador",
@@ -54,10 +54,13 @@
             "dc_area_especial",
             "nm_bacia"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_manancial_billings"
+        },
         "predicate": "intersects"
     },
     "manancial_guarapiranga": {
-        "id_col": "cd_identificador",
+        "id_col": "cd_identificador_manancial_guarapiranga",
         "properties": [
             "geometry",
             "cd_identificador",
@@ -66,10 +69,13 @@
             "dc_area_especial",
             "nm_bacia"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_manancial_guarapiranga"
+        },
         "predicate": "intersects"
     },
     "manancial_juquery": {
-        "id_col": "cd_identificador",
+        "id_col": "cd_identificador_manancial_juquery",
         "properties": [
             "geometry",
             "cd_identificador",
@@ -78,16 +84,22 @@
             "dc_area_especial",
             "nm_bacia"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_manancial_juquery"
+        },
         "predicate": "intersects"
     },
     "remanescente_pmma": {
-        "id_col": "cd_identificador",
+        "id_col": "cd_identificador_remanescente_pmma",
         "properties": [
             "geometry",
             "cd_identificador",
             "cd_classe_vegetacao",
             "dc_classe_vegetacao"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_remanescente_pmma"
+        },
         "predicate": "intersects"
     },
     "represa_nivel_maximo": {
@@ -100,23 +112,29 @@
         "predicate": "intersects"
     },
     "risco_ocorrencia_alagamento": {
-        "id_col": "cd_identificador",
+        "id_col": "cd_identificador_risco_ocorrencia_alagamento",
         "properties": [
             "geometry",
             "cd_identificador",
             "dt_ocorrencia",
             "dc_tipo_ocorrencia"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_risco_ocorrencia_alagamento"
+        },
         "predicate": "intersects"
     },
     "risco_ocorrencia_inundacao": {
-        "id_col": "cd_identificador",
+        "id_col": "cd_identificador_risco_ocorrencia_inundacao",
         "properties": [
             "geometry",
             "cd_identificador",
             "dt_ocorrencia",
             "dc_tipo_ocorrencia"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_risco_ocorrencia_inundacao"
+        },
         "predicate": "intersects"
     },
     "setor_censitario_2010": {
