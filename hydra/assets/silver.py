@@ -272,7 +272,24 @@ def __build_intersections_asset(name, group_name="silver") -> AssetsDefinition:
 
             assert na_after_sjoin == 0,  f'Existem setores sem nenhuma interseção com a camada {name}'
 
-            df_inter = df_inter.drop(columns=['index_right'])
+        df_inter = df_inter.drop(columns=['index_right'])
+
+        n = 10 if df_inter.shape[0] > 10 else df_inter.shape[0]
+
+        hide_cols = [
+            'geometry',
+            'negative_buffer',
+            'intersection',
+            'right_geometry',
+        ]
+        peek = df_inter.drop(columns=hide_cols).sample(n)
+
+        context.add_output_metadata(
+            metadata={
+                'registros': df_inter.shape[0],
+                f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
+            }
+        )
         return df_inter
     return _asset
 
