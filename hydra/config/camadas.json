@@ -48,7 +48,7 @@
         "id_col": "cd_identificador_manancial_billings",
         "properties": [
             "geometry",
-            "cd_identificador",
+            "cd_identificador_manancial_billings",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
@@ -63,7 +63,7 @@
         "id_col": "cd_identificador_manancial_guarapiranga",
         "properties": [
             "geometry",
-            "cd_identificador",
+            "cd_identificador_manancial_guarapiranga",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
@@ -78,7 +78,7 @@
         "id_col": "cd_identificador_manancial_juquery",
         "properties": [
             "geometry",
-            "cd_identificador",
+            "cd_identificador_manancial_juquery",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
@@ -93,7 +93,7 @@
         "id_col": "cd_identificador_remanescente_pmma",
         "properties": [
             "geometry",
-            "cd_identificador",
+            "cd_identificador_remanescente_pmma",
             "cd_classe_vegetacao",
             "dc_classe_vegetacao"
         ],
@@ -115,7 +115,7 @@
         "id_col": "cd_identificador_risco_ocorrencia_alagamento",
         "properties": [
             "geometry",
-            "cd_identificador",
+            "cd_identificador_risco_ocorrencia_alagamento",
             "dt_ocorrencia",
             "dc_tipo_ocorrencia"
         ],
@@ -128,7 +128,7 @@
         "id_col": "cd_identificador_risco_ocorrencia_inundacao",
         "properties": [
             "geometry",
-            "cd_identificador",
+            "cd_identificador_risco_ocorrencia_inundacao",
             "dt_ocorrencia",
             "dc_tipo_ocorrencia"
         ],
