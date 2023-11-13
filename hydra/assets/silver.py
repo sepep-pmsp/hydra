@@ -280,3 +280,74 @@ def __build_intersections_asset(name, group_name="silver") -> AssetsDefinition:
 globals().update({f'intersection_setor_{asset_}': __build_intersections_asset(asset_)
                   for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()
                   if 'id_col' in GeosampaConfig.get_asset_config().get('geosampa').get(asset_).keys()})
+
+
+# Não é possível definir dinâmicamente uma lista de assets como um parâmetro.
+# Cada definição em ins deve corresponder a um upstream asset único e um
+# parâmetro único na função que define o asset. Assim, para que a lista possa ser
+# gerada dinâmicamente, precisarei definir uma lista de asset keys como string e
+# utilizar o parâmetro deps da definição
+intersections = [f'intersection_setor_{asset_}'
+                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()
+                  if 'id_col' in GeosampaConfig.get_asset_config().get('geosampa').get(asset_).keys()]
+
+@asset(
+    io_manager_key='gpd_silver_io_manager',
+    deps=intersections,
+    group_name='silver',
+)
+def setor_censitario_enriched_geosampa(
+    context: AssetExecutionContext,
+    setor_censitario_enriched: gpd.GeoDataFrame,
+) -> gpd.GeoDataFrame:
+    # Infelizmente, não encontrei um modo mais elegante de carregar
+    # os assets dinamicamente
+    # O import precisa estar dentro da função, porque no cabeçalho
+    # causaria referência circular
+    from hydra import defs
+
+    # Primero removo os setores sem domicílios particulares
+    setor_censitario_enriched = setor_censitario_enriched[
+        setor_censitario_enriched['missing'] == False]
+
+    left_id_col = 'cd_original_setor_censitario'
+
+    # Depois adapto o gdf de setores para minimizar o tamanho
+    df_inter = setor_censitario_enriched[[
+        'geometry', left_id_col]].copy()
+
+    # Defino a lista de camadas a agregar ao gdf de setores censitários
+    schemas_to_add = [
+        dep_key for dep_key in context.op_def.ins.keys()
+        if dep_key != 'setor_censitario_enriched'
+    ]
+
+    for dep_key in schemas_to_add:
+        schema = dep_key.removesuffix('_digested')
+        context.log.info(
+            f'Agregando a camada {schema}'
+        )
+
+        camada = defs.load_asset_value(dep_key)
+        camada = camada.rename(columns={'intersection_pct': f'{schema}_intersection_pct'})
+        camada = camada.drop(columns=[
+            'geometry',
+            'right_geometry',
+            'intersection',
+            'negative_buffer',
+        ])
+        
+        df_inter = df_inter.merge(camada, how='left', on=left_id_col)
+
+
+    n = 10
+
+    peek = df_inter.drop(columns='geometry').sample(n)
+
+    context.add_output_metadata(
+        metadata={
+            'registros': df_inter.shape[0],
+            f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
+        }
+    )
+    return df_inter
