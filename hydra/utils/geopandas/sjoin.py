@@ -9,7 +9,8 @@ def sjoin_largest(
     left_geometry: str = 'geometry',
     right_geometry: str = 'geometry',
     try_covered_by: bool = True,
-    keep_right_geometry: bool = False
+    keep_right_geometry: bool = False,
+    keep_intersection_geometry: bool = False
 ) -> GeoDataFrame:
 
     assert isinstance(
@@ -46,6 +47,7 @@ def sjoin_largest(
     if try_covered_by == True:
         covered = left_copy.sjoin(
             right_copy, how='left', predicate='covered_by')
+        covered.loc[:, 'intersection'] = covered.loc[:, left_geometry]
         covered.loc[:, 'intersection_pct'] = 1
 
         not_covered_filter = covered['index_right'].isna()
@@ -65,7 +67,6 @@ def sjoin_largest(
             intersect.loc[:,left_geometry].intersection(intersect.loc[:, 'right_geometry'])
     intersect.loc[:, 'intersection_pct'] = \
             intersect.loc[:, 'intersection'].area/intersect.loc[:, left_geometry].area
-    intersect  = intersect.drop(columns='intersection')
 
     # Ordeno pelo identificador dos registros e percentual de interseção
     intersect = intersect.sort_values(
@@ -102,5 +103,7 @@ def sjoin_largest(
     
     if keep_right_geometry==False:
         final_gdf.drop(columns='right_geometry', inplace=True)
+    if keep_intersection_geometry==False:
+        final_gdf.drop(columns='intersection', inplace=True)
 
     return final_gdf.sort_index()

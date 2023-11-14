@@ -1,6 +1,7 @@
 from dagster import (
     AssetExecutionContext,
     AssetIn,
+    AssetsDefinition,
     MetadataValue,
     asset,
 )  # import the `dagster` library
@@ -189,100 +190,181 @@ def setor_censitario_enriched(
     return df_setor_enriched
 
 
+def __build_intersections_asset(name, group_name="silver") -> AssetsDefinition:
+    @asset(
+        name=f'intersection_setor_{name}',
+        ins={
+            'camada': AssetIn(key=f'{name}_digested'),
+            'setor': AssetIn(key='setor_censitario_enriched')
+        },
+        group_name=group_name,
+        io_manager_key='gpd_silver_io_manager',
+        dagster_type=gpd.GeoDataFrame,
+    )
+    def _asset(
+        context: AssetExecutionContext,
+        camada: gpd.GeoDataFrame,
+        setor: gpd.GeoDataFrame
+    ):
+        # Primero removo os setores sem domicílios particulares
+        setor = setor[
+            setor['missing'] == False]
+
+        # Depois adapto o gdf de setores para minimizar o tamanho
+        df_inter = setor[[
+            'geometry', 'cd_original_setor_censitario']].copy()
+        df_inter['negative_buffer'] = df_inter['geometry'].buffer(-10)
+        df_inter = df_inter.set_geometry('negative_buffer')
+
+        context.log.info(
+            f'Buscando configurações da camada {name}'
+        )
+        conf = GeosampaConfig.get_asset_config().get('geosampa').get(name)
+        if conf.get('predicate') == 'intersects':
+            context.log.info(
+                f'Agregando a camada {name}'
+            )
+            props = conf.get('properties')
+            left_geometry = 'geometry'
+            right_geometry = 'right_geometry'
+
+            camada = camada[props]
+            camada[right_geometry] = camada['geometry']
+
+            df_inter = df_inter.sjoin(
+                camada, how='inner', predicate='intersects')
+
+            # Crio uma nova coluna com o polígono da interseção entre o setor e o camada
+            # e calculo o percentual de interseção
+            df_inter.loc[:, 'intersection'] = \
+                df_inter.loc[:, left_geometry].intersection(
+                    df_inter.loc[:, right_geometry])
+            df_inter.loc[:, 'intersection_pct'] = \
+                df_inter.loc[:, 'intersection'].area / \
+                df_inter.loc[:, left_geometry].area
+
+        if conf.get('predicate') == 'largest_intersection':
+            context.log.info(
+                f'Agregando a camada {name}'
+            )
+            props = conf.get('properties')
+
+            camada = camada[props]
+
+            rows_before_sjoin = df_inter.shape[0]
+
+            df_inter = sjoin_largest(
+                df_inter,
+                camada,
+                'cd_original_setor_censitario',
+                left_geometry='geometry',
+                right_geometry='geometry',
+                try_covered_by=True,
+                keep_right_geometry=True,
+                keep_intersection_geometry=True
+            )
+
+            rows_after_sjoin = df_inter.shape[0]
+
+            assert rows_before_sjoin == rows_after_sjoin, f'A relação entre setores e {name} foi diferente de 1:1'
+
+            na_after_sjoin = df_inter['index_right'].isna().sum()
+
+            assert na_after_sjoin == 0,  f'Existem setores sem nenhuma interseção com a camada {name}'
+
+        df_inter = df_inter.drop(columns=['index_right'])
+
+        n = 10 if df_inter.shape[0] > 10 else df_inter.shape[0]
+
+        hide_cols = [
+            'geometry',
+            'negative_buffer',
+            'intersection',
+            'right_geometry',
+        ]
+        peek = df_inter.drop(columns=hide_cols).sample(n)
+
+        context.add_output_metadata(
+            metadata={
+                'registros': df_inter.shape[0],
+                f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
+            }
+        )
+        return df_inter
+    return _asset
+
+
+globals().update({f'intersection_setor_{asset_}': __build_intersections_asset(asset_)
+                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()
+                  if 'id_col' in GeosampaConfig.get_asset_config().get('geosampa').get(asset_).keys()})
+
+
 # Não é possível definir dinâmicamente uma lista de assets como um parâmetro.
 # Cada definição em ins deve corresponder a um upstream asset único e um
 # parâmetro único na função que define o asset. Assim, para que a lista possa ser
 # gerada dinâmicamente, precisarei definir uma lista de asset keys como string e
 # utilizar o parâmetro deps da definição
-outras_camadas = [f'{asset_}_digested'
+intersections = [f'intersection_setor_{asset_}'
                   for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()
-                  if asset_ != 'setor_censitario_2010']
-
+                  if 'id_col' in GeosampaConfig.get_asset_config().get('geosampa').get(asset_).keys()]
 
 @asset(
     io_manager_key='gpd_silver_io_manager',
-    deps=outras_camadas,
+    deps=intersections,
     group_name='silver',
 )
 def setor_censitario_enriched_geosampa(
     context: AssetExecutionContext,
     setor_censitario_enriched: gpd.GeoDataFrame,
 ) -> gpd.GeoDataFrame:
-    # O import precisa estar dentro da função, porque no cabeçalho 
+    # Infelizmente, não encontrei um modo mais elegante de carregar
+    # os assets dinamicamente
+    # O import precisa estar dentro da função, porque no cabeçalho
     # causaria referência circular
     from hydra import defs
 
     # Primero removo os setores sem domicílios particulares
-    setor_censitario_enriched = setor_censitario_enriched[setor_censitario_enriched['missing']==False]
+    setor_censitario_enriched = setor_censitario_enriched[
+        setor_censitario_enriched['missing'] == False]
+
+    left_id_col = 'cd_original_setor_censitario'
 
     # Depois adapto o gdf de setores para minimizar o tamanho
-    new_setor = setor_censitario_enriched[['geometry','cd_original_setor_censitario']].copy()
-    new_setor['negative_buffer'] = new_setor['geometry'].buffer(-10)
-    new_setor = new_setor.set_geometry('negative_buffer')
+    df_inter = setor_censitario_enriched[[
+        'geometry', left_id_col]].copy()
 
     # Defino a lista de camadas a agregar ao gdf de setores censitários
-    schemas_to_add = [dep_key for dep_key in context.op_def.ins.keys() if dep_key != 'setor_censitario_enriched']
-    
+    schemas_to_add = [
+        dep_key for dep_key in context.op_def.ins.keys()
+        if dep_key != 'setor_censitario_enriched'
+    ]
+
     for dep_key in schemas_to_add:
         schema = dep_key.removesuffix('_digested')
         context.log.info(
-            f'Buscando configurações da camada {schema}'
+            f'Agregando a camada {schema}'
         )
-        conf = GeosampaConfig.get_asset_config().get('geosampa').get(schema)
-        if conf.get('predicate') == 'intersects':
-            context.log.info(
-                f'Agregando a camada {schema}'
-            )
-            camada = defs.load_asset_value(dep_key)
-            props = conf.get('properties')
 
-            camada = camada[props]
-            # camada[f'{camada}_geom'] = camada['geometry']
+        camada = defs.load_asset_value(dep_key)
+        camada = camada.rename(columns={'intersection_pct': f'{schema}_intersection_pct'})
+        camada = camada.drop(columns=[
+            'geometry',
+            'right_geometry',
+            'intersection',
+            'negative_buffer',
+        ])
+        
+        df_inter = df_inter.merge(camada, how='left', on=left_id_col)
 
-            new_setor = new_setor.sjoin(camada, how='left', predicate='intersects')
-            new_setor = new_setor.drop(columns=['index_right'])
-        if conf.get('predicate') == 'largest_intersection':
-            context.log.info(
-                f'Agregando a camada {schema}'
-            )
-            camada = defs.load_asset_value(dep_key)
-            props = conf.get('properties')
-
-            camada = camada[props]
-            
-            rows_before_sjoin = new_setor.shape[0]
-
-            new_setor = sjoin_largest(
-                                      new_setor,
-                                      camada,
-                                      'cd_original_setor_censitario',
-                                      left_geometry='geometry',
-                                      right_geometry='geometry',
-                                      try_covered_by=True,
-                                      keep_right_geometry=False
-                                    )
-
-            rows_after_sjoin = new_setor.shape[0]
-
-            assert rows_before_sjoin == rows_after_sjoin, f'A relação entre setores e {schema} foi diferente de 1:1'
-
-            na_after_sjoin = new_setor['index_right'].isna().sum()
-
-            assert na_after_sjoin == 0,  f'Existem setores sem nenhuma interseção com a camada {schema}'
-
-            new_setor = new_setor.drop(columns=['index_right'])
 
     n = 10
 
-    peek = new_setor.drop(columns=['geometry', 'negative_buffer']).sample(n)
-    mu = new_setor.memory_usage(index=True, deep=True).sum()/10**6
+    peek = df_inter.drop(columns='geometry').sample(n)
 
     context.add_output_metadata(
         metadata={
-            'registros': new_setor.shape[0],
+            'registros': df_inter.shape[0],
             f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
-            'uso de memória (MB)': f'~{mu:.1f}MB'
         }
     )
-    
-    return new_setor
+    return df_inter
