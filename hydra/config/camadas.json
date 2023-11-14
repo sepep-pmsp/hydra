@@ -1,5 +1,6 @@
 {
     "area_contaminada_reabilitada_svma": {
+        "id_col": "cd_identificador_area_contaminada_reabilitada",
         "properties": [
             "geometry",
             "cd_identificador_area_contaminada_reabilitada",
@@ -13,12 +14,15 @@
         "predicate": "intersects"
     },
     "area_inundavel": {
+        "id_col": "cd_identificador_area_inundavel",
         "properties": [
-            "geometry"
+            "geometry",
+            "cd_identificador_area_inundavel"
         ],
         "predicate": "intersects"
     },
     "distrito_municipal": {
+        "id_col": "cd_identificador_distrito",
         "properties": [
             "geometry",
             "cd_identificador_distrito",
@@ -30,8 +34,10 @@
         "predicate": "largest_intersection"
     },
     "GEOSAMPA_cadparcs_area_protecao_apa": {
+        "id_col": "cd_identificador_cadparcs_area_protecao_apa",
         "properties": [
             "geometry",
+            "cd_identificador_cadparcs_area_protecao_apa",
             "nm_esfera_administrativa",
             "nm_area_protecao_ambiental",
             "tx_instrumento_legal_criacao"
@@ -39,70 +45,103 @@
         "predicate": "intersects"
     },
     "manancial_billings": {
+        "id_col": "cd_identificador_manancial_billings",
         "properties": [
             "geometry",
+            "cd_identificador_manancial_billings",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
             "nm_bacia"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_manancial_billings"
+        },
         "predicate": "intersects"
     },
     "manancial_guarapiranga": {
+        "id_col": "cd_identificador_manancial_guarapiranga",
         "properties": [
             "geometry",
+            "cd_identificador_manancial_guarapiranga",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
             "nm_bacia"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_manancial_guarapiranga"
+        },
         "predicate": "intersects"
     },
     "manancial_juquery": {
+        "id_col": "cd_identificador_manancial_juquery",
         "properties": [
             "geometry",
+            "cd_identificador_manancial_juquery",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
             "nm_bacia"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_manancial_juquery"
+        },
         "predicate": "intersects"
     },
     "remanescente_pmma": {
+        "id_col": "cd_identificador_remanescente_pmma",
         "properties": [
             "geometry",
+            "cd_identificador_remanescente_pmma",
             "cd_classe_vegetacao",
             "dc_classe_vegetacao"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_remanescente_pmma"
+        },
         "predicate": "intersects"
     },
     "represa_nivel_maximo": {
+        "id_col": "cd_identificador_represa",
         "properties": [
             "geometry",
+            "cd_identificador_represa",
             "nm_acidente"
         ],
         "predicate": "intersects"
     },
     "risco_ocorrencia_alagamento": {
+        "id_col": "cd_identificador_risco_ocorrencia_alagamento",
         "properties": [
             "geometry",
+            "cd_identificador_risco_ocorrencia_alagamento",
             "dt_ocorrencia",
             "dc_tipo_ocorrencia"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_risco_ocorrencia_alagamento"
+        },
         "predicate": "intersects"
     },
     "risco_ocorrencia_inundacao": {
+        "id_col": "cd_identificador_risco_ocorrencia_inundacao",
         "properties": [
             "geometry",
+            "cd_identificador_risco_ocorrencia_inundacao",
             "dt_ocorrencia",
             "dc_tipo_ocorrencia"
         ],
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_risco_ocorrencia_inundacao"
+        },
         "predicate": "intersects"
     },
     "setor_censitario_2010": {
         "properties": []
     },
     "subprefeitura": {
+        "id_col": "cd_identificador_subprefeitura",
         "properties": [
             "geometry",
             "cd_identificador_subprefeitura",
@@ -113,8 +152,10 @@
         "predicate": "largest_intersection"
     },
     "transpetro_duto": {
+        "id_col": "cd_identificador_transpetro_duto",
         "properties": [
-            "geometry"
+            "geometry",
+            "cd_identificador_transpetro_duto"
         ],
         "predicate": "intersects"
     }

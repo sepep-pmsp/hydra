@@ -77,6 +77,17 @@ def __build_digested_asset(name, group_name="geosampa_bronze") -> AssetsDefiniti
         gdf = gdf.set_crs(raw_asset['crs'].get('properties').get('name'))
         gdf = gdf.to_crs(epsg=31983)
 
+        context.log.info(f'Camada {name} lida')
+        context.log.info(f'Lendo as configurações da camada {name}')
+        conf = GeosampaConfig.get_asset_config().get('geosampa').get(name)
+        if 'renamed_columns' in conf.keys():
+            context.log.info(f'Renomeando as colunas da camada {name}')
+            gdf = gdf.rename(columns=conf.get('renamed_columns'))
+        else:
+            context.log.info(f'A camada {name} não possui colunas a renomear')
+
+        context.log.info(f'Extraindo metadados da camada {name}')
+
         # Recebo a imagem de prévia em markdown
         md_preview = _get_md_preview_plot(gdf, name)
 
@@ -84,8 +95,6 @@ def __build_digested_asset(name, group_name="geosampa_bronze") -> AssetsDefiniti
         n = 10 if gdf.shape[0] > 10 else gdf.shape[0]
 
         peek = gdf.drop(columns=['geometry']).sample(n)
-
-        context.log.info(f'Camada {name} lida')
 
         return Output(
             gdf,
