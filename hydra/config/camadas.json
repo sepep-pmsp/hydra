@@ -1,161 +1,2095 @@
 {
+    "GEOSAMPA_cadparcs_area_protecao_apa": {
+        "id_col": "cd_identificador_cadparcs_area_protecao_apa",
+        "properties": [
+            "cd_identificador_cadparcs_area_protecao_apa",
+            "nm_esfera_administrativa",
+            "nm_area_protecao_ambiental",
+            "qt_area_metro",
+            "tx_instrumento_legal_criacao",
+            "dt_atualizacao",
+            "ge_multipoligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "GEOSAMPA_cadparcs_parque_estadual": {
+        "id_col": "cd_identificador_cadparcs_parque_estadual",
+        "properties": [
+            "cd_identificador_cadparcs_parque_estadual",
+            "nm_parque",
+            "nm_esfera_administrativa",
+            "tx_tipo_parque",
+            "qt_area_metro",
+            "tx_instrumento_legal_criacao",
+            "dt_atualizacao",
+            "ge_multipoligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "GEOSAMPA_cadparcs_parque_outra_secretaria": {
+        "id_col": "cd_identificador_cadparcs_parque_outra_secretaria",
+        "properties": [
+            "cd_identificador_cadparcs_parque_outra_secretaria",
+            "nm_parque",
+            "tx_tipo_categoria",
+            "tx_data_inauguracao",
+            "tx_decreto_criacao_parque",
+            "nm_administrador_parque",
+            "qt_area_metro",
+            "dt_atualizacao",
+            "ge_multipoligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "GEOSAMPA_cadparcs_reserva_particular_natural": {
+        "id_col": "cd_identificador_cadparcs_reserva_particular_natural",
+        "properties": [
+            "cd_identificador_cadparcs_reserva_particular_natural",
+            "nm_area",
+            "nm_esfera_administrativa",
+            "qt_area_metro",
+            "tx_instrumento_legal_criacao",
+            "dt_atualizacao",
+            "ge_multipoligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "GEOSAMPA_cadparcs_unidade_conservacao_existente": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_GEOSAMPA_cadparcs_unidade_conservacao_existente"
+        },
+        "id_col": "cd_identificador_GEOSAMPA_cadparcs_unidade_conservacao_existente",
+        "properties": [
+            "cd_identificador_GEOSAMPA_cadparcs_unidade_conservacao_existente",
+            "nm_area",
+            "tx_tipo_categoria",
+            "tx_data_inauguracao",
+            "tx_instrumento_legal_criacao",
+            "nm_administrador",
+            "tx_fonte",
+            "dt_atualizacao",
+            "qt_area_metro",
+            "ge_multipoligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "GEOSAMPA_terra_indigena": {
+        "id_col": "cd_identificador_terra_indigena",
+        "properties": [
+            "cd_identificador_terra_indigena",
+            "nm_terra_indigena",
+            "nm_etnia",
+            "tx_regularizacao",
+            "qt_area_terra_indigena",
+            "dt_carga",
+            "ge_multipoligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "GEOSAMPA_zoneamento_geoambiental_apa_cm": {
+        "id_col": "cd_identificador_zoneamento_geoambiental_apa_cm",
+        "properties": [
+            "cd_identificador_zoneamento_geoambiental_apa_cm",
+            "qt_area_metro",
+            "tx_tipo_area",
+            "cd_usuario_atualizacao",
+            "dt_atualizacao",
+            "ge_multipoligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
     "area_contaminada_reabilitada_svma": {
         "id_col": "cd_identificador_area_contaminada_reabilitada",
         "properties": [
-            "geometry",
             "cd_identificador_area_contaminada_reabilitada",
+            "cd_identificador_original",
+            "tx_endereco_area_contaminada",
             "dc_classificacao_area_contaminada",
+            "in_cadastro_sigac",
+            "in_cadastro_cetesb",
+            "in_cadastro_sipol",
+            "dt_inclusao_cadastro",
+            "dt_modificacao_cadastro",
             "dc_tipo_terreno_area_contaminada",
             "dc_uso_anterior_geral",
             "dc_uso_pretendido_geral",
+            "cd_cep_area_contaminada",
             "tx_contaminante",
-            "tx_restricao"
+            "tx_restricao",
+            "tx_intervencao",
+            "ge_multipoligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "area_qualificacao_transformacao_aiu": {
+        "id_col": "cd_identificador_area_qualificacao_transformacao",
+        "properties": [
+            "cd_identificador_area_qualificacao_transformacao",
+            "cd_parametro",
+            "tx_tipo_area",
+            "cd_numero_lei",
+            "nm_lei",
+            "ge_poligono",
+            "dt_atualizacao",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "cobertura_vegetal": {
+        "id_col": "cd_identificador_vegetacao",
+        "properties": [
+            "cd_identificador_vegetacao",
+            "cd_identificador_original_vegetacao",
+            "cd_controle_vetor",
+            "tx_datum",
+            "cd_coordenada_x",
+            "cd_coordenada_y",
+            "cd_categoria_vegetacao",
+            "cd_subcategoria_vegetacao",
+            "cd_subcategoria_complementar_vegetacao",
+            "tx_descricao_categoria_subcategoria",
+            "qt_area_vegetacao",
+            "qt_perimetro_vegetacao",
+            "qt_altura_media_vegetacao",
+            "qt_desvio_altura_vegetacao",
+            "tx_data_voo",
+            "tx_entrega",
+            "tx_lote",
+            "tx_lote_versao",
+            "ge_poligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "controle_uso_via_publica_geoinfra": {
+        "id_col": "cd_identificador_controle_uso_via_publica",
+        "properties": [
+            "cd_identificador_controle_uso_via_publica",
+            "cd_identificador_original",
+            "tx_tipo_obra",
+            "tx_status_obra",
+            "nm_permissionaria",
+            "ge_ponto",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "corredor_ecologico": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_corredor_ecologico"
+        },
+        "id_col": "cd_identificador_corredor_ecologico",
+        "properties": [
+            "cd_identificador_corredor_ecologico",
+            "qt_area_metro_quadrado",
+            "qt_area_hectare",
+            "nm_corredor_ecologico",
+            "nm_trecho",
+            "nm_area_fonte",
+            "nm_projeto",
+            "nm_municipio",
+            "dt_carga",
+            "ge_poligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "curva_intermediaria": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_curva_intermediaria"
+        },
+        "id_col": "cd_identificador_curva_intermediaria",
+        "properties": [
+            "cd_identificador_curva_intermediaria",
+            "cd_numero_isovalor",
+            "tx_escala",
+            "ge_linha",
+            "in_segmento_complementar",
+            "cd_tipo_curva_nivel",
+            "dt_criacao",
+            "dt_atualizacao",
+            "sg_fonte_original",
+            "cd_usuario_atualizacao",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "curva_intermediaria_s": {
+        "renamed_columns": {
+            "cd_identificador_curva_nivel": "cd_identificador_curva_nivel_curva_intermediaria_s"
+        },
+        "id_col": "cd_identificador_curva_nivel_curva_intermediaria_s",
+        "properties": [
+            "cd_numero_isovalor",
+            "tx_escala",
+            "ge_linha",
+            "cd_identificador_curva_nivel_curva_intermediaria_s",
+            "in_segmento_complementar",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "curva_mestra": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_curva_mestra"
+        },
+        "id_col": "cd_identificador_curva_mestra",
+        "properties": [
+            "cd_identificador_curva_mestra",
+            "cd_numero_isovalor",
+            "tx_escala",
+            "ge_linha",
+            "in_segmento_complementar",
+            "cd_tipo_curva_nivel",
+            "dt_criacao",
+            "dt_atualizacao",
+            "sg_fonte_original",
+            "cd_usuario_atualizacao",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "curva_mestra_s": {
+        "renamed_columns": {
+            "cd_identificador_curva_nivel": "cd_identificador_curva_nivel_curva_mestra_s"
+        },
+        "id_col": "cd_identificador_curva_nivel_curva_mestra_s",
+        "properties": [
+            "cd_numero_isovalor",
+            "tx_escala",
+            "ge_linha",
+            "cd_identificador_curva_nivel_curva_mestra_s",
+            "in_segmento_complementar",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "declividade": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_declividade"
+        },
+        "id_col": "cd_identificador_declividade",
+        "properties": [
+            "cd_identificador_declividade",
+            "cd_classe_declividade",
+            "nm_classe_declividade",
+            "ge_poligono",
+            "area_declividade",
+            "dt_carga",
+            "sg_fonte_original",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "equipamento_feira_livre": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_equipamento_feira_livre"
+        },
+        "id_col": "cd_identificador_equipamento_feira_livre",
+        "properties": [
+            "cd_identificador_equipamento_feira_livre",
+            "nm_tema_equipamento",
+            "cd_identificador_rede_equipamento",
+            "nm_rede_equipamento",
+            "tx_rede_equipamento",
+            "cd_identificador_tipo_equipamento",
+            "nm_tipo_equipamento",
+            "tx_tipo_equipamento",
+            "cd_identificador_classe_equipamento",
+            "nm_classe_equipamento",
+            "tx_classe_equipamento",
+            "cd_identificador_esfera_administrativa_equipamento",
+            "nm_esfera_administrativa_equipamento",
+            "tx_esfera_administrativa_equipamento",
+            "cd_equipamento",
+            "nm_equipamento",
+            "tx_endereco_equipamento",
+            "nm_bairro_equipamento",
+            "cd_cep_equipamento",
+            "ge_ponto",
+            "cd_usuario_atualizacao",
+            "tx_horario_funcionamento",
+            "tx_numero_telefone",
+            "cd_equipamento_base_origem",
+            "sg_fonte_original",
+            "dt_carga",
+            "qt_equipamento",
+            "tx_dia_funcionamento",
+            "tx_observacao",
+            "cd_registro",
+            "dt_atualizacao",
+            "nm_distrito",
+            "qt_feirante",
+            "cd_tipo_categoria",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "equipamento_mercados_municipais": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_equipamento_mercados_municipais"
+        },
+        "id_col": "cd_identificador_equipamento_mercados_municipais",
+        "properties": [
+            "cd_identificador_equipamento_mercados_municipais",
+            "cd_identificador_tema_equipamento",
+            "nm_tema_equipamento",
+            "cd_identificador_rede_equipamento",
+            "nm_rede_equipamento",
+            "tx_rede_equipamento",
+            "cd_identificador_tipo_equipamento",
+            "nm_tipo_equipamento",
+            "tx_tipo_equipamento",
+            "cd_identificador_classe_equipamento",
+            "nm_classe_equipamento",
+            "tx_classe_equipamento",
+            "cd_identificador_esfera_administrativa_equipamento",
+            "nm_esfera_administrativa_equipamento",
+            "tx_esfera_administrativa_equipamento",
+            "cd_equipamento",
+            "nm_equipamento",
+            "tx_endereco_equipamento",
+            "nm_bairro_equipamento",
+            "cd_cep_equipamento",
+            "ge_ponto",
+            "tx_horario_funcionamento",
+            "tx_numero_telefone",
+            "cd_equipamento_base_origem",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "equipamento_sacoloes": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_equipamento_sacoloes"
+        },
+        "id_col": "cd_identificador_equipamento_sacoloes",
+        "properties": [
+            "cd_identificador_equipamento_sacoloes",
+            "cd_identificador_tema_equipamento",
+            "nm_tema_equipamento",
+            "cd_identificador_rede_equipamento",
+            "nm_rede_equipamento",
+            "tx_rede_equipamento",
+            "cd_identificador_tipo_equipamento",
+            "nm_tipo_equipamento",
+            "tx_tipo_equipamento",
+            "cd_identificador_classe_equipamento",
+            "nm_classe_equipamento",
+            "tx_classe_equipamento",
+            "cd_identificador_esfera_administrativa_equipamento",
+            "nm_esfera_administrativa_equipamento",
+            "tx_esfera_administrativa_equipamento",
+            "cd_equipamento",
+            "nm_equipamento",
+            "tx_endereco_equipamento",
+            "nm_bairro_equipamento",
+            "cd_cep_equipamento",
+            "ge_ponto",
+            "tx_horario_funcionamento",
+            "tx_numero_telefone",
+            "cd_equipamento_base_origem",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "plano_acao_regional": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_plano_acao_regional"
+        },
+        "id_col": "cd_identificador_plano_acao_regional",
+        "properties": [
+            "cd_identificador_plano_acao_regional",
+            "cd_identificador_original",
+            "nm_plano_regional",
+            "nm_subprefeitura",
+            "dt_carga",
+            "ge_poligono",
+            "tx_tipo_plano",
+            "cd_perimetro",
+            "tx_perimetro",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "plano_macro_regional": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_plano_macro_regional"
+        },
+        "id_col": "cd_identificador_plano_macro_regional",
+        "properties": [
+            "cd_identificador_plano_macro_regional",
+            "cd_identificador_original",
+            "nm_plano_regional",
+            "nm_macroregiao",
+            "dt_carga",
+            "ge_poligono",
+            "tx_tipo_plano",
+            "cd_perimetro",
+            "tx_perimetro",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "remanescente_pmma": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_remanescente_pmma"
+        },
+        "id_col": "cd_identificador_remanescente_pmma",
+        "properties": [
+            "cd_identificador_remanescente_pmma",
+            "cd_classe_vegetacao",
+            "dc_classe_vegetacao",
+            "qt_area_hectare",
+            "qt_area_metro",
+            "nm_projeto",
+            "ge_poligono",
+            "dt_carga",
+            "sg_fonte_original",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "unidade_produtiva_rural": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_unidade_produtiva_rural"
+        },
+        "id_col": "cd_identificador_unidade_produtiva_rural",
+        "properties": [
+            "cd_identificador_unidade_produtiva_rural",
+            "sg_fonte_dado_rural",
+            "tx_fonte_dado_rural",
+            "nm_bacia_hidrografica",
+            "nm_cultura_predominante",
+            "tx_outra_atividade",
+            "cd_identificador_faixa_area_total",
+            "faixa_area_total",
+            "cd_identificador_faixa_area_produtiva",
+            "faixa_area_produtiva",
+            "sg_fonte_original",
+            "tx_fonte_original",
+            "ge_ponto",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "zona_origem_destino": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_zona_origem_destino"
+        },
+        "id_col": "cd_identificador_zona_origem_destino",
+        "properties": [
+            "cd_identificador_zona_origem_destino",
+            "cd_municipio",
+            "cd_original_zona_origem_destino",
+            "nm_zona",
+            "qt_area_zona",
+            "ge_poligono",
+            "an_pesquisa",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "zoneamento_2016_map1": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_zoneamento_2016_map1"
+        },
+        "id_col": "cd_identificador_zoneamento_2016_map1",
+        "properties": [
+            "cd_identificador_zoneamento_2016_map1",
+            "tx_zoneamento_perimetro",
+            "tx_observacao_perimetro",
+            "cd_zoneamento_perimetro",
+            "cd_prmr_pre",
+            "cd_subprefeitura_perimetro",
+            "cd_tipo_legislacao_zoneamento",
+            "cd_numero_legislacao_zoneamento",
+            "an_legislacao_zoneamento",
+            "ge_poligono",
+            "geometry"
         ],
         "predicate": "intersects"
     },
     "area_inundavel": {
         "id_col": "cd_identificador_area_inundavel",
         "properties": [
-            "geometry",
-            "cd_identificador_area_inundavel"
+            "cd_identificador_area_inundavel",
+            "qt_tempo_retorno",
+            "qt_cota_inundacao",
+            "ge_poligono",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "area_risco_geologico": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_area_risco_geologico"
+        },
+        "id_col": "cd_identificador_area_risco_geologico",
+        "properties": [
+            "cd_identificador_area_risco_geologico",
+            "nm_area_risco",
+            "tx_grau_de_risco_geologico",
+            "sg_area_risco",
+            "sg_setor_risco",
+            "tx_tipo_processo_geologico",
+            "ge_poligono",
+            "cd_tipo_processo_geologico",
+            "cd_grau_risco_geologico",
+            "dt_atualizacao",
+            "dt_vistoria",
+            "sg_fonte_original",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "area_verde_aiu": {
+        "id_col": "cd_identificador_area_verde",
+        "properties": [
+            "cd_identificador_area_verde",
+            "tx_ferramenta",
+            "tx_situacao",
+            "cd_quadro_geral",
+            "nm_local",
+            "qt_area_metro",
+            "nm_lei_aiu_sce",
+            "cd_numero_lei_aiu_sce",
+            "ge_poligono",
+            "dt_atualizacao",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "aterro_rcc": {
+        "id_col": "cd_identificador_aterro_rcc",
+        "properties": [
+            "cd_identificador_aterro_rcc",
+            "cd_identificador_original",
+            "nm_aterro_rcc",
+            "nm_endereco",
+            "ge_ponto",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "aterro_sanitario": {
+        "id_col": "cd_identificador_aterro_sanitario",
+        "properties": [
+            "cd_identificador_aterro_sanitario",
+            "cd_identificador_original",
+            "nm_aterro_sanitario",
+            "nm_endereco",
+            "tx_status_aterro_sanitario",
+            "nm_concessionaria",
+            "ge_ponto",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "bacia_hidrografica": {
+        "id_col": "cd_identificador_bacia_hidrografica",
+        "properties": [
+            "cd_identificador_bacia_hidrografica",
+            "ge_poligono",
+            "sg_fonte_original",
+            "qt_area",
+            "nm_bacia_hidrografica",
+            "cd_identificador_original_bacia_hidrografica",
+            "nm_bacia_hidrografica_principal",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "central_triagem_cooperativa": {
+        "id_col": "cd_identificador_central_triagem_cooperativa",
+        "properties": [
+            "cd_identificador_central_triagem_cooperativa",
+            "cd_identificador_original",
+            "nm_cooperativa",
+            "nm_endereco",
+            "tx_especialidade",
+            "tx_link_informacao",
+            "ge_ponto",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "central_triagem_mecanizada": {
+        "id_col": "cd_identificador_central_triagem_mecanizada",
+        "properties": [
+            "cd_identificador_central_triagem_mecanizada",
+            "cd_identificador_original",
+            "nm_central_triagem_mecanizada",
+            "nm_endereco",
+            "qt_di_capacidade_tonelada",
+            "tx_quantitativo",
+            "ge_ponto",
+            "geometry"
         ],
         "predicate": "intersects"
     },
     "distrito_municipal": {
         "id_col": "cd_identificador_distrito",
         "properties": [
-            "geometry",
             "cd_identificador_distrito",
-            "cd_distrito_municipal",
             "cd_identificador_subprefeitura",
+            "ge_poligono",
+            "cd_distrito_municipal",
             "nm_distrito_municipal",
-            "sg_distrito_municipal"
+            "sg_distrito_municipal",
+            "tx_escala",
+            "sg_fonte_original",
+            "dt_criacao",
+            "dt_atualizacao",
+            "cd_usuario_atualizacao",
+            "cd_tipo_discrepancia",
+            "qt_area_quilometro",
+            "qt_area_metro",
+            "geometry"
         ],
         "predicate": "largest_intersection"
     },
-    "GEOSAMPA_cadparcs_area_protecao_apa": {
-        "id_col": "cd_identificador_cadparcs_area_protecao_apa",
+    "drenagem": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_drenagem"
+        },
+        "id_col": "cd_identificador_drenagem",
         "properties": [
-            "geometry",
-            "cd_identificador_cadparcs_area_protecao_apa",
-            "nm_esfera_administrativa",
-            "nm_area_protecao_ambiental",
-            "tx_instrumento_legal_criacao"
+            "cd_identificador_drenagem",
+            "tx_tipo_acidente",
+            "nm_acidente",
+            "ge_linha",
+            "cd_tipo_acidente",
+            "cd_numero_ordem",
+            "nm_bairro",
+            "cd_ordem_rio",
+            "nm_via_proximo",
+            "qt_comprimento_hidrografia",
+            "cd_tipo_curso_hidrografia",
+            "nm_tipo_curso_hidrografia",
+            "cd_setor_fiscal",
+            "tx_escala",
+            "dt_criacao",
+            "dt_atualizacao",
+            "cd_usuario_atualizacao",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "ecoponto": {
+        "id_col": "cd_identificador_ecoponto",
+        "properties": [
+            "cd_identificador_ecoponto",
+            "cd_identificador_original",
+            "nm_subprefeitura",
+            "sg_subprefeitura",
+            "nm_distrito",
+            "nm_ecoponto",
+            "nm_endereco",
+            "dt_inauguracao",
+            "cd_lote_indivisivel",
+            "nm_empresa",
+            "tx_atendimento",
+            "tx_recebimento_comum",
+            "tx_recebimento_diferenciado",
+            "tx_decreto",
+            "tx_link_decreto",
+            "tx_lei",
+            "tx_link_lei",
+            "tx_tipo_recebimento",
+            "ge_ponto",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "estacao_transbordo": {
+        "id_col": "cd_identificador_estacao_transbordo",
+        "properties": [
+            "cd_identificador_estacao_transbordo",
+            "nm_estacao_transbordo",
+            "nm_endereco",
+            "qt_capacidade_tonelada_dia",
+            "tx_agrupamento",
+            "nm_concessionaria",
+            "ge_ponto",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "geohabisp_vw_wfs_cortico_geosampa": {
+        "renamed_columns": {
+            "gid": "gid_geohabisp_vw_wfs_cortico_geosampa"
+        },
+        "id_col": "gid_geohabisp_vw_wfs_cortico_geosampa",
+        "properties": [
+            "gid_geohabisp_vw_wfs_cortico_geosampa",
+            "id_hsp",
+            "nome",
+            "localizacao",
+            "qtd_pessoas",
+            "areageo_m2",
+            "ehab_geometria",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "geohabisp_vw_wfs_favela_geosampa": {
+        "renamed_columns": {
+            "gid": "gid_geohabisp_vw_wfs_favela_geosampa"
+        },
+        "id_col": "gid_geohabisp_vw_wfs_favela_geosampa",
+        "properties": [
+            "gid_geohabisp_vw_wfs_favela_geosampa",
+            "uuid_id",
+            "nome",
+            "nome_secundario",
+            "localizacao",
+            "tot_domicilio",
+            "areageo_m2",
+            "anoimplant",
+            "propriedade_area",
+            "ehab_geometria",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "geohabisp_vw_wfs_loteamento_geosampa": {
+        "renamed_columns": {
+            "gid": "gid_geohabisp_vw_wfs_loteamento_geosampa"
+        },
+        "id_col": "gid_geohabisp_vw_wfs_loteamento_geosampa",
+        "properties": [
+            "gid_geohabisp_vw_wfs_loteamento_geosampa",
+            "uuid_id",
+            "nome",
+            "totlotes",
+            "areageo_m2",
+            "nro_pa",
+            "nro_sei",
+            "definicao",
+            "nro_planta_au",
+            "nro_auto_regulariza",
+            "renda",
+            "ehab_geometria",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "geohabisp_vw_wfs_nucleo_geosampa": {
+        "renamed_columns": {
+            "gid": "gid_geohabisp_vw_wfs_nucleo_geosampa"
+        },
+        "id_col": "gid_geohabisp_vw_wfs_nucleo_geosampa",
+        "properties": [
+            "gid_geohabisp_vw_wfs_nucleo_geosampa",
+            "uuid_id",
+            "nome",
+            "nome_secundario",
+            "localizacao",
+            "tot_domicilio",
+            "areageo_m2",
+            "anoimplant",
+            "propriedade_area",
+            "ehab_geometria",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "hidrografia_ilha": {
+        "id_col": "cd_identificador_hidrografia_ilha",
+        "properties": [
+            "cd_identificador_hidrografia_ilha",
+            "cd_identificador_hidrografia_ilha_original",
+            "tx_tipo_hidrografia_ilha",
+            "tx_escala",
+            "tx_ano_referencia",
+            "qt_area_metro",
+            "sg_fonte_original",
+            "ge_poligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "hidrografia_restituida": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_hidrografia_restituida"
+        },
+        "id_col": "cd_identificador_hidrografia_restituida",
+        "properties": [
+            "cd_identificador_hidrografia_restituida",
+            "tx_tipo_acidente",
+            "nm_acidente",
+            "ge_linha",
+            "cd_tipo_acidente",
+            "cd_setor_fiscal",
+            "cd_numero_ordem",
+            "cd_numero_acidente",
+            "tx_escala",
+            "dt_criacao",
+            "sg_fonte_original",
+            "dt_atualizacao",
+            "cd_usuario_atualizacao",
+            "geometry"
         ],
         "predicate": "intersects"
     },
     "manancial_billings": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_manancial_billings"
+        },
         "id_col": "cd_identificador_manancial_billings",
         "properties": [
-            "geometry",
             "cd_identificador_manancial_billings",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
-            "nm_bacia"
+            "tx_aod",
+            "qt_area",
+            "qt_perimetro",
+            "nm_bacia",
+            "ge_poligono",
+            "geometry"
         ],
-        "renamed_columns": {
-            "cd_identificador": "cd_identificador_manancial_billings"
-        },
         "predicate": "intersects"
     },
     "manancial_guarapiranga": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_manancial_guarapiranga"
+        },
         "id_col": "cd_identificador_manancial_guarapiranga",
         "properties": [
-            "geometry",
             "cd_identificador_manancial_guarapiranga",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
-            "nm_bacia"
+            "tx_aod",
+            "qt_area",
+            "qt_perimetro",
+            "nm_bacia",
+            "ge_poligono",
+            "geometry"
         ],
-        "renamed_columns": {
-            "cd_identificador": "cd_identificador_manancial_guarapiranga"
-        },
         "predicate": "intersects"
     },
     "manancial_juquery": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_manancial_juquery"
+        },
         "id_col": "cd_identificador_manancial_juquery",
         "properties": [
-            "geometry",
             "cd_identificador_manancial_juquery",
             "dc_classe",
             "sg_classe",
             "dc_area_especial",
-            "nm_bacia"
+            "tx_aod",
+            "qt_area",
+            "qt_perimetro",
+            "nm_bacia",
+            "ge_poligono",
+            "geometry"
         ],
-        "renamed_columns": {
-            "cd_identificador": "cd_identificador_manancial_juquery"
-        },
         "predicate": "intersects"
     },
-    "remanescente_pmma": {
-        "id_col": "cd_identificador_remanescente_pmma",
+    "massa_d_agua": {
+        "id_col": "cd_identificador_hidrografia_poligono",
         "properties": [
-            "geometry",
-            "cd_identificador_remanescente_pmma",
-            "cd_classe_vegetacao",
-            "dc_classe_vegetacao"
+            "cd_identificador_hidrografia_poligono",
+            "nm_acidente",
+            "dt_atualizacao",
+            "cd_tipo_acidente",
+            "sg_fonte_original",
+            "cd_tipo_discrepancia",
+            "qt_perimetro_hidrografia_poligono",
+            "qt_area_hidrografia_poligono",
+            "ge_poligono",
+            "geometry"
         ],
+        "predicate": "intersects"
+    },
+    "papeleira": {
+        "id_col": "cd_identificador_papeleira",
+        "properties": [
+            "cd_identificador_papeleira",
+            "cd_identificador_original",
+            "nm_endereco",
+            "nm_subprefeitura",
+            "ge_ponto",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "patio_compostagem": {
+        "id_col": "cd_identificador_patio_compostagem",
+        "properties": [
+            "cd_identificador_patio_compostagem",
+            "cd_identificador_original",
+            "nm_patio_compostagem",
+            "nm_endereco",
+            "nm_empresa_operacao",
+            "tx_horario_atendimento",
+            "tx_contato",
+            "tx_site",
+            "ge_ponto",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "pluviometro": {
+        "id_col": "cd_identificador_pluviometro",
+        "properties": [
+            "cd_identificador_pluviometro",
+            "sg_fonte_original",
+            "ge_ponto",
+            "dt_carga",
+            "tx_endereco",
+            "nr_latitude",
+            "nr_longitude",
+            "nm_pluviometro",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "ponto_cotado": {
         "renamed_columns": {
-            "cd_identificador": "cd_identificador_remanescente_pmma"
+            "cd_identificador": "cd_identificador_ponto_cotado"
         },
+        "id_col": "cd_identificador_ponto_cotado",
+        "properties": [
+            "cd_identificador_ponto_cotado",
+            "ge_ponto",
+            "cd_altitude",
+            "tx_escala",
+            "sg_fonte_original",
+            "in_ponto_intervia",
+            "dt_criacao",
+            "dt_atualizacao",
+            "cd_usuario_atualizacao",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "ponto_entrega_voluntaria": {
+        "id_col": "cd_identificador_ponto_entrega_voluntaria",
+        "properties": [
+            "cd_identificador_ponto_entrega_voluntaria",
+            "cd_identificador_original",
+            "nm_local",
+            "nm_endereco",
+            "qt_container",
+            "nm_subprefeitura",
+            "ge_ponto",
+            "geometry"
+        ],
         "predicate": "intersects"
     },
     "represa_nivel_maximo": {
         "id_col": "cd_identificador_represa",
         "properties": [
-            "geometry",
             "cd_identificador_represa",
-            "nm_acidente"
+            "nm_acidente",
+            "dt_atualizacao",
+            "cd_tipo_acidente",
+            "sg_fonte_original",
+            "cd_tipo_discrepancia",
+            "qt_perimetro_represa",
+            "qt_area_represa",
+            "ge_poligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "reservatorio_amortecimento": {
+        "id_col": "cd_identificador_reservatorio_amortecimento",
+        "properties": [
+            "cd_identificador_reservatorio_amortecimento",
+            "nm_reservatorio",
+            "qt_volume_maximo_capacidade",
+            "nm_curso_dagua",
+            "dc_legenda",
+            "qt_area",
+            "nm_bacia_hidrografica",
+            "ge_poligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "reservatorio_amortecimento_ponto": {
+        "id_col": "cd_identificador_reservatorio_amortecimento_ponto",
+        "properties": [
+            "cd_identificador_reservatorio_amortecimento_ponto",
+            "cd_identificador_original",
+            "tx_tipo_reservatorio",
+            "cd_reservatorio",
+            "tx_status_reservatorio",
+            "qt_volume_metro",
+            "qt_area_metro",
+            "tx_tipo_esgotamento",
+            "nm_reservatorio",
+            "nm_subprefeitura",
+            "nm_endereco",
+            "cd_identificador_objeto",
+            "tx_caracteristica",
+            "nm_corrego",
+            "ge_ponto",
+            "dt_atualizacao",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "risco_hidrologico": {
+        "id_col": "cd_identificador_risco_hidrologico",
+        "properties": [
+            "cd_identificador_risco_hidrologico",
+            "nm_area_risco_hidrologico",
+            "tx_grau_risco_hidrologico",
+            "sg_area_risco_hidrologico",
+            "sg_setor_risco_hidrologico",
+            "tx_tipo_processo",
+            "dt_vistoria",
+            "qt_moradia",
+            "nm_subprefeitura",
+            "nm_bacia_hidrografica",
+            "ge_poligono",
+            "geometry"
         ],
         "predicate": "intersects"
     },
     "risco_ocorrencia_alagamento": {
-        "id_col": "cd_identificador_risco_ocorrencia_alagamento",
-        "properties": [
-            "geometry",
-            "cd_identificador_risco_ocorrencia_alagamento",
-            "dt_ocorrencia",
-            "dc_tipo_ocorrencia"
-        ],
         "renamed_columns": {
             "cd_identificador": "cd_identificador_risco_ocorrencia_alagamento"
         },
+        "id_col": "cd_identificador_risco_ocorrencia_alagamento",
+        "properties": [
+            "cd_identificador_risco_ocorrencia_alagamento",
+            "dt_ocorrencia",
+            "dc_tipo_ocorrencia",
+            "nm_distrito",
+            "ge_ponto",
+            "dt_carga",
+            "nm_subprefeitura",
+            "sg_fonte_original",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "risco_ocorrencia_deslizamento": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_risco_ocorrencia_deslizamento"
+        },
+        "id_col": "cd_identificador_risco_ocorrencia_deslizamento",
+        "properties": [
+            "cd_identificador_risco_ocorrencia_deslizamento",
+            "dt_ocorrencia",
+            "dc_tipo_ocorrencia",
+            "nm_distrito",
+            "ge_ponto",
+            "dt_carga",
+            "nm_subprefeitura",
+            "sg_fonte_original",
+            "geometry"
+        ],
         "predicate": "intersects"
     },
     "risco_ocorrencia_inundacao": {
-        "id_col": "cd_identificador_risco_ocorrencia_inundacao",
-        "properties": [
-            "geometry",
-            "cd_identificador_risco_ocorrencia_inundacao",
-            "dt_ocorrencia",
-            "dc_tipo_ocorrencia"
-        ],
         "renamed_columns": {
             "cd_identificador": "cd_identificador_risco_ocorrencia_inundacao"
         },
+        "id_col": "cd_identificador_risco_ocorrencia_inundacao",
+        "properties": [
+            "cd_identificador_risco_ocorrencia_inundacao",
+            "dt_ocorrencia",
+            "dc_tipo_ocorrencia",
+            "nm_distrito",
+            "ge_ponto",
+            "dt_carga",
+            "nm_subprefeitura",
+            "sg_fonte_original",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "risco_ocorrencia_queda_arvore": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_risco_ocorrencia_queda_arvore"
+        },
+        "id_col": "cd_identificador_risco_ocorrencia_queda_arvore",
+        "properties": [
+            "cd_identificador_risco_ocorrencia_queda_arvore",
+            "dt_ocorrencia",
+            "dc_tipo_ocorrencia",
+            "nm_distrito",
+            "ge_ponto",
+            "dt_carga",
+            "nm_subprefeitura",
+            "sg_fonte_original",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "risco_ocorrencia_risco_deslizamento": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_risco_ocorrencia_risco_deslizamento"
+        },
+        "id_col": "cd_identificador_risco_ocorrencia_risco_deslizamento",
+        "properties": [
+            "cd_identificador_risco_ocorrencia_risco_deslizamento",
+            "dt_ocorrencia",
+            "dc_tipo_ocorrencia",
+            "nm_distrito",
+            "ge_ponto",
+            "dt_carga",
+            "nm_subprefeitura",
+            "sg_fonte_original",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_ausencia_coleta_conteiner_coleta_seletiva": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_ausencia_coleta_conteiner_coleta_seletiva"
+        },
+        "id_col": "cd_identificador_sac_ausencia_coleta_conteiner_coleta_seletiva",
+        "properties": [
+            "cd_identificador_sac_ausencia_coleta_conteiner_coleta_seletiva",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_capinacao_guia_sarjeta": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_capinacao_guia_sarjeta"
+        },
+        "id_col": "cd_identificador_sac_capinacao_guia_sarjeta",
+        "properties": [
+            "cd_identificador_sac_capinacao_guia_sarjeta",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_cata_bagulho": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_cata_bagulho"
+        },
+        "id_col": "cd_identificador_sac_cata_bagulho",
+        "properties": [
+            "cd_identificador_sac_cata_bagulho",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_conserto_lixeira": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_conserto_lixeira"
+        },
+        "id_col": "cd_identificador_sac_conserto_lixeira",
+        "properties": [
+            "cd_identificador_sac_conserto_lixeira",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_conteiner": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_conteiner"
+        },
+        "id_col": "cd_identificador_sac_conteiner",
+        "properties": [
+            "cd_identificador_sac_conteiner",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_erosao_urgencia": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_erosao_urgencia"
+        },
+        "id_col": "cd_identificador_sac_erosao_urgencia",
+        "properties": [
+            "cd_identificador_sac_erosao_urgencia",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_falta_varricao": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_falta_varricao"
+        },
+        "id_col": "cd_identificador_sac_falta_varricao",
+        "properties": [
+            "cd_identificador_sac_falta_varricao",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_implantacao_coleta_porta_porta": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_implantacao_coleta_porta_porta"
+        },
+        "id_col": "cd_identificador_sac_implantacao_coleta_porta_porta",
+        "properties": [
+            "cd_identificador_sac_implantacao_coleta_porta_porta",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_instalacao_conteiner_coleta_seletiva": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_instalacao_conteiner_coleta_seletiva"
+        },
+        "id_col": "cd_identificador_sac_instalacao_conteiner_coleta_seletiva",
+        "properties": [
+            "cd_identificador_sac_instalacao_conteiner_coleta_seletiva",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_lavagem_especial": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_lavagem_especial"
+        },
+        "id_col": "cd_identificador_sac_lavagem_especial",
+        "properties": [
+            "cd_identificador_sac_lavagem_especial",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_limpeza_bueiro": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_limpeza_bueiro"
+        },
+        "id_col": "cd_identificador_sac_limpeza_bueiro",
+        "properties": [
+            "cd_identificador_sac_limpeza_bueiro",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_limpeza_enchente_evento": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_limpeza_enchente_evento"
+        },
+        "id_col": "cd_identificador_sac_limpeza_enchente_evento",
+        "properties": [
+            "cd_identificador_sac_limpeza_enchente_evento",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_manutencao_conteiner_residuo_servico_saude": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_manutencao_conteiner_residuo_servico_saude"
+        },
+        "id_col": "cd_identificador_sac_manutencao_conteiner_residuo_servico_saude",
+        "properties": [
+            "cd_identificador_sac_manutencao_conteiner_residuo_servico_saude",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_quadra_arvore_urgencia": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_quadra_arvore_urgencia"
+        },
+        "id_col": "cd_identificador_sac_quadra_arvore_urgencia",
+        "properties": [
+            "cd_identificador_sac_quadra_arvore_urgencia",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_quadra_galho_urgencia": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_quadra_galho_urgencia"
+        },
+        "id_col": "cd_identificador_sac_quadra_galho_urgencia",
+        "properties": [
+            "cd_identificador_sac_quadra_galho_urgencia",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_reclamacao_coleta_lixo_domiciliar": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_reclamacao_coleta_lixo_domiciliar"
+        },
+        "id_col": "cd_identificador_sac_reclamacao_coleta_lixo_domiciliar",
+        "properties": [
+            "cd_identificador_sac_reclamacao_coleta_lixo_domiciliar",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_reclamacao_coleta_residuo_servico_saude": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_reclamacao_coleta_residuo_servico_saude"
+        },
+        "id_col": "cd_identificador_sac_reclamacao_coleta_residuo_servico_saude",
+        "properties": [
+            "cd_identificador_sac_reclamacao_coleta_residuo_servico_saude",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_reclamacao_coleta_seletiva": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_reclamacao_coleta_seletiva"
+        },
+        "id_col": "cd_identificador_sac_reclamacao_coleta_seletiva",
+        "properties": [
+            "cd_identificador_sac_reclamacao_coleta_seletiva",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_reclamacao_falta_lavagem_calcadao": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_reclamacao_falta_lavagem_calcadao"
+        },
+        "id_col": "cd_identificador_sac_reclamacao_falta_lavagem_calcadao",
+        "properties": [
+            "cd_identificador_sac_reclamacao_falta_lavagem_calcadao",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_reclamacao_falta_limpeza_ruas_feira": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_reclamacao_falta_limpeza_ruas_feira"
+        },
+        "id_col": "cd_identificador_sac_reclamacao_falta_limpeza_ruas_feira",
+        "properties": [
+            "cd_identificador_sac_reclamacao_falta_limpeza_ruas_feira",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_reformar_galeria_agua_chuva_pluvial": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_reformar_galeria_agua_chuva_pluvial"
+        },
+        "id_col": "cd_identificador_sac_reformar_galeria_agua_chuva_pluvial",
+        "properties": [
+            "cd_identificador_sac_reformar_galeria_agua_chuva_pluvial",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_remocao_conteiner_coleta_lixo_domiciliar": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_remocao_conteiner_coleta_lixo_domiciliar"
+        },
+        "id_col": "cd_identificador_sac_remocao_conteiner_coleta_lixo_domiciliar",
+        "properties": [
+            "cd_identificador_sac_remocao_conteiner_coleta_lixo_domiciliar",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_remocao_conteiner_coleta_seletiva": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_remocao_conteiner_coleta_seletiva"
+        },
+        "id_col": "cd_identificador_sac_remocao_conteiner_coleta_seletiva",
+        "properties": [
+            "cd_identificador_sac_remocao_conteiner_coleta_seletiva",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_remocao_entulho": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_remocao_entulho"
+        },
+        "id_col": "cd_identificador_sac_remocao_entulho",
+        "properties": [
+            "cd_identificador_sac_remocao_entulho",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_remocao_grande_objeto": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_remocao_grande_objeto"
+        },
+        "id_col": "cd_identificador_sac_remocao_grande_objeto",
+        "properties": [
+            "cd_identificador_sac_remocao_grande_objeto",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_remocao_lixeira": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_remocao_lixeira"
+        },
+        "id_col": "cd_identificador_sac_remocao_lixeira",
+        "properties": [
+            "cd_identificador_sac_remocao_lixeira",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_remocao_saco_varricao": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_remocao_saco_varricao"
+        },
+        "id_col": "cd_identificador_sac_remocao_saco_varricao",
+        "properties": [
+            "cd_identificador_sac_remocao_saco_varricao",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_rompimento_galeria_agua_pluvial": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_rompimento_galeria_agua_pluvial"
+        },
+        "id_col": "cd_identificador_sac_rompimento_galeria_agua_pluvial",
+        "properties": [
+            "cd_identificador_sac_rompimento_galeria_agua_pluvial",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_selo_identificacao_estabelecimento_gerador_residuo": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_selo_identificacao_estabelecimento_gerador_residuo"
+        },
+        "id_col": "cd_identificador_sac_selo_identificacao_estabelecimento_gerador_residuo",
+        "properties": [
+            "cd_identificador_sac_selo_identificacao_estabelecimento_gerador_residuo",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_solicitacao_manutencao_conteiner_coleta_seletiva": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_solicitacao_manutencao_conteiner_coleta_seletiva"
+        },
+        "id_col": "cd_identificador_sac_solicitacao_manutencao_conteiner_coleta_seletiva",
+        "properties": [
+            "cd_identificador_sac_solicitacao_manutencao_conteiner_coleta_seletiva",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "sac_sugestao_obra_drenagem_corrego": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_sac_sugestao_obra_drenagem_corrego"
+        },
+        "id_col": "cd_identificador_sac_sugestao_obra_drenagem_corrego",
+        "properties": [
+            "cd_identificador_sac_sugestao_obra_drenagem_corrego",
+            "cd_identificador_original_atendimento_cidadao",
+            "dt_abertura",
+            "nm_logradouro",
+            "nr_logradouro",
+            "dt_parecer",
+            "ge_ponto",
+            "sg_orgao_responsavel",
+            "tx_situacao_solicitacao",
+            "tx_canal_atendimento",
+            "dc_tema",
+            "dc_assunto",
+            "dc_servico",
+            "dt_carga",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "servico_divisivel_agrupamento": {
+        "id_col": "cd_identificador_servico_divisivel_agrupamento",
+        "properties": [
+            "cd_identificador_servico_divisivel_agrupamento",
+            "cd_identificador_original",
+            "nm_empresa_concessionaria",
+            "tx_link_consulta_coleta",
+            "tx_link_acesso",
+            "ge_poligono",
+            "tx_regiao_agrupamento",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "servico_varricao_lote_amlurb": {
+        "id_col": "cd_identificador_servico_varricao_lote_amlurb",
+        "properties": [
+            "cd_identificador_servico_varricao_lote_amlurb",
+            "cd_identificador_original",
+            "cd_lote_varricao",
+            "nm_empresa",
+            "tx_link_programacao_cata_bagulho",
+            "tx_link_quantitativo",
+            "ge_poligono",
+            "geometry"
+        ],
         "predicate": "intersects"
     },
     "setor_censitario_2010": {
-        "properties": []
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_setor_censitario_2010"
+        },
+        "id_col": "cd_identificador_setor_censitario_2010",
+        "properties": [
+            "cd_identificador_setor_censitario_2010",
+            "cd_identificador_georreferenciamento",
+            "qt_area_setor_censitario",
+            "cd_original_setor_censitario",
+            "an_censo_demografico",
+            "ge_poligono",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "setor_censitario_densidadedemografica": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_setor_censitario_densidadedemografica"
+        },
+        "id_col": "cd_identificador_setor_censitario_densidadedemografica",
+        "properties": [
+            "cd_identificador_setor_censitario_densidadedemografica",
+            "cd_identificador_domicilio_censitario",
+            "cd_identificador_densidade_demografica",
+            "cd_identificador_georreferenciamento",
+            "qt_area_setor_censitario",
+            "cd_original_setor_censitario",
+            "an_censo_demografico",
+            "ge_poligono",
+            "cd_setor_censitario_domicilio",
+            "qt_domicilio",
+            "an_censo_domicilio",
+            "cd_setor_censitario_vulnerabilidade",
+            "cd_indice_vulnerabilidade_social",
+            "an_vulnerabilidade_social",
+            "cd_setor_censitario_densidade",
+            "qt_populacao",
+            "qt_area_hectare",
+            "qt_habitante_hectare",
+            "an_densidade_demografica",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "setor_censitario_vulnerabilidadesocial": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_setor_censitario_vulnerabilidadesocial"
+        },
+        "id_col": "cd_identificador_setor_censitario_vulnerabilidadesocial",
+        "properties": [
+            "cd_identificador_setor_censitario_vulnerabilidadesocial",
+            "cd_identificador_domicilio_censitario",
+            "cd_identificador_vulnerabilidade_social",
+            "cd_identificador_georreferenciamento",
+            "qt_area_setor_censitario",
+            "cd_original_setor_censitario",
+            "an_censo_demografico",
+            "ge_poligono",
+            "cd_setor_censitario_domicilio",
+            "qt_domicilio",
+            "an_censo_domicilio",
+            "cd_setor_censitario_vulnerabilidade",
+            "cd_indice_vulnerabilidade_social",
+            "an_vulnerabilidade_social",
+            "cd_setor_censitario_densidade",
+            "qt_populacao",
+            "qt_area_hectare",
+            "qt_habitante_hectare",
+            "an_densidade_demografica",
+            "geometry"
+        ],
+        "predicate": "intersects"
     },
     "subprefeitura": {
         "id_col": "cd_identificador_subprefeitura",
         "properties": [
-            "geometry",
             "cd_identificador_subprefeitura",
+            "ge_poligono",
             "cd_subprefeitura",
             "nm_subprefeitura",
-            "sg_subprefeitura"
+            "tx_escala",
+            "sg_fonte_original",
+            "dt_criacao",
+            "cd_tipo_discrepancia",
+            "dt_atualizacao",
+            "cd_usuario_atualizacao",
+            "sg_subprefeitura",
+            "qt_area_quilometro",
+            "qt_area_metro",
+            "geometry"
         ],
         "predicate": "largest_intersection"
     },
-    "transpetro_duto": {
-        "id_col": "cd_identificador_transpetro_duto",
+    "tratamento_residuo_solido_saude": {
+        "id_col": "cd_identificador_tratamento_residuo_solido",
         "properties": [
-            "geometry",
-            "cd_identificador_transpetro_duto"
+            "cd_identificador_tratamento_residuo_solido",
+            "nm_endereco",
+            "nm_operacao",
+            "dt_atualizacao",
+            "ge_ponto",
+            "nm_unidade",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "pde2014_v_parq_pde_map": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_pde2014_v_parq_pde_map"
+        },
+        "id_col": "cd_identificador_pde2014_v_parq_pde_map",
+        "properties": [
+            "cd_identificador_pde2014_v_parq_pde_map",
+            "nm_parque_pde",
+            "cd_parque_pde",
+            "qt_area_perimetro_pde",
+            "ge_poligono",
+            "cd_tipo_esfera_parque",
+            "txt_tipo_esfera_parque",
+            "txt_categoria_parque_pde",
+            "cd_categoria_parque_pde",
+            "cd_situacao_parque_pde",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "pde2014_v_zeis_04_map": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_pde2014_v_zeis_04_map"
+        },
+        "id_col": "cd_identificador_pde2014_v_zeis_04_map",
+        "properties": [
+            "cd_identificador_pde2014_v_zeis_04_map",
+            "ge_poligono",
+            "tx_zoneamento_perimetro",
+            "tx_observacao_perimetro",
+            "cd_zoneamento_perimetro",
+            "cd_prmr_pre",
+            "cd_subprefeitura_perimetro",
+            "cd_tipo_legislacao_zoneamento",
+            "cd_numero_legislacao_zoneamento",
+            "an_legislacao_zoneamento",
+            "geometry"
+        ],
+        "predicate": "intersects"
+    },
+    "pde2014_v_zeis_04a_map": {
+        "renamed_columns": {
+            "cd_identificador": "cd_identificador_pde2014_v_zeis_04a_map"
+        },
+        "id_col": "cd_identificador_pde2014_v_zeis_04a_map",
+        "properties": [
+            "cd_identificador_pde2014_v_zeis_04a_map",
+            "ge_poligono",
+            "tx_zoneamento_perimetro",
+            "tx_observacao_perimetro",
+            "cd_zoneamento_perimetro",
+            "cd_prmr_pre",
+            "cd_subprefeitura_perimetro",
+            "cd_tipo_legislacao_zoneamento",
+            "cd_numero_legislacao_zoneamento",
+            "an_legislacao_zoneamento",
+            "geometry"
         ],
         "predicate": "intersects"
     }
