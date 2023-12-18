@@ -10,6 +10,8 @@ services:
       POSTGRES_USER: ${DAGSTER_PG_USERNAME}
       POSTGRES_PASSWORD: ${DAGSTER_PG_PASSWORD}
       POSTGRES_DB: ${DAGSTER_PG_DB}
+    volumes:
+      - dagster-db-data:/var/lib/postgresql/data
     expose:
       - ${DAGSTER_PG_PORT}
     ports:
@@ -23,6 +25,8 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
     expose:
       - 9000
       - 9001
@@ -64,6 +68,8 @@ services:
       POSTGRES_USER: ${GOLD_DB_USER}
       POSTGRES_PASSWORD: ${GOLD_DB_PASSWORD}
       POSTGRES_DB: ${GOLD_DB_NAME}
+    volumes:
+      - gold-db-data:/var/lib/postgresql/data
     networks:
       - datalake_network
     expose:
@@ -71,7 +77,12 @@ services:
     ports:
       - ${GOLD_DB_PORT}:${GOLD_DB_PORT}
     command: -p ${GOLD_DB_PORT}
-            
+
+volumes:
+  dagster-db-data:
+  minio-data:
+  gold-db-data:
+
 networks:
   datalake_network:
     driver: bridge
