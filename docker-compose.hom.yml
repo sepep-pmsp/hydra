@@ -10,6 +10,8 @@ services:
       POSTGRES_USER: ${DAGSTER_PG_USERNAME}
       POSTGRES_PASSWORD: ${DAGSTER_PG_PASSWORD}
       POSTGRES_DB: ${DAGSTER_PG_DB}
+    volumes:
+      - dagster-db-data:/var/lib/postgresql/data
     networks:
       - dagster_network
 
@@ -53,8 +55,6 @@ services:
       GOLD_DB_USER: ${GOLD_DB_USER}
       GOLD_DB_PASSWORD: ${GOLD_DB_PASSWORD}
       GOLD_DB_NAME: ${GOLD_DB_NAME}
-    volumes:
-      - ./${DAGSTER_MODULE_NAME}:${DAGSTER_HOME}${DAGSTER_MODULE_NAME}
     entrypoint:
       - dagster
       - api
@@ -100,7 +100,6 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     volumes: # Make docker client accessible so we can terminate containers from the webserver
       - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/io_manager_storage:/tmp/io_manager_storage
     networks:
       - dagster_network
     depends_on:
@@ -136,7 +135,6 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     volumes: # Make docker client accessible so we can terminate containers from the webserver
       - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/io_manager_storage:/tmp/io_manager_storage
     networks:
       - dagster_network
     depends_on:
@@ -146,10 +144,12 @@ services:
   # minio for bronze and silver tier database
   minio:
     image: minio/minio
-    container_name: minio
+    container_name: ${MINIO_CONTAINER_NAME}
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
     expose:
       - 9000
       - 9001
@@ -164,7 +164,7 @@ services:
       - --console-address
       - :9001
 
-# minio client for the creation of bronze and silver tier buckets
+  # minio client for the creation of bronze and silver tier buckets
   createbuckets:
     image: minio/mc
     container_name: createbuckets
@@ -183,7 +183,7 @@ services:
       exit 0;
       "
 
-# postgres for gold tier database
+  # postgres for gold tier database
   gold_db:
     image: postgres:11
     container_name: ${GOLD_DB_HOST}
@@ -191,6 +191,8 @@ services:
       POSTGRES_USER: ${GOLD_DB_USER}
       POSTGRES_PASSWORD: ${GOLD_DB_PASSWORD}
       POSTGRES_DB: ${GOLD_DB_NAME}
+    volumes:
+      - gold-db-data:/var/lib/postgresql/data
     networks:
       - datalake_network
     expose:
@@ -198,6 +200,11 @@ services:
     ports:
       - ${GOLD_DB_PORT}:${GOLD_DB_PORT}
     command: -p ${GOLD_DB_PORT}
+
+volumes:
+  dagster-db-data:
+  minio-data:
+  gold-db-data:
             
 networks:
   dagster_network:
