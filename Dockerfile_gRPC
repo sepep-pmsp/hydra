@@ -4,14 +4,14 @@ FROM python:3.10-slim
 # exposing your repository to dagster-webserver and dagster-daemon, and to load the DagsterInstance
 
 RUN pip install \
-    dagster==1.4.15 \
-    dagster-postgres==0.20.15 \
+    dagster==1.5.13\
+    dagster-postgres==0.21.13 \
     pandas==2.1.0 \
     geopandas==0.14.0 \
     matplotlib==3.8.0 \
     seaborn==0.12.2 \
     pyarrow==13.0.0 \
-    dagster-aws==0.20.15 \
+    dagster-aws==0.21.13 \
     httpx==0.24.1 \
     tenacity==8.2.3 \
     xmltodict==0.13.0
