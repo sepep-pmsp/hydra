@@ -1,8 +1,7 @@
-dagster==1.4.15
-dagster-aws==0.20.15
-dagster-graphql==1.4.15
-dagster-postgres==0.20.15
-dagster-webserver==1.4.15
+dagster==1.5.13
+dagster-aws==0.21.13
+dagster-postgres==0.21.13
+dagster-webserver==1.5.13
 pandas==2.1.0
 geopandas==0.14.0
 matplotlib==3.8.0
