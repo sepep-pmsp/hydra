@@ -4,8 +4,13 @@ from dagster import (
     AssetsDefinition,
     MetadataValue,
     asset,
-)  # import the `dagster` library
-import geopandas as gpd
+    Output,
+)
+import base64
+from io import BytesIO
+from geopandas import GeoDataFrame
+import matplotlib.pyplot as plt
+import seaborn as sns
 import pandas as pd
 
 from hydra.config.censo import (
@@ -17,7 +22,7 @@ from hydra.utils.geopandas import sjoin_largest
 
 
 def _get_log_masssages_setor_censitario(
-        df: gpd.GeoDataFrame,
+        df: GeoDataFrame,
         missing_col: str = 'missing',
         supressed_col: str = 'supressed'
 ) -> str:
@@ -42,13 +47,31 @@ def _get_log_masssages_setor_censitario(
     return '\n'.join(logs)
 
 
+def _get_md_preview_plot(gdf: GeoDataFrame, nome_camada: str) -> str:
+    # Defino o seaborn theme
+    sns.set_theme(rc={'patch.linewidth': 0.1})
+
+    # Ploto o dataframe
+    gdf.plot()
+    plt.axis('off')
+    plt.title(f'Features da camada {nome_camada}')
+
+    # Converto a imagem em um formato decodificável
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    image_data = base64.b64encode(buffer.getvalue())
+
+    # Converto a imagem em markdown
+    return f"![img](data:image/png;base64,{image_data.decode()})"
+
+
 def _fill_na_by_buffer(
-        gdf_to_fill: gpd.GeoDataFrame,
+        gdf_to_fill: GeoDataFrame,
         columns_to_fill: list[str],
-        gdf_fill_from: gpd.GeoDataFrame,
+        gdf_fill_from: GeoDataFrame,
         geometry_column: str = 'geometry',
         buffer_size: int = 5
-) -> gpd.GeoDataFrame:
+) -> GeoDataFrame:
     new_gdf_to_fill = gdf_to_fill.copy()
     new_gdf_fill_from = gdf_fill_from.copy()
 
@@ -64,12 +87,12 @@ def _fill_na_by_buffer(
 
 
 def _fill_na_by_nearest_neighbours(
-        gdf_to_fill: gpd.GeoDataFrame,
+        gdf_to_fill: GeoDataFrame,
         columns_to_fill: list[str],
-        gdf_fill_from: gpd.GeoDataFrame,
+        gdf_fill_from: GeoDataFrame,
         geometry_column: str = 'geometry',
         neighbours: int = 3
-) -> gpd.GeoDataFrame:
+) -> GeoDataFrame:
     new_gdf_to_fill = gdf_to_fill.copy()
 
     for i, row in new_gdf_to_fill.iterrows():
@@ -96,8 +119,8 @@ def _fill_na_by_nearest_neighbours(
 def setor_censitario_enriched(
     context: AssetExecutionContext,
     df_censo: pd.DataFrame,
-    setor_censitario_2010_digested: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
+    setor_censitario_2010_digested: GeoDataFrame
+) -> GeoDataFrame:
     context.log.info(f'Carregando os dados de {CensoFiles.DOMICILIO_01}')
 
     # Primeiro confiro se o tipo das duas colunas de identificação são iguais
@@ -190,6 +213,57 @@ def setor_censitario_enriched(
     return df_setor_enriched
 
 
+def __build_digested_asset(name, group_name="silver") -> AssetsDefinition:
+    @asset(
+        name=f'{name}_digested',
+        ins={"raw_asset": AssetIn(key=name)},
+        group_name=group_name,
+        io_manager_key="gpd_silver_io_manager",
+        dagster_type=GeoDataFrame,
+    )
+    def _asset(
+        context: AssetExecutionContext,
+        raw_asset: dict
+    ):
+        context.log.info(f'Lendo a camada {name}')
+        gdf = GeoDataFrame.from_features(raw_asset['features'])
+        gdf = gdf.set_crs(raw_asset['crs'].get('properties').get('name'))
+        gdf = gdf.to_crs(epsg=31983)
+
+        context.log.info(f'Camada {name} lida')
+        context.log.info(f'Lendo as configurações da camada {name}')
+        conf = GeosampaConfig.get_asset_config().get('geosampa').get(name)
+        if 'renamed_columns' in conf.keys():
+            context.log.info(f'Renomeando as colunas da camada {name}')
+            gdf = gdf.rename(columns=conf.get('renamed_columns'))
+        else:
+            context.log.info(f'A camada {name} não possui colunas a renomear')
+
+        context.log.info(f'Extraindo metadados da camada {name}')
+
+        # Recebo a imagem de prévia em markdown
+        md_preview = _get_md_preview_plot(gdf, name)
+
+        # Extraio algumas linhas como amostra
+        n = 10 if gdf.shape[0] > 10 else gdf.shape[0]
+
+        peek = gdf.drop(columns=['geometry']).sample(n)
+
+        return Output(
+            gdf,
+            metadata={
+                'núm. linhas': gdf.shape[0],
+                'prévia em gráfico': MetadataValue.md(md_preview),
+                f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
+            })
+
+    return _asset
+
+
+globals().update({f'{asset_}_digested': __build_digested_asset(asset_)
+                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()})
+
+
 def __build_intersections_asset(name, group_name="silver") -> AssetsDefinition:
     @asset(
         name=f'intersection_setor_{name}',
@@ -199,12 +273,12 @@ def __build_intersections_asset(name, group_name="silver") -> AssetsDefinition:
         },
         group_name=group_name,
         io_manager_key='gpd_silver_io_manager',
-        dagster_type=gpd.GeoDataFrame,
+        dagster_type=GeoDataFrame,
     )
     def _asset(
         context: AssetExecutionContext,
-        camada: gpd.GeoDataFrame,
-        setor: gpd.GeoDataFrame
+        camada: GeoDataFrame,
+        setor: GeoDataFrame
     ):
         # Primero removo os setores sem domicílios particulares
         setor = setor[
@@ -305,8 +379,9 @@ globals().update({f'intersection_setor_{asset_}': __build_intersections_asset(as
 # gerada dinâmicamente, precisarei definir uma lista de asset keys como string e
 # utilizar o parâmetro deps da definição
 intersections = [f'intersection_setor_{asset_}'
-                  for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()
-                  if 'id_col' in GeosampaConfig.get_asset_config().get('geosampa').get(asset_).keys()]
+                 for asset_ in GeosampaConfig.get_asset_config().get('geosampa').keys()
+                 if 'id_col' in GeosampaConfig.get_asset_config().get('geosampa').get(asset_).keys()]
+
 
 @asset(
     io_manager_key='gpd_silver_io_manager',
@@ -315,8 +390,8 @@ intersections = [f'intersection_setor_{asset_}'
 )
 def setor_censitario_enriched_geosampa(
     context: AssetExecutionContext,
-    setor_censitario_enriched: gpd.GeoDataFrame,
-) -> gpd.GeoDataFrame:
+    setor_censitario_enriched: GeoDataFrame,
+) -> GeoDataFrame:
     # Infelizmente, não encontrei um modo mais elegante de carregar
     # os assets dinamicamente
     # O import precisa estar dentro da função, porque no cabeçalho
@@ -346,16 +421,16 @@ def setor_censitario_enriched_geosampa(
         )
 
         camada = defs.load_asset_value(dep_key)
-        camada = camada.rename(columns={'intersection_pct': f'{schema}_intersection_pct'})
+        camada = camada.rename(
+            columns={'intersection_pct': f'{schema}_intersection_pct'})
         camada = camada.drop(columns=[
             'geometry',
             'right_geometry',
             'intersection',
             'negative_buffer',
         ])
-        
-        df_inter = df_inter.merge(camada, how='left', on=left_id_col)
 
+        df_inter = df_inter.merge(camada, how='left', on=left_id_col)
 
     n = 10
 
