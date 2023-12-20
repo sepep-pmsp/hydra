@@ -1,0 +1,6 @@
+dash==2.14.2
+dash-leaflet[geobuf]==1.0.11
+dash-extensions==1.0.4
+geopandas==0.14.1
+pyarrow==14.0.2
+python-dotenv==1.0.0
