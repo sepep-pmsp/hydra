@@ -21,18 +21,20 @@ s3fs = S3FileSystem(
     access_key=AWS_ACCESS_KEY_ID,
     secret_key=AWS_SECRET_ACCESS_KEY,
     endpoint_override=ENDPOINT_OVERRIDE,
-    )
+)
 
-def _get_s3_path_for(table_name:str, bucket_name:str=AWS_S3_BUCKET) -> str:
+
+def _get_s3_path_for(table_name: str, bucket_name: str = AWS_S3_BUCKET) -> str:
 
     s3_path = f'{bucket_name}/dagster/{table_name}.parquet'
     return s3_path
 
-def load_parquet(table_name:str, bucket_name:str=AWS_S3_BUCKET) -> gpd.GeoDataFrame: 
-            
+
+def load_parquet(table_name: str, bucket_name: str = AWS_S3_BUCKET) -> gpd.GeoDataFrame:
+
     s3_path = _get_s3_path_for(table_name)
     print(f'Baixando parquet de {s3_path}')
-    
+
     gdf = gpd.read_parquet(s3_path, filesystem=s3fs)
     gdf = gdf.to_crs(epsg=4326)
     return gdf
