@@ -50,6 +50,13 @@ random_dist = gdf_distrito.sample(n=1)
 dist_geojson = json.loads(random_dist.to_json())
 dist_geobuf = dlx.geojson_to_geobuf(dist_geojson)
 
+gdf_setor = load_parquet('setor_censitario_enriched')
+filtro_setor = gdf_setor.intersects(random_dist['geometry'].iloc[0])
+gdf_setor = gdf_setor[filtro_setor]
+gdf_setor['tooltip'] = gdf_setor['cd_original_setor_censitario']
+setor_geojson = json.loads(gdf_setor.to_json())
+setor_geobuf = dlx.geojson_to_geobuf(setor_geojson)
+
 
     gdf_distrito = load_parquet('distrito_municipal_digested')
     gdf_distrito = gdf_distrito[['cd_identificador_distrito', 'cd_distrito_municipal', 'nm_distrito_municipal', 'sg_distrito_municipal', 'geometry']]
