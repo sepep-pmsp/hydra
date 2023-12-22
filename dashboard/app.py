@@ -45,6 +45,11 @@ gdf_distrito = gdf_distrito[['cd_identificador_distrito', 'cd_distrito_municipal
                              'nm_distrito_municipal', 'sg_distrito_municipal', 'geometry']]
 gdf_distrito['tooltip'] = gdf_distrito['nm_distrito_municipal']
 
+random_dist = gdf_distrito.sample(n=1)
+
+dist_geojson = json.loads(random_dist.to_json())
+dist_geobuf = dlx.geojson_to_geobuf(dist_geojson)
+
 
     gdf_distrito = load_parquet('distrito_municipal_digested')
     gdf_distrito = gdf_distrito[['cd_identificador_distrito', 'cd_distrito_municipal', 'nm_distrito_municipal', 'sg_distrito_municipal', 'geometry']]
