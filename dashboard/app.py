@@ -39,9 +39,12 @@ def load_parquet(table_name: str, bucket_name: str = AWS_S3_BUCKET) -> gpd.GeoDa
     gdf = gdf.to_crs(epsg=4326)
     return gdf
 
-local_file = './data/distritos.parquet'
 
-if not path.exists(local_file):
+gdf_distrito = load_parquet('distrito_municipal_digested')
+gdf_distrito = gdf_distrito[['cd_identificador_distrito', 'cd_distrito_municipal',
+                             'nm_distrito_municipal', 'sg_distrito_municipal', 'geometry']]
+gdf_distrito['tooltip'] = gdf_distrito['nm_distrito_municipal']
+
 
     gdf_distrito = load_parquet('distrito_municipal_digested')
     gdf_distrito = gdf_distrito[['cd_identificador_distrito', 'cd_distrito_municipal', 'nm_distrito_municipal', 'sg_distrito_municipal', 'geometry']]
