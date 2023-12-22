@@ -2,6 +2,13 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 100vh;
-    grid-gap: 0.5vw;
     grid-auto-flow: column;
+}
+
+#distrito_wrapper {
+    display: flex;
+}
+
+#distrito_wrapper .layer_header, #info_panel .layer_toggle {
+    width: 25vw;
 }
