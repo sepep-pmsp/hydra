@@ -9,7 +9,7 @@ import os
 from pyarrow.fs import S3FileSystem
 import json
 
-from os import path
+from dao import DuckDBDAO
 
 load_dotenv('../.env')
 
@@ -18,30 +18,15 @@ AWS_ACCESS_KEY_ID = os.getenv("MINIO_ROOT_USER")
 AWS_SECRET_ACCESS_KEY = os.getenv("MINIO_ROOT_PASSWORD")
 ENDPOINT_OVERRIDE = os.getenv("MINIO_ENDPOINT_URL")
 
-s3fs = S3FileSystem(
+duckdb_dao = DuckDBDAO(
+    bucket_name=AWS_S3_BUCKET,
     access_key=AWS_ACCESS_KEY_ID,
     secret_key=AWS_SECRET_ACCESS_KEY,
-    endpoint_override=ENDPOINT_OVERRIDE,
+    endpoint=ENDPOINT_OVERRIDE
 )
 
 
-def _get_s3_path_for(table_name: str, bucket_name: str = AWS_S3_BUCKET) -> str:
-
-    s3_path = f'{bucket_name}/dagster/{table_name}.parquet'
-    return s3_path
-
-
-def load_parquet(table_name: str, bucket_name: str = AWS_S3_BUCKET) -> gpd.GeoDataFrame:
-
-    s3_path = _get_s3_path_for(table_name)
-    print(f'Baixando parquet de {s3_path}')
-
-    gdf = gpd.read_parquet(s3_path, filesystem=s3fs)
-    gdf = gdf.to_crs(epsg=4326)
-    return gdf
-
-
-gdf_distrito = load_parquet('distrito_municipal_digested')
+gdf_distrito = duckdb_dao.load_parquet('distrito_municipal_digested')
 gdf_distrito = gdf_distrito[['cd_identificador_distrito', 'cd_distrito_municipal',
                              'nm_distrito_municipal', 'sg_distrito_municipal', 'geometry']]
 gdf_distrito['tooltip'] = gdf_distrito['nm_distrito_municipal']
@@ -51,7 +36,7 @@ random_dist = gdf_distrito.sample(n=1)
 dist_geojson = json.loads(random_dist.to_json())
 dist_geobuf = dlx.geojson_to_geobuf(dist_geojson)
 
-gdf_setor = load_parquet('setor_censitario_enriched')
+gdf_setor = duckdb_dao.load_parquet('setor_censitario_enriched')
 filtro_setor = gdf_setor.intersects(random_dist['geometry'].iloc[0])
 gdf_setor = gdf_setor[filtro_setor]
 gdf_setor['tooltip'] = gdf_setor['cd_original_setor_censitario']
