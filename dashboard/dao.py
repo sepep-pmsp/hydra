@@ -22,7 +22,7 @@ class DuckDBDAO():
         access_key: str,
         secret_key: str,
         endpoint: str,
-        db_path:str = '/tmp/hydra.db'
+        db_path:str = ''
     ) -> None:
         self.bucket_name = bucket_name
         self.access_key = access_key
