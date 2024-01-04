@@ -51,21 +51,40 @@ def map_children(distrito_toggle: bool):
                 name='Base',
                 checked=True
             )] + [
-                dl.Overlay(dl.GeoJSON(data=dist_geobuf, id="distritos", format='geobuf',
-                                      style={'color': 'green',
+                dl.Overlay(dl.Pane(dl.GeoJSON(data=dist_geobuf, id="distritos", format='geobuf',
+                                      options={
+                                      "style":{'color': 'green',
                                              'fillColor': 'green',
-                                             'fillOpacity': 0.5},
-                                    #   hoverStyle=arrow_function(
-                                    #       dict(weight=5, color='#666', dashArray=''))
+                                             'fillOpacity': 0.5}},
+                                      hoverStyle=arrow_function(
+                                          dict(weight=5, color='#666', dashArray=''))
                                     ),
                            name='distritos_pane',
+                           style={'zIndex':1000}
+                           ),
+                           id='distritos_ol',
+                           name='distritos_ol',
                            checked=distrito_toggle
                            ),
-                dl.Overlay(children=[],
-                           id="setores_pane",
-                           name='setores_pane',
-                           checked=True
-                           )],
+                dl.Overlay(children=[dl.Pane(dl.GeoJSON(data=setor_geobuf, id="setores", format='geobuf',
+                       hideout=dict(selected=[]),
+                       options={
+                       "style": {
+                           'color': 'red',
+                           'fillColor': 'red'
+                       }},
+                       hoverStyle=arrow_function(
+                           dict(weight=5, color='red', dashArray='', fillOpacity=0.5)),
+                       zoomToBounds=True),
+                        name='setores_pane',
+                        style={'zIndex': 1100}
+                    )],
+                        id="setores_ol",
+                        name='setores_ol',
+                        checked=True
+                    ),
+
+                ],
             id='layers-control'),]
 
 
@@ -87,32 +106,16 @@ app.layout = html.Div([
         ], id='distrito_wrapper'
         )
     ],
-    id="info_panel")
+    id="info_panel"),
+    html.Div(children=[],id='message')
 ],
     id="wrapper"
 )
 
-
-@app.callback(
-    Output('setores_pane', 'children'),
-    Input("map", "children"),
-)
-def load_setores(map_children):
-    return [dl.GeoJSON(data=setor_geobuf, id="setores", format='geobuf',
-                       hideout=dict(selected=[]),
-                       style={
-                           'color': 'red',
-                           'fillColor': 'red'
-                       },
-                       hoverStyle=arrow_function(
-                           dict(weight=5, color='red', dashArray='', fillOpacity=0.5)),
-                       zoomToBounds=True),]
-
-
 @app.callback(
     Output("setor_data", "children"),
-    Input("distritos", "clickData"),
-    Input("setores", "clickData"),
+    Input("distritos", "click_feature"),
+    Input("setores", "click_feature"),
     prevent_initial_call=True
 )
 def feature_click(f1, f2):
@@ -127,11 +130,12 @@ def feature_click(f1, f2):
 
 
 @app.callback(
-    Output('map', 'children'),
+    Output('distritos_ol', 'checked'),
     Input('distrito_toggle', 'on')
 )
 def update_output(value):
-    return map_children(value)
+    print(value)
+    return value
 
 if __name__ == '__main__':
     app.run_server(debug=True, port=7777)
