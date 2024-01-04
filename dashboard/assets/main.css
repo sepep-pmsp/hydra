@@ -1,3 +1,7 @@
+.leaflet-control-layers {
+    display: none;
+}
+
 #wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
