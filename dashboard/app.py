@@ -60,7 +60,9 @@ def map_children(distrito_toggle: bool):
                                           dict(weight=5, color='#666', dashArray=''))
                                     ),
                            name='distritos_pane',
-                           style={'zIndex':1000}
+                           # O z-index padrão do overlay pane é 400 e o próximo pane (shadow) é 500,
+                           # portanto os valores personalizados devem estar entre 400 e 500
+                           style={'zIndex': 410}
                            ),
                            id='distritos_ol',
                            name='distritos_ol',
@@ -77,7 +79,7 @@ def map_children(distrito_toggle: bool):
                            dict(weight=5, color='red', dashArray='', fillOpacity=0.5)),
                        zoomToBounds=True),
                         name='setores_pane',
-                        style={'zIndex': 1100}
+                        style={'zIndex': 420}
                     )],
                         id="setores_ol",
                         name='setores_ol',
