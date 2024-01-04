@@ -133,8 +133,7 @@ def feature_click(f1, f2):
     Output('distritos_ol', 'checked'),
     Input('distrito_toggle', 'on')
 )
-def update_output(value):
-    print(value)
+def update_checked_layers(value):
     return value
 
 if __name__ == '__main__':
