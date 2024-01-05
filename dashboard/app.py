@@ -6,7 +6,6 @@ from dash_extensions.javascript import arrow_function
 import geopandas as gpd
 from dotenv import load_dotenv
 import os
-from pyarrow.fs import S3FileSystem
 import json
 
 from dao import DuckDBDAO
@@ -26,9 +25,16 @@ duckdb_dao = DuckDBDAO(
 )
 
 
-gdf_distrito = duckdb_dao.load_parquet('distrito_municipal_digested')
-gdf_distrito = gdf_distrito[['cd_identificador_distrito', 'cd_distrito_municipal',
-                             'nm_distrito_municipal', 'sg_distrito_municipal', 'geometry']]
+rel_distrito = duckdb_dao.load_parquet('distrito_municipal_digested', lazy_loading=True)
+rel_distrito = rel_distrito.project(', '.join([
+                                               'cd_identificador_distrito',
+                                               'cd_distrito_municipal',
+                                               'nm_distrito_municipal',
+                                               'sg_distrito_municipal',
+                                               'geometry'
+                                               ]
+                                            ))
+gdf_distrito = duckdb_dao.duckdb_relation_to_gdf(rel_distrito)
 gdf_distrito['tooltip'] = gdf_distrito['nm_distrito_municipal']
 
 random_dist = gdf_distrito.sample(n=1)
@@ -36,9 +42,10 @@ random_dist = gdf_distrito.sample(n=1)
 dist_geojson = json.loads(random_dist.to_json())
 dist_geobuf = dlx.geojson_to_geobuf(dist_geojson)
 
-gdf_setor = duckdb_dao.load_parquet('setor_censitario_enriched')
-filtro_setor = gdf_setor.intersects(random_dist['geometry'].iloc[0])
-gdf_setor = gdf_setor[filtro_setor]
+relation_setor = duckdb_dao.load_parquet('intersection_setor_distrito_municipal', lazy_loading=True)
+relation_setor = relation_setor.project('cd_original_setor_censitario, cd_identificador_distrito, geometry')
+relation_setor = relation_setor.filter(f'cd_identificador_distrito == {random_dist["cd_identificador_distrito"].iloc[0]}')
+gdf_setor = duckdb_dao.duckdb_relation_to_gdf(relation_setor)
 gdf_setor['tooltip'] = gdf_setor['cd_original_setor_censitario']
 setor_geojson = json.loads(gdf_setor.to_json())
 setor_geobuf = dlx.geojson_to_geobuf(setor_geojson)
