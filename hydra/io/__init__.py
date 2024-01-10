@@ -1,3 +1,2 @@
 from .postgres_pandas_io_manager import postgres_pandas_io_manager
 from .geopandas_parquetS3_io_manager import geo_pandas_parquets3_io_manager
-from .duckdb_parquetS3_io_manager import duckdb_parquets3_io_manager
