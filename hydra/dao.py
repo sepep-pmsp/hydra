@@ -80,23 +80,6 @@ class DuckDBS3():
 
         return s3_path
 
-    def to_parquet(self, table_name: str, geometry_columns=['geometry']) -> DuckDBPyRelation:
-
-        s3_path = self._get_s3_path_for(table_name)
-        self.logger.info(f'Gerando query para o arquivo {s3_path}...')
-
-        geom_exclude = 'EXCLUDE (' + \
-            ', '.join([f'{col}' for col in geometry_columns]) + ')'
-        geom_as_text = ', '.join(
-            [f'ST_AsText(ST_GeomFromWKB({col})) AS {col}' for col in geometry_columns])
-        geom_fix = f'{geom_exclude}, {geom_as_text}'
-        sql_query = f'SELECT * {geom_fix} FROM read_parquet("{s3_path}")'
-        self.logger.info('Query gerada:')
-        self.logger.info(sqlparse.format(sql_query, reindent=True, keyword_case='upper'))
-
-        gdf = self.connection.sql(sql_query)
-        return gdf
-
     def load_parquet(self, table_name: str, geometry_columns=['geometry']) -> DuckDBPyRelation:
 
         s3_path = self._get_s3_path_for(table_name)
