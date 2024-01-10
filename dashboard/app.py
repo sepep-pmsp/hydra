@@ -10,6 +10,10 @@ import json
 
 from dao import DuckDBDAO
 
+
+
+#Carrega as variaveis de ambiente
+
 load_dotenv('../.env')
 
 AWS_S3_BUCKET = os.getenv("MINIO_SILVER_BUCKET_NAME")
@@ -24,8 +28,10 @@ duckdb_dao = DuckDBDAO(
     endpoint=ENDPOINT_OVERRIDE
 )
 
-
+#Carrega o parquet dos distritos municipais no formato otimizado
 rel_distrito = duckdb_dao.load_parquet('distrito_municipal_digested', lazy_loading=True)
+
+#Junta as colunas 
 rel_distrito = rel_distrito.project(', '.join([
                                                'cd_identificador_distrito',
                                                'cd_distrito_municipal',
@@ -34,11 +40,17 @@ rel_distrito = rel_distrito.project(', '.join([
                                                'geometry'
                                                ]
                                             ))
+
+#Transforma num GeoDataFrame
 gdf_distrito = duckdb_dao.duckdb_relation_to_gdf(rel_distrito)
+
+#Adiciona o número do distrito na tooltip para exibicao
 gdf_distrito['tooltip'] = gdf_distrito['nm_distrito_municipal']
 
+#Armazena um distrito aleátoriamente
 random_dist = gdf_distrito.sample(n=1)
 
+#Transforma as informacoes do GDF pra GeoBUF
 dist_geojson = json.loads(random_dist.to_json())
 dist_geobuf = dlx.geojson_to_geobuf(dist_geojson)
 
