@@ -23,14 +23,14 @@ class DuckDBS3():
             access_key: str,
             secret_key: str,
             endpoint: str,
-            db_path: str = ':memory:',
+            db_path: str = None,
             logger: Logger = getLogger()
         ) -> None:
         self.bucket_name = bucket_name
         self.access_key = access_key
         self.secret_key = secret_key
         self.endpoint = endpoint
-        self.db_path = db_path
+        self.db_path = db_path if db_path != None else ':memory:'
         self.logger = logger
         self._connection:DuckDBPyConnection = None
     
@@ -66,7 +66,8 @@ class DuckDBS3():
     def _get_writing_output_log_message(self, path: str) -> str:
         return f"Writing S3 object at: {path}"
 
-    def save_parquet(self, table_name:str, rel: DuckDBPyRelation, geometry_columns=['geometry'], **kwargs) -> str:        
+    def save_parquet(self, table_name:str, rel: DuckDBPyRelation, geometry_columns:list[str]=None, **kwargs) -> str:        
+        geometry_columns = geometry_columns if geometry_columns != None else ['geometry']
         other_columns = [col for col in rel.columns if col not in geometry_columns]
         other_columns = ', '.join(other_columns)
 
@@ -80,7 +81,8 @@ class DuckDBS3():
 
         return s3_path
 
-    def load_parquet(self, table_name: str, geometry_columns=['geometry']) -> DuckDBPyRelation:
+    def load_parquet(self, table_name: str, geometry_columns:list[str]=None) -> DuckDBPyRelation:
+        geometry_columns = geometry_columns if geometry_columns != None else ['geometry']
 
         s3_path = self._get_s3_path_for(table_name)
         self.logger.info(f'Gerando query para o arquivo {s3_path}...')
