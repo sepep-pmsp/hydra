@@ -90,7 +90,6 @@ class DuckDBS3():
 
         geom_as_blob = self._geometry_columns_save_fix(geometry_columns)
 
-        self.logger.info(f'{other_columns}{geom_as_blob}')
         return rel.select(f'{other_columns}{geom_as_blob}')
 
     def save_parquet(self, table_name: str, rel: DuckDBPyRelation, geometry_columns: list[str] = None, **kwargs) -> str:
@@ -98,6 +97,8 @@ class DuckDBS3():
         s3_path = self._get_s3_path_for(table_name)
 
         self.logger.info(self._get_writing_output_log_message(s3_path))
+        self.logger.info(f'Columns: {rel.columns}')
+        self.logger.info(f'Code to run: {rel.explain()}')
 
         self._to_compatible_geoparquet(
             rel, geometry_columns).to_parquet(s3_path, **kwargs)
@@ -127,7 +128,7 @@ class DuckDBS3():
 
         geom_fix = self._geometry_columns_load_fix(geometry_columns)
 
-        sql_query = f'SELECT * {geom_fix} FROM read_parquet("{s3_path}")'
+        sql_query = f'SELECT * {geom_fix} FROM read_parquet("{s3_path}") AS {table_name}'
         self.logger.info('Query gerada:')
         self.logger.info(sqlparse.format(
             sql_query, reindent=True, keyword_case='upper'))

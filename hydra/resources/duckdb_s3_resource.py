@@ -25,20 +25,19 @@ class DuckDBS3Resource(ConfigurableResource):
             bucket_name=self.bucket_name,
             access_key=self.access_key,
             secret_key=self.secret_key,
-            endpoint=self.endpoint,
+            endpoint=self.endpoint.removeprefix('http://'),
             db_path=self.db_path
         )
 
-    def save_parquet(self, context: OpExecutionContext, rel: DuckDBPyRelation, geometry_columns:list[str]=None, **kwargs) -> str:
-        table_name = context.upstream_output.asset_key.to_python_identifier()
+    def save_parquet(self, rel: DuckDBPyRelation, context: OpExecutionContext, table_name:str=None, geometry_columns:list[str]=None, **kwargs) -> str:
+        table_name = context.asset_key.to_python_identifier() if not table_name else table_name
         
         self._dao.logger = context.log
         s3_path = self._dao.save_parquet(table_name, rel, geometry_columns, **kwargs)
 
         return s3_path
 
-    def load_parquet(self, context: OpExecutionContext, geometry_columns=None) -> DuckDBPyRelation:
-        table_name = context.upstream_output.asset_key.to_python_identifier()
+    def load_parquet(self, table_name:str, context: OpExecutionContext, geometry_columns=None) -> DuckDBPyRelation:
         self._dao.logger = context.log
         
         rel = self._dao.load_parquet(table_name, geometry_columns)
