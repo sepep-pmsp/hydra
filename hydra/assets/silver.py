@@ -464,13 +464,13 @@ def setor_censitario_enriched_geosampa(
 
     n = 10
 
-    # peek_rel = duckdb_s3_resource.load_parquet(context.asset_key.to_python_identifier(), context)
-    # peek_sql = f'SELECT * EXCLUDE (geometry) FROM {peek_rel.alias} USING SAMPLE {n};'
-    # peek = duckdb_s3_resource._dao.connection.sql(peek_sql).df()
+    s3_path = duckdb_s3_resource._dao._get_s3_path_for(context.asset_key.to_python_identifier())
+    peek_sql = f'SELECT * EXCLUDE (geometry) FROM "{s3_path}" USING SAMPLE {n};'
+    peek = duckdb_s3_resource._dao.connection.sql(peek_sql).df()
 
     context.add_output_metadata(
         metadata={
             'registros': join_rels[-1].count(left_id_col).fetchone()[0],
-            # f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
+            f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
         }
     )
