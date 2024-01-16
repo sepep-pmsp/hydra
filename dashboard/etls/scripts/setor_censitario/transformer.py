@@ -1,11 +1,12 @@
-from extractor import Extractor
+from scripts.base_extractor import Extractor
 import dash_leaflet.express as dlx
-from scripts.utils.utils import receber_distrito_aleatorio_em_geodataframe, receber_geobuf_de_geodataframe
+from scripts.utils.utils import receber_geobuf_de_geodataframe
 
 class Transformer:
 
-    def __init__(self):
-        self.extractor = Extractor()
+    def __init__(self,):
+        self.extractor = Extractor('intersection_setor_distrito_municipal')
+
 
         self.DAO = self.extractor.configurar_DAO()
         self.package = self.extractor()

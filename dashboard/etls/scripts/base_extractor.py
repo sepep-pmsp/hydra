@@ -4,7 +4,9 @@ from dashboard.etls.scripts.utils.utils import get_bucket_os
  
 
 class Extractor: 
-    def __init__(self):
+    def __init__(self, nome_da_camada:str, lazy_loading:bool = True):
+        self.lazy_loading= lazy_loading
+        self.nome_da_camada = nome_da_camada
         self.bucket_os = get_bucket_os()
 
         print(self.bucket_os)
@@ -15,15 +17,15 @@ class Extractor:
     
     def armazenar_parquet(self, DAO):
         
-        rel_distrito = DAO.load_parquet('distrito_municipal_digested', lazy_loading=True)
+        parquet = DAO.load_parquet(self.nome_da_camada, lazy_loading=self.lazy_loading)
 
-        return rel_distrito
+        return parquet
     def pipeline(self):
             DAO = self.configurar_DAO()
-            distritos_relacao = self.armazenar_parquet(DAO)
+            camada_em_parquet = self.armazenar_parquet(DAO)
             
 
-            return distritos_relacao
+            return camada_em_parquet
     def __call__(self):
 
             return self.pipeline()
