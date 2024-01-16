@@ -395,7 +395,8 @@ def setor_censitario_enriched_geosampa(
     duckdb_s3_resource.setup()
     # Como as dependências não são gerenciadas pelo IOManager, preciso carregar
     # as dependências individualmente
-    rel_setor = duckdb_s3_resource.load_parquet('setor_censitario_enriched', context, ['geometry'])
+    rel_setor = duckdb_s3_resource.load_parquet(
+        'setor_censitario_enriched', context, ['geometry'])
 
     # Primero removo os setores sem domicílios particulares
     rel_setor = rel_setor.filter('missing = False')
@@ -412,8 +413,8 @@ def setor_censitario_enriched_geosampa(
         if dep_key != 'setor_censitario_enriched'
     ]
 
-    # Crio uma lista para receber as relations provenientes dos joins
-    join_rels = []
+    # Crio uma variável para receber a relation com os joins
+    join_rel = None
 
     for dep_key in schemas_to_add:
         schema = dep_key.removesuffix('_digested')
@@ -421,16 +422,28 @@ def setor_censitario_enriched_geosampa(
             f'Agregando a camada {schema}'
         )
 
+        # Carrego o parquet da camada atual
         camada = duckdb_s3_resource.load_parquet(dep_key, context)
-        drop_columns=[
+        # Defino uma lista de colunas a se descartar
+        # TODO: definir a lista de colunas nas configurações
+        drop_columns = [
             'geometry',
             'right_geometry',
             'intersection',
             'negative_buffer',
             '__index_level_0__',
         ]
-        keep_columns = [col for col in camada.columns if col not in drop_columns]
-        camada = camada.select(', '.join(keep_columns))
+        # Defino a lista de colunas a manter por exclusão com as colunas a descartar
+        keep_columns = [
+            col for col in camada.columns if col not in drop_columns]
+
+        # Crio a string de seleção e seleciono as colunas
+        select_str = ', '.join(keep_columns)
+        camada = camada.select(select_str)
+
+        # Defino a lista de colunas a renomear
+        # TODO: renomear colunas nos assets anteriores ou resolver ambiguidades
+        # (nomes de colunas repetidos) automaticamente
         rename_columns = [
             'intersection_pct',
             'dc_classe',
@@ -441,36 +454,52 @@ def setor_censitario_enriched_geosampa(
             'dc_tipo_ocorrencia',
             'cd_identificador_subprefeitura',
         ]
-        keep_columns = [col if col not in rename_columns else f'{col} AS {dep_key.removeprefix("intersection_setor_")}_{col}' for col in keep_columns]
-        
+        # Crio a nova lista de colunas, renomeando as colunas necessárias
+        keep_columns = [col if col not in rename_columns
+                        else f'{col} AS {dep_key.removeprefix("intersection_setor_")}_{col}'
+                        for col in keep_columns]
+
         keep_columns.remove(left_id_col)
 
-        if not len(join_rels):
-            join_condition=f'{rel_setor.alias}.{left_id_col} = {camada.alias}.{left_id_col}'
+        # Se a variável estiver vazia é a primeira execução, então crio o join com a partir
+        # da relation de setor censitário
+        if not join_rel:
+            join_condition = f'{rel_setor.alias}.{left_id_col} = {camada.alias}.{left_id_col}'
 
-            join_rels.append(rel_setor\
-                             .join(camada, condition=join_condition, how='left')\
-                             .select(', '.join(['geometry', f'{rel_setor.alias}.{left_id_col}'] + keep_columns)))
+            keep_columns = ['geometry',
+                            f'{rel_setor.alias}.{left_id_col}'] + keep_columns
+
+            join_rel = rel_setor.join(
+                camada, condition=join_condition, how='left')
+
+        # Caso contrário, já existe algum join anterior, então apenas encadeio um novo join
+        # ao join existente
         else:
-            join_condition=f'{join_rels[-1].alias}.{left_id_col} = {camada.alias}.{left_id_col}'
+            join_condition = f'{join_rel.alias}.{left_id_col} = {camada.alias}.{left_id_col}'
 
-            keep_columns = [f'{join_rels[-1].alias}.{col}' for col in join_rels[-1].columns] + keep_columns
+            keep_columns = [
+                f'{join_rel.alias}.{col}' for col in join_rel.columns] + keep_columns
 
-            join_rels.append(join_rels[-1]\
-                             .join(camada, condition=join_condition, how='left')\
-                             .select(', '.join(keep_columns)))
-    
-    duckdb_s3_resource.save_parquet(join_rels[-1], context)
+            join_rel = join_rel.join(
+                camada, condition=join_condition, how='left')
+
+        # Depois do join, seleciono as colunas desejadas
+        select_str = ', '.join(keep_columns)
+        join_rel = join_rel.select(select_str)
+
+    # Depois de todas as iterações, salvo o parquet
+    duckdb_s3_resource.save_parquet(join_rel, context)
 
     n = 10
 
-    s3_path = duckdb_s3_resource._dao._get_s3_path_for(context.asset_key.to_python_identifier())
+    s3_path = duckdb_s3_resource._dao._get_s3_path_for(
+        context.asset_key.to_python_identifier())
     peek_sql = f'SELECT * EXCLUDE (geometry) FROM "{s3_path}" USING SAMPLE {n};'
     peek = duckdb_s3_resource._dao.connection.sql(peek_sql).df()
 
     context.add_output_metadata(
         metadata={
-            'registros': join_rels[-1].count(left_id_col).fetchone()[0],
+            'registros': join_rel.count(left_id_col).fetchone()[0],
             f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
         }
     )
