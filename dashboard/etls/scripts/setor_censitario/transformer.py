@@ -20,4 +20,6 @@ class Transformer(Transformer):
 
         return geobuf_setores_por_distrito
         
-        
+    def __call__(self):
+        return self.pipeline()
+
