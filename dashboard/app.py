@@ -1,18 +1,66 @@
 import dash_leaflet as dl
-
+import dash_leaflet.express as dlx
 import dash_daq as daq
 from dash import Dash, html, Output, Input
 from dash_extensions.javascript import arrow_function
+import geopandas as gpd
+from dotenv import load_dotenv
+import os
+import json
+
+from dao import DuckDBDAO
 
 
 
-from etls.etl_scripts.distrito_municipal.transformer import Transformer as Transformer_distritos
-from etls.etl_scripts.setor_censitario.transformer import Transformer as Transformer_setores
+#Carrega as variaveis de ambiente
 
-distritos = Transformer_distritos()
-setores = Transformer_setores()
-distritos = distritos()
-setores = setores()
+load_dotenv('../.env')
+
+AWS_S3_BUCKET = os.getenv("MINIO_SILVER_BUCKET_NAME")
+AWS_ACCESS_KEY_ID = os.getenv("MINIO_ROOT_USER")
+AWS_SECRET_ACCESS_KEY = os.getenv("MINIO_ROOT_PASSWORD")
+ENDPOINT_OVERRIDE = os.getenv("MINIO_ENDPOINT_URL")
+
+duckdb_dao = DuckDBDAO(
+    bucket_name=AWS_S3_BUCKET,
+    access_key=AWS_ACCESS_KEY_ID,
+    secret_key=AWS_SECRET_ACCESS_KEY,
+    endpoint=ENDPOINT_OVERRIDE
+)
+
+#Carrega o parquet dos distritos municipais no formato otimizado
+rel_distrito = duckdb_dao.load_parquet('distrito_municipal_digested', lazy_loading=True)
+
+#Junta as colunas 
+rel_distrito = rel_distrito.project(', '.join([
+                                               'cd_identificador_distrito',
+                                               'cd_distrito_municipal',
+                                               'nm_distrito_municipal',
+                                               'sg_distrito_municipal',
+                                               'geometry'
+                                               ]
+                                            ))
+
+#Transforma num GeoDataFrame
+gdf_distrito = duckdb_dao.duckdb_relation_to_gdf(rel_distrito)
+
+#Adiciona o número do distrito na tooltip para exibicao
+gdf_distrito['tooltip'] = gdf_distrito['nm_distrito_municipal']
+
+#Armazena um distrito aleátoriamente
+random_dist = gdf_distrito.sample(n=1)
+
+#Transforma as informacoes do GDF pra GeoBUF
+dist_geojson = json.loads(random_dist.to_json())
+dist_geobuf = dlx.geojson_to_geobuf(dist_geojson)
+
+relation_setor = duckdb_dao.load_parquet('intersection_setor_distrito_municipal', lazy_loading=True)
+relation_setor = relation_setor.project('cd_original_setor_censitario, cd_identificador_distrito, geometry')
+relation_setor = relation_setor.filter(f'cd_identificador_distrito == {random_dist["cd_identificador_distrito"].iloc[0]}')
+gdf_setor = duckdb_dao.duckdb_relation_to_gdf(relation_setor)
+gdf_setor['tooltip'] = gdf_setor['cd_original_setor_censitario']
+setor_geojson = json.loads(gdf_setor.to_json())
+setor_geobuf = dlx.geojson_to_geobuf(setor_geojson)
 
 
 def map_children(distrito_toggle: bool):
@@ -22,7 +70,7 @@ def map_children(distrito_toggle: bool):
                 name='Base',
                 checked=True
             )] + [
-                dl.Overlay(dl.Pane(dl.GeoJSON(data=distritos, id="distritos", format='geobuf',
+                dl.Overlay(dl.Pane(dl.GeoJSON(data=dist_geobuf, id="distritos", format='geobuf',
                                       options={
                                       "style":{'color': 'green',
                                              'fillColor': 'green',
@@ -39,7 +87,7 @@ def map_children(distrito_toggle: bool):
                            name='distritos_ol',
                            checked=distrito_toggle
                            ),
-                dl.Overlay(children=[dl.Pane(dl.GeoJSON(data=setores, id="setores", format='geobuf',
+                dl.Overlay(children=[dl.Pane(dl.GeoJSON(data=setor_geobuf, id="setores", format='geobuf',
                        hideout=dict(selected=[]),
                        options={
                        "style": {
