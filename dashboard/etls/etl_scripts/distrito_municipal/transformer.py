@@ -1,4 +1,4 @@
-from scripts.base_transformer import Transformer
+from etl_scripts.base_transformer import Transformer
 import json
 import dash_leaflet.express as dlx
 

@@ -1,4 +1,4 @@
-from scripts.base_transformer import Transformer
+from etl_scripts.base_transformer import Transformer
 from utils.utils import receber_distrito_aleatorio_em_geojson as random
 
 class Transformer(Transformer):
