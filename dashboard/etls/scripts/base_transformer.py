@@ -13,25 +13,26 @@ class Transformer:
         self.package = self.extractor()
 
 
+    def receber_resultado_aleatorio_em_gjson(t):
+        random = t.sample(n=1)
+        random_gjsn = json.loads(random.to_json())
 
-
+        return random_gjsn
+    
+    def filtrar_colunas(self,duckdb_relation):
+        if len(self.colunas_selecionadas):
+            duckdb_relation.select(', '.join(self.colunas_selecionadas))
 
 
     def transformar_geodataframe(self, duckdb_relation):
-        if len(self.colunas_selecionadas):
-            duckdb_relation.select(', '.join(self.colunas_selecionadas))
+
         gdf = self.DAO.duckdb_relation_to_gdf(duckdb_relation)
         gdf['tooltip'] = gdf[self.tooltip_text]
             
-
-
-
         return gdf
 
     def receber_geobuf_de_geodataframe (gdf):
-
         geojson = json.loads(gdf.to_json())
-        
         geobuf = dlx.geojson_to_geobuf(geojson)
 
         return geobuf

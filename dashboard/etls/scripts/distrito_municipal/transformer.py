@@ -1,53 +1,41 @@
-from extractor import Extractor
-import dash_leaflet.express as dlx
-from scripts.utils.utils import receber_distrito_aleatorio_em_geodataframe
+from scripts.base_transformer import Transformer
 import json
+import dash_leaflet.express as dlx
 
-class Transformer:
 
-    def __init__(self):
-        self.extractor = Extractor()
-
-        self.DAO = self.extractor.configurar_DAO()
-        self.package = self.extractor()
-
-    def juntar_colunas (self):
-        duckdb_relation = self.package.project(', '.join([
+class Transformer(Transformer):
+    def __init__(self, get_geobuf:bool = True):
+        self.get_geobuf = get_geobuf
+        super().__init__('distrito_municipal_digested','nm_distrito_municipal',[
                                                'cd_identificador_distrito',
                                                'cd_distrito_municipal',
                                                'nm_distrito_municipal',
                                                'sg_distrito_municipal',
                                                'geometry'
-                                               ]
-                                            ))
+                                               ], True)
         
-        return duckdb_relation
-    
-    def transformar_geodataframe(self, duckdb_relation):
-        gdf_todos_distritos = self.DAO.duckdb_relation_to_gdf(duckdb_relation)
-        gdf_todos_distritos['tooltip'] = gdf_todos_distritos['nm_distrito_municipal']
 
-
-        return gdf_todos_distritos
-    
-
-    def gdf_para_geobuf (self, gdf):
-
-        geojson = json.loads(gdf.to_json())
-        
+    def receber_geobuf_de_json (json):
+        geojson = json
         geobuf = dlx.geojson_to_geobuf(geojson)
 
         return geobuf
+
+
     
     def pipeline(self):
 
-        duckdb_relation = self.juntar_colunas()
-        gdf_todos_distritos = self.transformar_geodataframe(duckdb_relation)
-        geojson_distrito_aleatorio = receber_distrito_aleatorio_em_geodataframe(gdf_todos_distritos)
-        geobuf_distrito_aleatorio = self.gdf_para_geobuf(geojson_distrito_aleatorio)
-        geobuf_todos_distritos = self.gdf_para_geobuf(gdf_todos_distritos)
+        duckdb_relation = self.filtrar_colunas(self.package)
+        geodataframe_todos_distritos = self.transformar_geodataframe(duckdb_relation)
+        distrito_aleatorio_json = self.receber_resultado_aleatorio_em_gjson(geodataframe_todos_distritos)
+        geobuf_distrito_aleatorio = self.receber_geobuf_de_json(distrito_aleatorio_json)
 
-        return [geobuf_todos_distritos, geobuf_distrito_aleatorio]
+
+        if self.get_geobuf:
+            return geobuf_distrito_aleatorio 
+        
+        return distrito_aleatorio_json
+    
     def __call__(self):
-
         return self.pipeline()
+
