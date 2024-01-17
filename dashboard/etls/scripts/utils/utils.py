@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 import json
 import dash_leaflet.express as dlx
-from dashboard.etls.etl_scripts.distrito_municipal.transformer import Transformer
+from dashboard.etls.scripts.distrito_municipal.transformer import Transformer
 
 
 

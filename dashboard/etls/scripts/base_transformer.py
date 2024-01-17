@@ -1,4 +1,4 @@
-from etl_scripts.base_extractor import Extractor
+from scripts.base_extractor import Extractor
 import dash_leaflet.express as dlx
 import json
 
