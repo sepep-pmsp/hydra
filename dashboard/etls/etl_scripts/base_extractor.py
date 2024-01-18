@@ -8,6 +8,7 @@ class Extractor:
         self.lazy_loading= lazy_loading
         self.nome_da_camada = nome_da_camada
         self.bucket_os = get_bucket_os()
+        self._dao = None
 
         print(self.bucket_os)
 
