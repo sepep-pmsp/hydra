@@ -16,5 +16,4 @@ def get_bucket_os(read_mode:bool = False):
     return {"bucket_name" : AWS_S3_BUCKET, 
             "access_key" : AWS_ACCESS_KEY_ID, 
             "secret_key" : AWS_SECRET_ACCESS_KEY,
-            "endpoint":  ENDPOINT_OVERRIDE,
-            "read_only": read_mode}
+            "endpoint":  ENDPOINT_OVERRIDE}
