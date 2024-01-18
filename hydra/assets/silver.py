@@ -488,7 +488,7 @@ def setor_censitario_enriched_geosampa(
         join_rel = join_rel.select(select_str)
 
     # Depois de todas as iterações, salvo o parquet
-    duckdb_s3_resource.save_parquet(join_rel, context)
+    duckdb_s3_resource.save_parquet(join_rel, context, geometry_columns=['geometry'])
 
     n = 10
 
