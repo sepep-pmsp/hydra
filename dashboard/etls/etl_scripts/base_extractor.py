@@ -1,5 +1,5 @@
-from dashboard.dao import DuckDBDAO
-from dashboard.etls.etl_scripts.utils.utils import get_bucket_os
+from dao import DuckDBDAO
+from etls.etl_scripts.utils.utils import get_bucket_os
 
  
 

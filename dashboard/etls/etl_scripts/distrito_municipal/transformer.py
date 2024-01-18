@@ -1,9 +1,9 @@
-from etl_scripts.base_transformer import Transformer
+from ..base_transformer import BaseTransformer
 import json
 import dash_leaflet.express as dlx
 
 
-class Transformer(Transformer):
+class Transformer(BaseTransformer):
     def __init__(self, get_geobuf:bool = True):
         self.get_geobuf = get_geobuf
         super().__init__('distrito_municipal_digested','nm_distrito_municipal',[
@@ -21,13 +21,20 @@ class Transformer(Transformer):
 
         return geobuf
 
+    @staticmethod
+    def receber_distrito_aleatorio_em_geojson():
+        T = Transformer
+        t = T(get_geobuf=False)
+
+        return t
+
 
     
     def pipeline(self):
 
         duckdb_relation = self.filtrar_colunas(self.package)
         geodataframe_todos_distritos = self.transformar_geodataframe(duckdb_relation)
-        distrito_aleatorio_json = self.receber_resultado_aleatorio_em_gjson(geodataframe_todos_distritos)
+        distrito_aleatorio_json = BaseTransformer.receber_resultado_aleatorio_em_gjson(geodataframe_todos_distritos)
         geobuf_distrito_aleatorio = self.receber_geobuf_de_json(distrito_aleatorio_json)
 
 

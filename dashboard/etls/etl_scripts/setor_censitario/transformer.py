@@ -1,7 +1,7 @@
-from etl_scripts.base_transformer import Transformer
-from utils.utils import receber_distrito_aleatorio_em_geojson as random
+from ..base_transformer import BaseTransformer
+from ..distrito_municipal.transformer import Transformer as DistritoTransformer
 
-class Transformer(Transformer):
+class Transformer(BaseTransformer):
     def __init__(self):
         super().__init__('intersection_setor_distrito_municipal','cd_original_setor_censitario',['cd_original_setor_censitario', 'cd_identificador_distrito', 'geometry'], True)
 
@@ -12,7 +12,7 @@ class Transformer(Transformer):
     
     def pipeline(self):
 
-        distrito_aleatorio_json = random()
+        distrito_aleatorio_json = DistritoTransformer.receber_distrito_aleatorio_em_geojson()
         duckdb_relation = self.filtrar_colunas(self.package)
         duckdb_relation = self.filtrar_resultado_por_distrito(distrito_aleatorio_json,duckdb_relation)
         geodataframe_setores_por_distrito = self.transformar_geodataframe(duckdb_relation)

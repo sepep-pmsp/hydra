@@ -9,7 +9,15 @@ import os
 import json
 
 from dao import DuckDBDAO
+print(os.getcwd())
+from etls import DistritoTransformer
 
+distritos = DistritoTransformer()
+distritos = distritos()
+
+print(distritos)
+
+from etls import DistritoTransformer
 
 
 #Carrega as variaveis de ambiente
@@ -111,6 +119,7 @@ def map_children(distrito_toggle: bool):
 
 # Create example app.
 app = Dash()
+
 app.layout = html.Div([
     dl.Map(center=[-23.5475, -46.6375],
            children=map_children(False), id="map"),
