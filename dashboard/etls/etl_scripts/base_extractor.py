@@ -11,9 +11,11 @@ class Extractor:
 
         print(self.bucket_os)
 
-    def configurar_DAO(self):
-        DAO = DuckDBDAO(**self.bucket_os)
-        return DAO
+    @property
+    def dao(self) -> DuckDBDAO:
+        if not self._dao:
+            self._dao = DuckDBDAO(**self.bucket_os)
+        return self._dao
     
     def armazenar_parquet(self, DAO):
         
@@ -21,7 +23,7 @@ class Extractor:
 
         return parquet
     def pipeline(self):
-            DAO = self.configurar_DAO()
+            DAO = self.dao
             camada_em_parquet = self.armazenar_parquet(DAO)
             
 

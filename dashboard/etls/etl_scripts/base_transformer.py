@@ -9,7 +9,7 @@ class BaseTransformer:
         self.tooltip_text = tooltip_text
         self.colunas_selecionadas = colunas
 
-        self.DAO = self.extractor.configurar_DAO()
+        self.DAO = self.extractor.dao
         self.package = self.extractor()
 
     @staticmethod
