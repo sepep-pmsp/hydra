@@ -29,20 +29,21 @@ class DuckDBDAO():
         self.secret_key = secret_key
         self.endpoint = endpoint.removeprefix("http://")
         self.db_path = db_path
-        self.connection = None
+        self._connection = None
 
-    def _get_connection(self) -> DuckDBPyConnection:
-        if self.connection == None:
-            self.connection = connect(self.db_path)
+    @property
+    def connection(self) -> DuckDBPyConnection:
+        if self._connection == None:
+            self._connection = connect(self.db_path)
             self._config_connection()
 
-        return self.connection
+        return self._connection
 
     def _config_connection(self) -> None:
-        self._get_connection().install_extension("httpfs")
-        self._get_connection().load_extension("httpfs")
-        self._get_connection().install_extension("spatial")
-        self._get_connection().load_extension("spatial")
+        self._connection.install_extension("httpfs")
+        self._connection.load_extension("httpfs")
+        self._connection.install_extension("spatial")
+        self._connection.load_extension("spatial")
 
         query = f"""SET s3_endpoint = '{self.endpoint}';
         SET s3_use_ssl = false;
@@ -50,7 +51,7 @@ class DuckDBDAO():
         SET s3_access_key_id = '{self.access_key}';
         SET s3_secret_access_key = '{self.secret_key}';
         """
-        self._get_connection().query(query)
+        self._connection.query(query)
 
     def _get_s3_path_for(self, table_name: str, bucket_name: str = None) -> str:
         bucket_name = bucket_name if bucket_name != None else self.bucket_name
@@ -84,7 +85,7 @@ class DuckDBDAO():
         print('Query gerada:')
         print(sql_query)
 
-        gdf = self._get_connection().sql(sql_query)
+        gdf = self.connection.sql(sql_query)
         if not lazy_loading:
             gdf = self.duckdb_relation_to_gdf(gdf, geometry_columns, default_geometry)
         return gdf
