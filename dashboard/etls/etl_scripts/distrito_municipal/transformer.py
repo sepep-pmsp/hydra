@@ -14,8 +14,8 @@ class Transformer(BaseTransformer):
                                                'geometry'
                                                ], True)
         
-
-    def receber_geobuf_de_json (json):
+    @staticmethod
+    def receber_geobuf_de_json(json):
         geojson = json
         geobuf = dlx.geojson_to_geobuf(geojson)
 
@@ -35,7 +35,7 @@ class Transformer(BaseTransformer):
         duckdb_relation = self.filtrar_colunas(self.package)
         geodataframe_todos_distritos = self.transformar_geodataframe(duckdb_relation)
         distrito_aleatorio_json = BaseTransformer.receber_resultado_aleatorio_em_gjson(geodataframe_todos_distritos)
-        geobuf_distrito_aleatorio = self.receber_geobuf_de_json(distrito_aleatorio_json)
+        geobuf_distrito_aleatorio = Transformer.receber_geobuf_de_json(distrito_aleatorio_json)
 
 
         if self.get_geobuf:
