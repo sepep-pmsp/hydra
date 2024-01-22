@@ -1,3 +1,6 @@
+import json
+import dash_leaflet.express as dlx
+
 from ..base_transformer import BaseTransformer
 from ..distrito_municipal.transformer import Transformer as DistritoTransformer
 
@@ -16,7 +19,8 @@ class Transformer(BaseTransformer):
         duckdb_relation = self.filtrar_colunas(self.package)
         # duckdb_relation = self.filtrar_resultado_por_distrito(distrito_aleatorio_json,duckdb_relation)
         geodataframe_setores_por_distrito = self.transformar_geodataframe(duckdb_relation)
-        geobuf_setores_por_distrito = self.receber_geobuf_de_geodataframe(geodataframe_setores_por_distrito)
+        geojson = json.loads(geodataframe_setores_por_distrito.to_json())
+        geobuf_setores_por_distrito = dlx.geojson_to_geobuf(geojson)
 
         return geobuf_setores_por_distrito
         

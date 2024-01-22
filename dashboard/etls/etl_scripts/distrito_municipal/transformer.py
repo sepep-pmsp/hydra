@@ -1,5 +1,4 @@
 from ..base_transformer import BaseTransformer
-import json
 import dash_leaflet.express as dlx
 
 
@@ -13,13 +12,6 @@ class Transformer(BaseTransformer):
                                                'sg_distrito_municipal',
                                                'geometry'
                                                ], True)
-        
-    @staticmethod
-    def receber_geobuf_de_json(json):
-        geojson = json
-        geobuf = dlx.geojson_to_geobuf(geojson)
-
-        return geobuf
 
     @staticmethod
     def receber_distrito_aleatorio_em_geojson():
@@ -27,18 +19,16 @@ class Transformer(BaseTransformer):
         t = T(get_geobuf=False)
 
         return t
-
-
     
     def pipeline(self):
 
         duckdb_relation = self.filtrar_colunas(self.package)
         geodataframe_todos_distritos = self.transformar_geodataframe(duckdb_relation)
         distrito_aleatorio_json = BaseTransformer.receber_resultado_aleatorio_em_gjson(geodataframe_todos_distritos)
-        geobuf_distrito_aleatorio = Transformer.receber_geobuf_de_json(distrito_aleatorio_json)
 
 
         if self.get_geobuf:
+            geobuf_distrito_aleatorio = dlx.geojson_to_geobuf(distrito_aleatorio_json)
             return geobuf_distrito_aleatorio 
         
         return distrito_aleatorio_json

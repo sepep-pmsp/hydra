@@ -1,5 +1,5 @@
+from duckdb import DuckDBPyRelation
 from .base_extractor import Extractor
-import dash_leaflet.express as dlx
 import json
 
 class BaseTransformer:
@@ -30,12 +30,3 @@ class BaseTransformer:
         gdf['tooltip'] = gdf[self.tooltip_text]
             
         return gdf
-
-    @staticmethod
-    def receber_geobuf_de_geodataframe (gdf):
-        geojson = json.loads(gdf.to_json())
-        geobuf = dlx.geojson_to_geobuf(geojson)
-
-        return geobuf
-    
-    
