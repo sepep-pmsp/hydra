@@ -49,9 +49,9 @@ def map_children(distrito_toggle: bool):
             )] + [
                 dl.Overlay(dl.Pane(dl.GeoJSON(data=dist_geobuf, id="distritos", format='geobuf',
                                       options={
-                                      "style":{'color': 'green',
+                                      "style":{'color': 'rgba(0,0,0,0)',
                                              'fillColor': 'green',
-                                             'fillOpacity': 0.5}},
+                                             'fillOpacity': 0.8}},
                                       hoverStyle=arrow_function(
                                           dict(weight=5, color='#666', dashArray=''))
                                     ),
@@ -68,8 +68,9 @@ def map_children(distrito_toggle: bool):
                        hideout=dict(selected=[]),
                        options={
                        "style": {
-                           'color': 'red',
-                           'fillColor': 'red'
+                           'color': 'rgba(0,0,0,0)',
+                           'fillColor': 'red',
+                           'fillOpacity': 0.8
                        }},
                        hoverStyle=arrow_function(
                            dict(weight=5, color='red', dashArray='', fillOpacity=0.5)),
