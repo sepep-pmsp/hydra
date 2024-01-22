@@ -9,17 +9,16 @@ import os
 import json
 
 from dao import DuckDBDAO
-print(os.getcwd())
-from etls import DistritoTransformer
+from etls import (
+    DistritoTransformer,
+    SetoresTransformer,
+)
 
 distritos = DistritoTransformer()
 distritos = distritos()
 
-print(distritos)
-
-from etls import DistritoTransformer
-
-
+setores = SetoresTransformer()
+setores = setores()
 #Carrega as variaveis de ambiente
 
 load_dotenv('../.env')
@@ -36,39 +35,9 @@ duckdb_dao = DuckDBDAO(
     endpoint=ENDPOINT_OVERRIDE
 )
 
-#Carrega o parquet dos distritos municipais no formato otimizado
-rel_distrito = duckdb_dao.load_parquet('distrito_municipal_digested', lazy_loading=True)
+dist_geobuf = distritos
 
-#Junta as colunas 
-rel_distrito = rel_distrito.project(', '.join([
-                                               'cd_identificador_distrito',
-                                               'cd_distrito_municipal',
-                                               'nm_distrito_municipal',
-                                               'sg_distrito_municipal',
-                                               'geometry'
-                                               ]
-                                            ))
-
-#Transforma num GeoDataFrame
-gdf_distrito = duckdb_dao.duckdb_relation_to_gdf(rel_distrito)
-
-#Adiciona o número do distrito na tooltip para exibicao
-gdf_distrito['tooltip'] = gdf_distrito['nm_distrito_municipal']
-
-#Armazena um distrito aleátoriamente
-random_dist = gdf_distrito.sample(n=1)
-
-#Transforma as informacoes do GDF pra GeoBUF
-dist_geojson = json.loads(random_dist.to_json())
-dist_geobuf = dlx.geojson_to_geobuf(dist_geojson)
-
-relation_setor = duckdb_dao.load_parquet('intersection_setor_distrito_municipal', lazy_loading=True)
-relation_setor = relation_setor.project('cd_original_setor_censitario, cd_identificador_distrito, geometry')
-relation_setor = relation_setor.filter(f'cd_identificador_distrito == {random_dist["cd_identificador_distrito"].iloc[0]}')
-gdf_setor = duckdb_dao.duckdb_relation_to_gdf(relation_setor)
-gdf_setor['tooltip'] = gdf_setor['cd_original_setor_censitario']
-setor_geojson = json.loads(gdf_setor.to_json())
-setor_geobuf = dlx.geojson_to_geobuf(setor_geojson)
+setor_geobuf = setores
 
 
 def map_children(distrito_toggle: bool):
