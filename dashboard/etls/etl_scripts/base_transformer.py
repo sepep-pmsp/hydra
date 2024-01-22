@@ -4,10 +4,18 @@ import json
 
 class BaseTransformer:
 
-    def __init__(self, nome_da_camada:str,tooltip_text:str, colunas:list[str] = [], lazy_loading:bool = True, ):
+    def __init__(
+            self,
+            nome_da_camada:str,
+            tooltip_text:str,
+            colunas:list[str] = [],
+            filtro_personalizado:str = None,
+            lazy_loading:bool = True,
+            ):
         self.extractor = Extractor(nome_da_camada, lazy_loading= lazy_loading)
         self.tooltip_text = tooltip_text
         self.colunas_selecionadas = colunas
+        self.filtro_personalizado = filtro_personalizado
 
         self.DAO = self.extractor.dao
         self.package = self.extractor()
@@ -23,6 +31,12 @@ class BaseTransformer:
         if len(self.colunas_selecionadas):
            duckdb_relation = duckdb_relation.select(', '.join(self.colunas_selecionadas))
            return duckdb_relation
+    
+    def filtrar_personalizado(
+            self,
+            duckdb_relation:DuckDBPyRelation
+    ) -> DuckDBPyRelation:
+        return duckdb_relation.filter(self.filtro_personalizado)
         
 
     def transformar_geodataframe(self, duckdb_relation):
