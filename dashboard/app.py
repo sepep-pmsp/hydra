@@ -1,7 +1,7 @@
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
 import dash_daq as daq
-from dash import Dash, html, dcc, Output, Input
+from dash import Dash, html, dcc, Output, Input, State
 from dash_extensions.javascript import arrow_function
 import geopandas as gpd
 from dotenv import load_dotenv
@@ -89,39 +89,43 @@ if __name__ == '__main__':
             ),
         ]
 
+    def componente_filtro(colunas: list[str] = ['']) -> list:
+        filtro_tipo = dcc.RadioItems(
+            ['Básico', 'Avançado'], 'Avançado',
+            id='filtro_tipo'
+        )
+
+        filtro_coluna = dcc.Dropdown(
+            colunas, colunas[0],
+            id='filtro_coluna'
+        )
+
+        filtro_operacao = dcc.Dropdown(
+            ['<', '<=', '==', '>=', '>', '!='], '',
+            id='filtro_operacao'
+        )
+
+        filtro_valor = dcc.Input(
+            type='text',
+            id='filtro_valor',
+            value='qtd_domicilios_esgotamento_rio > 0'
+        )
+
+        filtro_botao = html.Button(
+            'Filtrar',
+            id='filtro_botao'
+        )
+
+        return [
+            filtro_tipo,
+            filtro_coluna,
+            filtro_operacao,
+            filtro_valor,
+            filtro_botao
+        ]
+
     # Create example app.
     app = Dash()
-
-    app.layout = html.Div([
-        dl.Map(center=[-23.5475, -46.6375],
-               zoom=10,
-               children=map_children(None, None, False), id="map"),
-        html.Div([
-            html.Div(
-                dcc.Input(
-                    id='input_text',
-                    type='text',
-                    value='qtd_domicilios_esgotamento_rio > 0'
-                )
-            ),
-            html.Div(id='setor_data'),
-            html.Div([
-                html.H2('Distrito', id='distrito_header',
-                        className='layer_header'),
-                daq.BooleanSwitch(
-                    id='distrito_toggle',
-                    label="Exibir no mapa",
-                    on=False,
-                    className='layer_toggle',
-                )
-            ], id='distrito_wrapper'
-            )
-        ],
-            id="info_panel"),
-        html.Div(children=[], id='message')
-    ],
-        id="wrapper"
-    )
 
     @app.callback(
         Output("setor_data", "children"),
@@ -148,23 +152,63 @@ if __name__ == '__main__':
 
     @app.callback(
         Output('map', 'children'),
-        Input('input_text', 'value'),
+        Input('filtro_botao', 'n_clicks'),
+        State('filtro_tipo', 'value'),
+        State('filtro_valor', 'value'),
     )
-    def load_data(value):
+    def load_data(n_clicks, filtro_tipo, filtro_valor):
         distritos = DistritoTransformer(get_geobuf=False)
         distritos = distritos()
 
-        if value:
-            setores = SetoresTransformer(filtro_personalizado=value)
-        else:
+        if not filtro_valor:
             setores = SetoresTransformer()
-        setores = setores()
+        else:
+            if filtro_tipo == 'Avançado':
+                setores = SetoresTransformer(filtro_personalizado=filtro_valor)
+        setor_geobuf = setores()
         # Carrega as variaveis de ambiente
 
         dist_geobuf = dlx.geojson_to_geobuf(distritos)
 
-        setor_geobuf = setores
+        coluna_options = [
+            col.split(' ')[-1] for col in setores.colunas_selecionadas
+        ]
 
         return map_children(setor_geobuf, dist_geobuf, False)
+        # return map_children(setor_geobuf, dist_geobuf, False)
+
+    app.layout = html.Div([
+        dl.Map(center=[-23.5475, -46.6375],
+               zoom=10,
+               children=load_data(1, 'Avançado', 'qtd_domicilios_esgotamento_rio > 0'), id="map"),
+        html.Div([
+            html.Div(componente_filtro(
+                [
+                    'codigo_setor',
+                    'qtd_domicilios',
+                    'qtd_domicilios_rede_geral',
+                    'qtd_domicilios_fossa_rudimentar',
+                    'qtd_domicilios_esgotamento_rio',
+                    'geometry'
+                ]
+            ), id='componente_filtro'),
+            html.Div(id='setor_data'),
+            html.Div([
+                html.H2('Distrito', id='distrito_header',
+                        className='layer_header'),
+                daq.BooleanSwitch(
+                    id='distrito_toggle',
+                    label="Exibir no mapa",
+                    on=False,
+                    className='layer_toggle',
+                )
+            ], id='distrito_wrapper'
+            )
+        ],
+            id="info_panel"),
+        html.Div(children=[], id='message')
+    ],
+        id="wrapper"
+    )
 
     app.run_server(debug=True, port=7777)
