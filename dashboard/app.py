@@ -30,58 +30,71 @@ if __name__ == '__main__':
         endpoint=ENDPOINT_OVERRIDE
     )
 
-    def map_children(setor_geobuf:str, dist_geobuf:str, distrito_toggle: bool):
-        return [dl.LayersControl(
-                [dl.BaseLayer(
-                    dl.TileLayer(),
-                    name='Base',
-                    checked=True
-                )] + [
-                    dl.Overlay(dl.Pane(dl.GeoJSON(data=dist_geobuf, id="distritos", format='geobuf',
-                                        options={
-                                        "style":{'color': 'rgba(0,0,0,0)',
-                                                'fillColor': 'green',
-                                                'fillOpacity': 0.8}},
-                                        hoverStyle=arrow_function(
-                                            dict(weight=5, color='#666', dashArray=''))
-                                        ),
-                            name='distritos_pane',
-                            # O z-index padrão do overlay pane é 400 e o próximo pane (shadow) é 500,
-                            # portanto os valores personalizados devem estar entre 400 e 500
-                            style={'zIndex': 410}
-                            ),
-                            id='distritos_ol',
-                            name='distritos_ol',
-                            checked=distrito_toggle
-                            ),
-                    dl.Overlay(children=[dl.Pane(dl.GeoJSON(data=setor_geobuf, id="setores", format='geobuf',
-                        hideout=dict(selected=[]),
-                        options={
-                        "style": {
-                            'color': 'rgba(0,0,0,0)',
-                            'fillColor': 'red',
-                            'fillOpacity': 0.8
-                        }},
-                        hoverStyle=arrow_function(
-                            dict(weight=5, color='red', dashArray='', fillOpacity=0.5)),
-                        zoomToBounds=True),
-                            name='setores_pane',
-                            style={'zIndex': 420}
-                        )],
-                            id="setores_ol",
-                            name='setores_ol',
-                            checked=True
-                        ),
+    def map_children(setor_geobuf: str, dist_geobuf: str, distrito_toggle: bool):
+        base = [dl.BaseLayer(
+            dl.TileLayer(),
+            name='Base',
+            checked=True
+        )]
+        overlay = []
+        zindex = 401
+        if dist_geobuf:
+            overlay.append(
+                dl.Overlay(dl.Pane(dl.GeoJSON(data=dist_geobuf, id="distritos", format='geobuf',
+                                              options={
+                                                  "style": {'color': 'rgba(0,0,0,0)',
+                                                            'fillColor': 'green',
+                                                            'fillOpacity': 0.8}},
+                                              hoverStyle=arrow_function(
+                                                  dict(weight=5, color='#666', dashArray=''))
+                                              ),
+                                   name='distritos_pane',
+                                   # O z-index padrão do overlay pane é 400 e o próximo pane (shadow) é 500,
+                                   # portanto os valores personalizados devem estar entre 400 e 500
+                                   style={'zIndex': zindex}
+                                   ),
+                           id='distritos_ol',
+                           name='distritos_ol',
+                           checked=distrito_toggle
+                           )
+            )
+            zindex += 1
 
-                    ],
-                id='layers-control'),]
+        if setor_geobuf:
+            overlay.append(
+                dl.Overlay(children=[dl.Pane(dl.GeoJSON(data=setor_geobuf, id="setores", format='geobuf',
+                                                        hideout=dict(
+                                                            selected=[]),
+                                                        options={
+                                                            "style": {
+                                                                'color': 'rgba(0,0,0,0)',
+                                                                'fillColor': 'red',
+                                                                'fillOpacity': 0.8
+                                                            }},
+                                                        hoverStyle=arrow_function(
+                                                            dict(weight=5, color='red', dashArray='', fillOpacity=0.5)),
+                                                        zoomToBounds=True),
+                                             name='setores_pane',
+                                             style={'zIndex': 420}
+                                             )],
+                           id="setores_ol",
+                           name='setores_ol',
+                           checked=True
+                           )
+            )
+        return [
+            dl.LayersControl(
+                base + overlay,
+                id='layers-control'
+            ),
+        ]
 
     # Create example app.
     app = Dash()
 
     app.layout = html.Div([
         dl.Map(center=[-23.5475, -46.6375],
-            children=map_children(None, None, False), id="map"),
+               children=map_children(None, None, False), id="map"),
         html.Div([
             html.Div(
                 dcc.Input(
@@ -91,7 +104,8 @@ if __name__ == '__main__':
             ),
             html.Div(id='setor_data'),
             html.Div([
-                html.H2('Distrito', id='distrito_header', className='layer_header'),
+                html.H2('Distrito', id='distrito_header',
+                        className='layer_header'),
                 daq.BooleanSwitch(
                     id='distrito_toggle',
                     label="Exibir no mapa",
@@ -101,8 +115,8 @@ if __name__ == '__main__':
             ], id='distrito_wrapper'
             )
         ],
-        id="info_panel"),
-        html.Div(children=[],id='message')
+            id="info_panel"),
+        html.Div(children=[], id='message')
     ],
         id="wrapper"
     )
@@ -123,7 +137,6 @@ if __name__ == '__main__':
         if msg is not None:
             return f"You clicked {msg}"
 
-
     @app.callback(
         Output('distritos_ol', 'checked'),
         Input('distrito_toggle', 'on')
@@ -138,14 +151,13 @@ if __name__ == '__main__':
     def load_data(value):
         distritos = DistritoTransformer(get_geobuf=False)
         distritos = distritos()
-        cd_identificador_distrito = distritos['features'][0]['properties']['cd_identificador_distrito']
 
         if value:
             setores = SetoresTransformer(filtro_personalizado=value)
         else:
             setores = SetoresTransformer()
         setores = setores()
-        #Carrega as variaveis de ambiente
+        # Carrega as variaveis de ambiente
 
         dist_geobuf = dlx.geojson_to_geobuf(distritos)
 
