@@ -94,6 +94,7 @@ if __name__ == '__main__':
 
     app.layout = html.Div([
         dl.Map(center=[-23.5475, -46.6375],
+               zoom=12,
                children=map_children(None, None, False), id="map"),
         html.Div([
             html.Div(
