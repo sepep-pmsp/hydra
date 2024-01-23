@@ -154,9 +154,11 @@ if __name__ == '__main__':
         Output('map', 'children'),
         Input('filtro_botao', 'n_clicks'),
         State('filtro_tipo', 'value'),
+        State('filtro_coluna', 'value'),
+        State('filtro_operacao', 'value'),
         State('filtro_valor', 'value'),
     )
-    def load_data(n_clicks, filtro_tipo, filtro_valor):
+    def load_data(n_clicks, filtro_tipo, filtro_coluna, filtro_operacao, filtro_valor):
         distritos = DistritoTransformer(get_geobuf=False)
         distritos = distritos()
 
@@ -165,6 +167,9 @@ if __name__ == '__main__':
         else:
             if filtro_tipo == 'Avançado':
                 setores = SetoresTransformer(filtro_personalizado=filtro_valor)
+            elif filtro_tipo == 'Básico':
+                filtro_basico = f'{filtro_coluna} {filtro_operacao} {filtro_valor}'
+                setores = SetoresTransformer(filtro_personalizado=filtro_basico)
         setor_geobuf = setores()
         # Carrega as variaveis de ambiente
 
@@ -180,7 +185,7 @@ if __name__ == '__main__':
     app.layout = html.Div([
         dl.Map(center=[-23.5475, -46.6375],
                zoom=10,
-               children=load_data(1, 'Avançado', 'qtd_domicilios_esgotamento_rio > 0'), id="map"),
+               children=load_data(1, 'Avançado', '', '', 'qtd_domicilios_esgotamento_rio > 0'), id="map"),
         html.Div([
             html.Div(componente_filtro(
                 [
