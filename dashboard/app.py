@@ -30,7 +30,25 @@ if __name__ == '__main__':
         endpoint=ENDPOINT_OVERRIDE
     )
 
-    def map_children(setor_geobuf: str, dist_geobuf: str, distrito_toggle: bool):
+    def setor_overlay_children(setor_geobuf:str) -> dl.Pane:
+        pane = dl.Pane(dl.GeoJSON(data=setor_geobuf, id="setores", format='geobuf',
+                                                        hideout=dict(
+                                                            selected=[]),
+                                                        options={
+                                                            "style": {
+                                                                'color': 'rgba(0,0,0,0)',
+                                                                'fillColor': 'red',
+                                                                'fillOpacity': 0.8
+                                                            }},
+                                                        hoverStyle=arrow_function(
+                                                            dict(weight=5, color='red', dashArray='', fillOpacity=0.5)),
+                                                        zoomToBounds=True),
+                                             name='setores_pane',
+                                             style={'zIndex': 420}
+                                             )
+        return pane
+
+    def map_children(setor_children:dl.Pane, dist_geobuf: str, distrito_toggle: bool):
         base = [dl.BaseLayer(
             dl.TileLayer(),
             name='Base',
@@ -60,23 +78,9 @@ if __name__ == '__main__':
             )
             zindex += 1
 
-        if setor_geobuf:
+        if setor_children:
             overlay.append(
-                dl.Overlay(children=[dl.Pane(dl.GeoJSON(data=setor_geobuf, id="setores", format='geobuf',
-                                                        hideout=dict(
-                                                            selected=[]),
-                                                        options={
-                                                            "style": {
-                                                                'color': 'rgba(0,0,0,0)',
-                                                                'fillColor': 'red',
-                                                                'fillOpacity': 0.8
-                                                            }},
-                                                        hoverStyle=arrow_function(
-                                                            dict(weight=5, color='red', dashArray='', fillOpacity=0.5)),
-                                                        zoomToBounds=True),
-                                             name='setores_pane',
-                                             style={'zIndex': 420}
-                                             )],
+                dl.Overlay(children=[setor_children],
                            id="setores_ol",
                            name='setores_ol',
                            checked=True
@@ -151,17 +155,14 @@ if __name__ == '__main__':
         return value
 
     @app.callback(
-        Output('map', 'children'),
+        Output('setores_ol', 'children'),
         Input('filtro_botao', 'n_clicks'),
         State('filtro_tipo', 'value'),
         State('filtro_coluna', 'value'),
         State('filtro_operacao', 'value'),
         State('filtro_valor', 'value'),
     )
-    def load_data(n_clicks, filtro_tipo, filtro_coluna, filtro_operacao, filtro_valor):
-        distritos = DistritoTransformer(get_geobuf=False)
-        distritos = distritos()
-
+    def filter_setores(n_clicks, filtro_tipo, filtro_coluna, filtro_operacao, filtro_valor):
         if not filtro_valor:
             setores = SetoresTransformer()
         else:
@@ -173,19 +174,31 @@ if __name__ == '__main__':
         setor_geobuf = setores()
         # Carrega as variaveis de ambiente
 
-        dist_geobuf = dlx.geojson_to_geobuf(distritos)
 
         coluna_options = [
             col.split(' ')[-1] for col in setores.colunas_selecionadas
         ]
 
-        return map_children(setor_geobuf, dist_geobuf, False)
-        # return map_children(setor_geobuf, dist_geobuf, False)
+        return setor_overlay_children(setor_geobuf)
+    
+    def init_data():
+        distritos = DistritoTransformer(get_geobuf=False)
+        distritos = distritos()
+
+        setor_children = filter_setores(
+            n_clicks=0,
+            filtro_tipo='Avançado',
+            filtro_coluna='',
+            filtro_operacao='',
+            filtro_valor='qtd_domicilios_esgotamento_rio > 0'
+        )
+
+        return map_children(setor_children, distritos, False)
 
     app.layout = html.Div([
         dl.Map(center=[-23.5475, -46.6375],
                zoom=10,
-               children=load_data(1, 'Avançado', '', '', 'qtd_domicilios_esgotamento_rio > 0'), id="map"),
+               children=init_data(), id="map"),
         html.Div([
             html.Div(componente_filtro(
                 [
