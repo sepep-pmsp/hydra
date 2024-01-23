@@ -1,7 +1,7 @@
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
 import dash_daq as daq
-from dash import Dash, html, Output, Input
+from dash import Dash, html, dcc, Output, Input
 from dash_extensions.javascript import arrow_function
 import geopandas as gpd
 from dotenv import load_dotenv
@@ -30,20 +30,7 @@ if __name__ == '__main__':
         endpoint=ENDPOINT_OVERRIDE
     )
 
-    distritos = DistritoTransformer(get_geobuf=False)
-    distritos = distritos()
-    cd_identificador_distrito = distritos['features'][0]['properties']['cd_identificador_distrito']
-
-    setores = SetoresTransformer(filtro_personalizado=f"cd_identificador_distrito == {cd_identificador_distrito}")
-    setores = setores()
-    #Carrega as variaveis de ambiente
-
-    dist_geobuf = dlx.geojson_to_geobuf(distritos)
-
-    setor_geobuf = setores
-
-
-    def map_children(distrito_toggle: bool):
+    def map_children(setor_geobuf:str, dist_geobuf:str, distrito_toggle: bool):
         return [dl.LayersControl(
                 [dl.BaseLayer(
                     dl.TileLayer(),
@@ -89,14 +76,19 @@ if __name__ == '__main__':
                     ],
                 id='layers-control'),]
 
-
     # Create example app.
     app = Dash()
 
     app.layout = html.Div([
         dl.Map(center=[-23.5475, -46.6375],
-            children=map_children(False), id="map"),
+            children=map_children(None, None, False), id="map"),
         html.Div([
+            html.Div(
+                dcc.Input(
+                    id='input_text',
+                    type='text',
+                )
+            ),
             html.Div(id='setor_data'),
             html.Div([
                 html.H2('Distrito', id='distrito_header', className='layer_header'),
@@ -138,5 +130,27 @@ if __name__ == '__main__':
     )
     def update_checked_layers(value):
         return value
+
+    @app.callback(
+        Output('map', 'children'),
+        Input('input_text', 'value'),
+    )
+    def load_data(value):
+        distritos = DistritoTransformer(get_geobuf=False)
+        distritos = distritos()
+        cd_identificador_distrito = distritos['features'][0]['properties']['cd_identificador_distrito']
+
+        if value:
+            setores = SetoresTransformer(filtro_personalizado=value)
+        else:
+            setores = SetoresTransformer()
+        setores = setores()
+        #Carrega as variaveis de ambiente
+
+        dist_geobuf = dlx.geojson_to_geobuf(distritos)
+
+        setor_geobuf = setores
+
+        return map_children(setor_geobuf, dist_geobuf, False)
 
     app.run_server(debug=True, port=7777)
