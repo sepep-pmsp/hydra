@@ -101,6 +101,7 @@ if __name__ == '__main__':
                 dcc.Input(
                     id='input_text',
                     type='text',
+                    value='qtd_domicilios_esgotamento_rio > 0'
                 )
             ),
             html.Div(id='setor_data'),
@@ -133,7 +134,7 @@ if __name__ == '__main__':
         if f1 is not None:
             msg = f1['properties']['nm_distrito_municipal']
         if f2 is not None:
-            msg = f2['properties']['cd_original_setor_censitario']
+            msg = f2['properties']['codigo_setor']
 
         if msg is not None:
             return f"You clicked {msg}"
