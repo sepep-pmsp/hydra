@@ -16,3 +16,28 @@
 #distrito_wrapper .layer_header, #info_panel .layer_toggle {
     width: 25vw;
 }
+
+#dados_setores {
+    max-height: 50vh;
+    overflow-y: scroll;
+}
+
+#filtro_coluna {
+    width: 30%;
+}
+
+#filtro_operador {
+    width: 10%;
+}
+
+#filtro_basico_valor{
+    width: 60%;
+}
+
+#filtro_avancado_valor{
+    width: 100%;
+}
+
+#componente_filtro button {
+    width: 20%;
+}

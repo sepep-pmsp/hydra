@@ -1,5 +1,6 @@
 import json
 import dash_leaflet.express as dlx
+from geopandas import GeoDataFrame
 
 from ..base_transformer import BaseTransformer
 
@@ -29,17 +30,15 @@ class Transformer(BaseTransformer):
 
         return duckdb_relation
 
-    def pipeline(self):
+    def pipeline(self) -> GeoDataFrame:
 
         duckdb_relation = self.filtrar_colunas(self.package)
         if self.filtro_personalizado:
             duckdb_relation = self.filtrar_personalizado(duckdb_relation)
         geodataframe_setores_por_distrito = self.transformar_geodataframe(
             duckdb_relation)
-        geojson = json.loads(geodataframe_setores_por_distrito.to_json())
-        geobuf_setores_por_distrito = dlx.geojson_to_geobuf(geojson)
 
-        return geobuf_setores_por_distrito
+        return geodataframe_setores_por_distrito
 
     def __call__(self):
         return self.pipeline()
