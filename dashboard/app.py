@@ -91,25 +91,29 @@ if __name__ == '__main__':
             ),
         ]
 
-    def componente_filtro(colunas: list[str] = ['']) -> list:
+    def componente_filtro(colunas: list[str] = [''], coluna_selecionada:str=None) -> list:
         filtro_tipo = dbc.RadioItems(
-            ['Básico', 'Avançado'], 'Avançado',
+            ['Básico', 'Avançado'], 'Básico',
             id='filtro_tipo'
         )
 
+        coluna_selecionada = coluna_selecionada if coluna_selecionada else colunas[0]
         filtro_coluna = dcc.Dropdown(
-            colunas, colunas[0],
-            id='filtro_coluna'
+            colunas, coluna_selecionada,
+            id='filtro_coluna',
+            className='form-control'
         )
 
         filtro_operacao = dcc.Dropdown(
-            ['<', '<=', '==', '>=', '>', '!='], '',
-            id='filtro_operacao'
+            ['<', '<=', '==', '>=', '>', '!='], '>',
+            id='filtro_operacao',
+            className='form-control'
         )
 
         filtro_basico_valor = dbc.Input(
             type='text',
-            id='filtro_basico_valor'
+            id='filtro_basico_valor',
+            value='0'
         )
 
         filtro_basico_collapse = dbc.Collapse(
@@ -139,9 +143,18 @@ if __name__ == '__main__':
             is_open=True
         )
 
-        filtro_botao = dbc.Button(
-            'Filtrar',
-            id='filtro_botao'
+        filtro_botao = html.Div(
+            dbc.Button(
+                'Filtrar',
+                id='filtro_botao',
+                class_name='m-3'
+            ),
+            className='d-flex flex-row-reverse'
+        )
+
+        message_text = html.P(
+            id='message',
+            className='mx-auto',
         )
 
         filtro_titulo = html.H4(
@@ -154,8 +167,9 @@ if __name__ == '__main__':
             filtro_tipo,
             filtro_basico_collapse,
             filtro_avancado_collapse,
-            filtro_botao
-        ],
+            filtro_botao,
+            message_text
+            ],
             class_name='p-3 m-3')
 
         return card
@@ -175,10 +189,10 @@ if __name__ == '__main__':
         Output('filtro_basico_collapse', 'is_open'),
         Input('filtro_tipo', 'value')
     )
-    def selecionar_filtro(filtro_tipo_value:str) -> (bool, bool):
-        if filtro_tipo_value=='Básico':
+    def selecionar_filtro(filtro_tipo_value: str) -> (bool, bool):
+        if filtro_tipo_value == 'Básico':
             return False, True
-        if filtro_tipo_value=='Avançado':
+        if filtro_tipo_value == 'Avançado':
             return True, False
 
     @app.callback(
@@ -198,12 +212,13 @@ if __name__ == '__main__':
             setores = SetoresTransformer()
         else:
             if filtro_tipo == 'Avançado':
-                setores = SetoresTransformer(
-                    filtro_personalizado=filtro_avancado_valor)
+                filtro = filtro_avancado_valor
             elif filtro_tipo == 'Básico':
-                filtro_basico = f'{filtro_coluna} {filtro_operacao} {filtro_basico_valor}'
-                setores = SetoresTransformer(
-                    filtro_personalizado=filtro_basico)
+                filtro = f'{filtro_coluna} {filtro_operacao} {filtro_basico_valor}'
+
+            setores = SetoresTransformer(
+                filtro_personalizado=filtro)
+            
         setor_gdf = setores()
         setor_geobuf = gdf_to_geobuf(setor_gdf)
 
@@ -211,7 +226,7 @@ if __name__ == '__main__':
             col.split(' ')[-1] for col in setores.colunas_selecionadas
         ]
 
-        msg = f"{setor_gdf.shape[0]} setores encontrados!"
+        msg = f"{setor_gdf.shape[0]} setores censitários encontrados com o filtro {filtro}!"
         print(msg)
         print('Retornando setores...')
         setor_gdf = setor_gdf.drop(columns=['geometry', 'tooltip'])
@@ -222,10 +237,10 @@ if __name__ == '__main__':
     def init_data():
         data = filter_setores(
             n_clicks=0,
-            filtro_tipo='Avançado',
-            filtro_coluna='',
-            filtro_operacao='',
-            filtro_valor='qtd_domicilios_esgotamento_rio > 0'
+            filtro_tipo='Básico',
+            filtro_coluna='qtd_domicilios_esgotamento_rio',
+            filtro_operacao='>',
+            filtro_valor='0'
         )
 
         return data
@@ -242,10 +257,15 @@ if __name__ == '__main__':
                     'qtd_domicilios_rede_geral',
                     'qtd_domicilios_fossa_rudimentar',
                     'qtd_domicilios_esgotamento_rio',
-                ]
+                ],
+                coluna_selecionada='qtd_domicilios_esgotamento_rio'
             ), id='componente_filtro'),
-            html.Div(id='message'),
-            dash_table.DataTable(id='dados_setores'),
+            dash_table.DataTable(
+                id='dados_setores',
+                page_action="native",
+                page_current= 0,
+                page_size= 10,
+            ),
             html.Div([
                 html.H2('Distrito', id='distrito_header',
                         className='layer_header'),
