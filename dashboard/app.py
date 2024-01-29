@@ -194,11 +194,22 @@ if __name__ == '__main__':
             return False, True
         if filtro_tipo_value == 'Avançado':
             return True, False
+        
+        
+    @app.callback(
+            Output('detalhes_setor', 'children'),
+            Input('dados_setores', 'active_cell'),
+    )
+    def load_details(active_cell):
+        if active_cell:
+            print(active_cell)
+            return str(active_cell) if active_cell else "Click the table"
 
     @app.callback(
         Output('setores_ol', 'children'),
         Output('message', 'children'),
         Output('dados_setores', 'data'),
+        Output('dados_setores', 'columns'),
         Input('filtro_botao', 'n_clicks'),
         State('filtro_tipo', 'value'),
         State('filtro_coluna', 'value'),
@@ -231,8 +242,12 @@ if __name__ == '__main__':
         print('Retornando setores...')
         setor_gdf = setor_gdf.drop(columns=['geometry', 'tooltip'])
         setor_df = pd.DataFrame(setor_gdf)
+        setor_df['id'] = setor_df['codigo_setor']
         dados_setor = setor_df.to_dict('records')
-        return setor_overlay_children(setor_geobuf), msg, dados_setor
+
+        cols = [{'id': col, 'name': col} for col in setor_df.columns if col != 'id']
+
+        return setor_overlay_children(setor_geobuf), msg, dados_setor, cols
 
     def init_data():
         data = filter_setores(
@@ -265,6 +280,11 @@ if __name__ == '__main__':
                 page_action="native",
                 page_current= 0,
                 page_size= 10,
+            ),
+            html.Div(
+                html.P(
+                    id='detalhes_setor'
+                )
             ),
             html.Div([
                 html.H2('Distrito', id='distrito_header',
