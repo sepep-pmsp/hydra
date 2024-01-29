@@ -113,7 +113,8 @@ if __name__ == '__main__':
         filtro_basico_valor = dbc.Input(
             type='text',
             id='filtro_basico_valor',
-            value='0'
+            value='0',
+            class_name='m-2'
         )
 
         filtro_basico_collapse = dbc.Collapse(
@@ -170,7 +171,7 @@ if __name__ == '__main__':
             filtro_botao,
             message_text
             ],
-            class_name='p-3 m-3')
+            class_name='p-3')
 
         return card
 
@@ -272,9 +273,11 @@ if __name__ == '__main__':
         return data
 
     app.layout = html.Div([
+        # Mapa no painel esquerdo
         dl.Map(center=[-23.5475, -46.6375],
                zoom=10,
                children=map_children(None, None, False), id="map"),
+        # Filtro e detalhes no painel direito
         html.Div([
             html.Div(componente_filtro(
                 [
@@ -309,9 +312,11 @@ if __name__ == '__main__':
             ], id='distrito_wrapper'
             )
         ],
-            id="info_panel"),
+            id="info_panel",
+            className='p-3'),
     ],
-        id="wrapper"
+        id="wrapper",
+        className='m-3'
     )
 
     app.run_server(debug=True, port=7777)

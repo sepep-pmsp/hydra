@@ -5,7 +5,7 @@
 #wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 100vh;
+    grid-template-rows: 97vh;
     grid-auto-flow: column;
 }
 
@@ -20,6 +20,7 @@
 #dados_setores {
     max-height: 50vh;
     overflow-y: scroll;
+    margin: 1rem;
 }
 
 #filtro_coluna {
