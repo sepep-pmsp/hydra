@@ -9,6 +9,7 @@ import pandas as pd
 from dotenv import load_dotenv
 import os
 import json
+from dash_bootstrap_templates import ThemeSwitchAIO
 
 from dao import DuckDBDAO
 from etls import (
@@ -20,6 +21,17 @@ from services import (
     MunicipioService,
     DistritoService,
 )
+
+
+dbc_css = (
+    "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.1/dbc.min.css"
+)
+
+template_theme1 = "sketchy"
+template_theme2 = "darkly"
+url_theme1 = dbc.themes.MATERIA
+url_theme2 = dbc.themes.DARKLY
+
 
 url = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
 attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
@@ -300,7 +312,7 @@ def card_detalhes_children(
     return children
 
 # Create example app.
-app = Dash(external_stylesheets=[dbc.themes.MATERIA])
+app = Dash(external_stylesheets=[dbc.themes.MATERIA, dbc_css])
 
 @app.callback(
     Output('distritos_ol', 'checked'),
@@ -469,6 +481,20 @@ app.layout = html.Div([
     ],
         id="info_panel",
         className='p-3'),
+
+        dbc.Container(
+    [
+
+        dbc.Row(
+            [
+                dbc.Col([ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2],)]),
+                
+            ]
+        ),
+    ],
+    className="m-4 dbc",
+    fluid=True,
+)
 ],
     id="wrapper",
     className='m-3'
