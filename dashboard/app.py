@@ -197,13 +197,24 @@ if __name__ == '__main__':
         
         
     @app.callback(
-            Output('detalhes_setor', 'children'),
+            Output('detalhes_setor', 'children', allow_duplicate=True),
             Input('dados_setores', 'active_cell'),
+            prevent_initial_call='initial_duplicate'
     )
-    def load_details(active_cell):
+    def load_details_from_table(active_cell):
         if active_cell:
             print(active_cell)
             return str(active_cell) if active_cell else "Click the table"
+        
+    @app.callback(
+            Output('detalhes_setor', 'children', allow_duplicate=True),
+            Input('setores', 'click_feature'),
+            prevent_initial_call='initial_duplicate'
+    )
+    def load_details_from_map(feature):
+        if feature:
+            print(feature['properties'])
+            return str(feature['properties']) if feature else "Click the table"
 
     @app.callback(
         Output('setores_ol', 'children'),
