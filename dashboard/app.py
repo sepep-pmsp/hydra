@@ -274,9 +274,11 @@ if __name__ == '__main__':
 
     app.layout = html.Div([
         # Mapa no painel esquerdo
-        dl.Map(center=[-23.5475, -46.6375],
-               zoom=10,
-               children=map_children(None, None, False), id="map"),
+        dcc.Loading(
+            dl.Map(center=[-23.5475, -46.6375],
+                zoom=10,
+                children=map_children(None, None, False), id="map")
+            ),
         # Filtro e detalhes no painel direito
         html.Div([
             html.Div(componente_filtro(
@@ -289,28 +291,32 @@ if __name__ == '__main__':
                 ],
                 coluna_selecionada='qtd_domicilios_esgotamento_rio'
             ), id='componente_filtro'),
-            dash_table.DataTable(
-                id='dados_setores',
-                page_action="native",
-                page_current= 0,
-                page_size= 10,
-            ),
-            html.Div(
-                html.P(
-                    id='detalhes_setor'
+            dcc.Loading(
+                dash_table.DataTable(
+                    id='dados_setores',
+                    page_action="native",
+                    page_current= 0,
+                    page_size= 10,
                 )
             ),
-            html.Div([
-                html.H2('Distrito', id='distrito_header',
-                        className='layer_header'),
-                daq.BooleanSwitch(
-                    id='distrito_toggle',
-                    label="Exibir no mapa",
-                    on=False,
-                    className='layer_toggle',
+            dcc.Loading(
+                html.Div(
+                    [html.P(
+                        id='detalhes_setor'
+                    ),
+                    html.Div([
+                        html.H2('Distrito', id='distrito_header',
+                                className='layer_header'),
+                        daq.BooleanSwitch(
+                            id='distrito_toggle',
+                            label="Exibir no mapa",
+                            on=False,
+                            className='layer_toggle',
+                        )
+                    ], id='distrito_wrapper'
+                    )]
                 )
-            ], id='distrito_wrapper'
-            )
+            ),
         ],
             id="info_panel",
             className='p-3'),
