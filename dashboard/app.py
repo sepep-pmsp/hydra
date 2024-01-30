@@ -263,25 +263,34 @@ def selecionar_filtro(filtro_tipo_value: str) -> (bool, bool):
     if filtro_tipo_value == 'Avançado':
         return True, False
 
+def carregar_detalhes_setor(codigo_setor:str):
+    setores = SetoresTransformer(filtro_personalizado=f'codigo_setor == {codigo_setor}')
+    df = pd.DataFrame(setores().drop(columns=['geometry','tooltip']))
+    df = df
+    setor = df.iloc[0].to_dict()
+    return setor
+
 @app.callback(
-    Output('detalhes_setor', 'children', allow_duplicate=True),
+    Output('card_detalhes', 'children', allow_duplicate=True),
     Input('dados_setores', 'active_cell'),
     prevent_initial_call='initial_duplicate'
 )
 def load_details_from_table(active_cell):
     if active_cell:
         print(active_cell)
-        return str(active_cell) if active_cell else "Click the table"
+        detalhes = carregar_detalhes_setor(active_cell['row_id'])
+        return card_detalhes_children(**detalhes)
 
 @app.callback(
-    Output('detalhes_setor', 'children', allow_duplicate=True),
+    Output('card_detalhes', 'children', allow_duplicate=True),
     Input('setores', 'click_feature'),
     prevent_initial_call='initial_duplicate'
 )
 def load_details_from_map(feature):
     if feature:
         print(feature['properties'])
-        return str(feature['properties']) if feature else "Click the table"
+        detalhes = carregar_detalhes_setor(feature['properties']['codigo_setor'])
+        return card_detalhes_children(**detalhes)
 
 @app.callback(
     Output('setores_ol', 'children'),
