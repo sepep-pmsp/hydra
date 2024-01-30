@@ -17,7 +17,7 @@ from etls import (
 )
 from utils import gdf_to_geobuf
 
-def setor_overlay_children(setor_geobuf: str) -> dl.Pane:
+def setores_overlay_children(setor_geobuf: str) -> dl.Pane:
     pane = dl.Pane(dl.GeoJSON(data=setor_geobuf, id="setores", format='geobuf',
                                                     hideout=dict(
                                                         selected=[]),
@@ -335,7 +335,7 @@ def filter_setores(basico_n_clicks, filtro_tipo, filtro_coluna, filtro_operacao,
     cols = [{'id': col, 'name': col}
             for col in setor_df.columns if col != 'id']
 
-    return setor_overlay_children(setor_geobuf), msg, dados_setor, cols
+    return setores_overlay_children(setor_geobuf), msg, dados_setor, cols
 
 def init_data():
     data = filter_setores(
