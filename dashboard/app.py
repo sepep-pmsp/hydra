@@ -35,7 +35,7 @@ def setores_overlay_children(setor_geobuf: str) -> dl.Pane:
                     )
     return pane
 
-def map_children(setor_children: dl.Pane, dist_geobuf: str, distrito_toggle: bool):
+def map_children():
     base = [dl.BaseLayer(
         dl.TileLayer(),
         name='Base',
@@ -43,44 +43,34 @@ def map_children(setor_children: dl.Pane, dist_geobuf: str, distrito_toggle: boo
     )]
     overlay = []
     zindex = 401
-    if dist_geobuf:
-        overlay.append(
-            dl.Overlay(dl.Pane(dl.GeoJSON(data=dist_geobuf, id="distritos", format='geobuf',
-                                            options={
-                                                "style": {'color': 'rgba(0,0,0,0)',
-                                                        'fillColor': 'green',
-                                                        'fillOpacity': 0.8}},
-                                            hoverStyle=arrow_function(
-                                                dict(weight=5, color='#666', dashArray=''))
-                                            ),
-                                name='distritos_pane',
-                                # O z-index padrão do overlay pane é 400 e o próximo pane (shadow) é 500,
-                                # portanto os valores personalizados devem estar entre 400 e 500
-                                style={'zIndex': zindex}
-                                ),
-                        id='distritos_ol',
-                        name='distritos_ol',
-                        checked=distrito_toggle
-                        )
-        )
-        zindex += 1
+    overlay.append(
+        dl.Overlay(dl.Pane(dl.GeoJSON(id="distritos", format='geobuf',
+                                        options={
+                                            "style": {'color': 'rgba(0,0,0,0)',
+                                                    'fillColor': 'green',
+                                                    'fillOpacity': 0.8}},
+                                        hoverStyle=arrow_function(
+                                            dict(weight=5, color='#666', dashArray=''))
+                                        ),
+                            name='distritos_pane',
+                            # O z-index padrão do overlay pane é 400 e o próximo pane (shadow) é 500,
+                            # portanto os valores personalizados devem estar entre 400 e 500
+                            style={'zIndex': zindex}
+                            ),
+                    id='distritos_ol',
+                    name='distritos_ol',
+                    checked=False
+                    )
+    )
+    zindex += 1
 
-    if setor_children:
-        overlay.append(
-            dl.Overlay(children=[setor_children],
-                        id="setores_ol",
-                        name='setores_ol',
-                        checked=True
-                        )
-        )
-    else:
-        overlay.append(
-            dl.Overlay(children=[],
-                        id="setores_ol",
-                        name='setores_ol',
-                        checked=True
-                        )
-        )
+    overlay.append(
+        dl.Overlay(children=[],
+                    id="setores_ol",
+                    name='setores_ol',
+                    checked=True
+                    )
+    )
 
     return [
         dl.LayersControl(
@@ -353,7 +343,7 @@ app.layout = html.Div([
     dcc.Loading(
         dl.Map(center=[-23.5475, -46.6375],
                 zoom=10,
-                children=map_children(None, None, False),
+                children=map_children(),
                 id="map",
                 className='p-3')
     ),
