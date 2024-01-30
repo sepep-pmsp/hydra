@@ -43,6 +43,11 @@
     width: 20%;
 }
 
+#detalhes_setor_ label {
+    min-width: 50%;
+    width: 50%;
+}
+
 tr:has(td.cell--selected)>td {
     /* --accent: hotpink;
     --border: lightgrey;

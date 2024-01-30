@@ -175,9 +175,9 @@ if __name__ == '__main__':
 
         return card
 
-    def componente_detalhes_setor(codigo_setor, qtd_domicilios, qtd_domicilios_rede_geral, qtd_domicilios_fossa_rudimentar, qtd_domicilios_esgotamento_rio):
+    def componente_detalhes_setor(codigo_setor = '', qtd_domicilios = '', qtd_domicilios_rede_geral = '', qtd_domicilios_fossa_rudimentar = '', qtd_domicilios_esgotamento_rio = ''):
         titulo = html.H4(
-            f'Detalhes do setor f{str(codigo_setor)}'
+            f'Detalhes do setor {str(codigo_setor)}'
         )
 
         campos_dict = {
@@ -191,15 +191,12 @@ if __name__ == '__main__':
             html.Div([
                 dbc.Label(label),
                 dbc.Input(value=value, type='text', readonly='readonly'),
-            ]) for label, value in campos_dict.items()
+            ], className='d-flex') for label, value in campos_dict.items()
         ]
 
-        return dbc.Card([
-            html.Div([
-                titulo + campos
-            ],
-            className='d-flex')
-        ])
+        campos.insert(0, titulo)
+        
+        return html.Div(campos, id='detalhes_setor_')
 
     def componente_detalhes_distrito():
         pass
@@ -337,11 +334,10 @@ if __name__ == '__main__':
                 )
             ),
             dcc.Loading(
-                html.Div(
-                    [html.P(
-                        id='detalhes_setor'
-                    ),
-                    html.Div([
+                dbc.Card(
+                        [
+                        componente_detalhes_setor('', 0, 0, 0, 0),
+                        html.Div([
                         html.H2('Distrito', id='distrito_header',
                                 className='layer_header'),
                         daq.BooleanSwitch(
@@ -351,7 +347,9 @@ if __name__ == '__main__':
                             className='layer_toggle',
                         )
                     ], id='distrito_wrapper'
-                    )]
+                    )],
+                    id='card_detalhes',
+                    className='p-3'
                 )
             ),
         ],
