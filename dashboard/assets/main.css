@@ -20,7 +20,7 @@
 #dados_setores {
     max-height: 50vh;
     overflow-y: scroll;
-    margin: 1rem;
+    margin-top: 1rem;
 }
 
 #filtro_coluna {

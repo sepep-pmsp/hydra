@@ -175,6 +175,35 @@ if __name__ == '__main__':
 
         return card
 
+    def componente_detalhes_setor(codigo_setor, qtd_domicilios, qtd_domicilios_rede_geral, qtd_domicilios_fossa_rudimentar, qtd_domicilios_esgotamento_rio):
+        titulo = html.H4(
+            f'Detalhes do setor f{str(codigo_setor)}'
+        )
+
+        campos_dict = {
+            'Domicílios particulares permanentes: ': qtd_domicilios,
+            'Domicílios particulares permanentes com banheiro de uso exclusivo dos moradores ou sanitário e esgotamento sanitário via rede geral de esgoto ou pluvial: ': qtd_domicilios_rede_geral,
+            'Domicílios particulares permanentes com banheiro de uso exclusivo dos moradores ou sanitário e esgotamento sanitário via fossa rudimentar: ': qtd_domicilios_fossa_rudimentar,
+            'Domicílios particulares permanentes, com banheiro de uso exclusivo dos moradores ou sanitário e esgotamento sanitário via rio, lago ou mar: ': qtd_domicilios_esgotamento_rio
+        }
+
+        campos = [
+            html.Div([
+                dbc.Label(label),
+                dbc.Input(value=value, type='text', readonly='readonly'),
+            ]) for label, value in campos_dict.items()
+        ]
+
+        return dbc.Card([
+            html.Div([
+                titulo + campos
+            ],
+            className='d-flex')
+        ])
+
+    def componente_detalhes_distrito():
+        pass
+
     # Create example app.
     app = Dash(external_stylesheets=[dbc.themes.MATERIA])
 
@@ -195,7 +224,7 @@ if __name__ == '__main__':
             return False, True
         if filtro_tipo_value == 'Avançado':
             return True, False
-        
+    
         
     @app.callback(
             Output('detalhes_setor', 'children', allow_duplicate=True),
@@ -277,7 +306,9 @@ if __name__ == '__main__':
         dcc.Loading(
             dl.Map(center=[-23.5475, -46.6375],
                 zoom=10,
-                children=map_children(None, None, False), id="map")
+                children=map_children(None, None, False),
+                id="map",
+                className='p-3')
             ),
         # Filtro e detalhes no painel direito
         html.Div([
@@ -297,6 +328,12 @@ if __name__ == '__main__':
                     page_action="native",
                     page_current= 0,
                     page_size= 10,
+                    style_header={
+                            'fontFamily': 'var(--bs-body-font-family)',
+                            'fontSize': 'var(--bs-body-font-size)',
+                            'fontWeight': 'var(--bs-body-font-weight)',
+                            'lineHeight': 'var(--bs-body-line-height)'
+                    }
                 )
             ),
             dcc.Loading(
