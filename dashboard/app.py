@@ -35,6 +35,23 @@ def setores_overlay_children(setor_geobuf: str) -> dl.Pane:
                     )
     return pane
 
+def setor_detalhes_overlay_children(setor_geobuf: str) -> dl.Pane:
+    pane = dl.Pane(dl.GeoJSON(data=setor_geobuf, id="setor_detalhes", format='geobuf',
+                                                    hideout=dict(
+                                                        selected=[]),
+                                                    options={
+                                                        "style": {
+                                                            'color': 'red',
+                                                            'fillColor': '#ffa7a1',
+                                                            'fillOpacity': 1
+                                                        }},
+                                                    hoverStyle=arrow_function(
+                                                        dict(weight=5, dashArray=''))),
+                    name='setor_detalhes_pane',
+                    style={'zIndex': 421}
+                    )
+    return pane
+
 def map_children():
     base = [dl.BaseLayer(
         dl.TileLayer(),
@@ -68,6 +85,14 @@ def map_children():
         dl.Overlay(children=[],
                     id="setores_ol",
                     name='setores_ol',
+                    checked=True
+                    )
+    )
+
+    overlay.append(
+        dl.Overlay(children=[],
+                    id="setor_detalhes_ol",
+                    name='setor_detalhes_ol',
                     checked=True
                     )
     )
@@ -255,32 +280,36 @@ def selecionar_filtro(filtro_tipo_value: str) -> (bool, bool):
 
 def carregar_detalhes_setor(codigo_setor:str):
     setores = SetoresTransformer(filtro_personalizado=f'codigo_setor == {codigo_setor}')
-    df = pd.DataFrame(setores().drop(columns=['geometry','tooltip']))
-    df = df
-    setor = df.iloc[0].to_dict()
-    return setor
+    gdf = setores()
+    df = pd.DataFrame(gdf.drop(columns=['geometry','tooltip']))
+    df = df.iloc[0]
+    setor = df.to_dict()
+    setor_geobuf = gdf_to_geobuf(gdf) 
+    return card_detalhes_children(**setor), setor_detalhes_overlay_children(setor_geobuf)
 
 @app.callback(
     Output('card_detalhes', 'children', allow_duplicate=True),
+    Output('setor_detalhes_ol', 'children', allow_duplicate=True),
     Input('dados_setores', 'active_cell'),
     prevent_initial_call='initial_duplicate'
 )
 def load_details_from_table(active_cell):
     if active_cell:
         print(active_cell)
-        detalhes = carregar_detalhes_setor(active_cell['row_id'])
-        return card_detalhes_children(**detalhes)
+        return carregar_detalhes_setor(active_cell['row_id'])
+    return None, None
 
 @app.callback(
     Output('card_detalhes', 'children', allow_duplicate=True),
+    Output('setor_detalhes_ol', 'children', allow_duplicate=True),
     Input('setores', 'click_feature'),
     prevent_initial_call='initial_duplicate'
 )
 def load_details_from_map(feature):
     if feature:
         print(feature['properties'])
-        detalhes = carregar_detalhes_setor(feature['properties']['codigo_setor'])
-        return card_detalhes_children(**detalhes)
+        return carregar_detalhes_setor(feature['properties']['codigo_setor'])
+    return None, None
 
 @app.callback(
     Output('setores_ol', 'children'),
