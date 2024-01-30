@@ -16,7 +16,10 @@ from etls import (
     SetoresTransformer,
 )
 from utils import gdf_to_geobuf, load_s3_vars
-from services import MunicipioService
+from services import (
+    MunicipioService,
+    DistritoService,
+)
 
 dao = DuckDBDAO(**load_s3_vars())
 
@@ -69,7 +72,18 @@ def limite_municipal_children(limite_municipal_geobuf:str) -> dl.GeoJSON:
                                         )
     return geojson
 
-def map_children(dao:DuckDBDAO):
+def distrito_municipal_children(distrito_geobuf:str) -> dl.GeoJSON:
+    geojson = dl.GeoJSON(data=distrito_geobuf, id="distritos", format='geobuf',
+                                        options={
+                                            "style": {'color': 'rgba(0,0,0,0)',
+                                                    'fillColor': 'green',
+                                                    'fillOpacity': 0.8}},
+                                        hoverStyle=arrow_function(
+                                            dict(weight=5, color='#666', dashArray=''))
+                                        )
+    return geojson
+
+def map_children():
     base = [dl.BaseLayer(
         dl.TileLayer(),
         name='Base',
@@ -92,14 +106,8 @@ def map_children(dao:DuckDBDAO):
     )
     zindex += 1
     overlay.append(
-        dl.Overlay(dl.Pane(dl.GeoJSON(id="distritos", format='geobuf',
-                                        options={
-                                            "style": {'color': 'rgba(0,0,0,0)',
-                                                    'fillColor': 'green',
-                                                    'fillOpacity': 0.8}},
-                                        hoverStyle=arrow_function(
-                                            dict(weight=5, color='#666', dashArray=''))
-                                        ),
+        dl.Overlay(dl.Pane(children=[],
+                           id='distritos_pane',
                             name='distritos_pane',
                             # O z-index padrão do overlay pane é 400 e o próximo pane (shadow) é 500,
                             # portanto os valores personalizados devem estar entre 400 e 500
@@ -315,12 +323,22 @@ def carregar_detalhes_setor(codigo_setor:str):
     df = pd.DataFrame(gdf.drop(columns=['geometry','tooltip']))
     df = df.iloc[0]
     setor = df.to_dict()
-    setor_geobuf = gdf_to_geobuf(gdf) 
-    return card_detalhes_children(**setor), setor_detalhes_overlay_children(setor_geobuf)
+    setor_geobuf = gdf_to_geobuf(gdf)
+
+    ds = DistritoService(dao)
+    
+    distrito_geobuf = ds.find_by_setor(codigo_setor, format='geobuf')
+
+    return (
+        card_detalhes_children(**setor),
+        setor_detalhes_overlay_children(setor_geobuf),
+        distrito_municipal_children(distrito_geobuf)
+    )
 
 @app.callback(
     Output('card_detalhes', 'children', allow_duplicate=True),
     Output('setor_detalhes_ol', 'children', allow_duplicate=True),
+    Output('distritos_pane', 'children', allow_duplicate=True),
     Input('dados_setores', 'active_cell'),
     prevent_initial_call='initial_duplicate'
 )
@@ -328,11 +346,12 @@ def load_details_from_table(active_cell):
     if active_cell:
         print(active_cell)
         return carregar_detalhes_setor(active_cell['row_id'])
-    return None, None
+    return None, None, None
 
 @app.callback(
     Output('card_detalhes', 'children', allow_duplicate=True),
     Output('setor_detalhes_ol', 'children', allow_duplicate=True),
+    Output('distritos_pane', 'children', allow_duplicate=True),
     Input('setores', 'click_feature'),
     prevent_initial_call='initial_duplicate'
 )
@@ -340,7 +359,7 @@ def load_details_from_map(feature):
     if feature:
         print(feature['properties'])
         return carregar_detalhes_setor(feature['properties']['codigo_setor'])
-    return None, None
+    return None, None, None
 
 @app.callback(
     Output('setores_ol', 'children'),
@@ -403,7 +422,7 @@ app.layout = html.Div([
     dcc.Loading(
         dl.Map(center=[-23.5475, -46.6375],
                 zoom=10,
-                children=map_children(dao),
+                children=map_children(),
                 id="map",
                 className='p-3')
     ),
