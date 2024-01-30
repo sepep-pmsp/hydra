@@ -176,7 +176,7 @@ if __name__ == '__main__':
         return card
 
     def componente_detalhes_setor(codigo_setor='', qtd_domicilios='', qtd_domicilios_rede_geral='', qtd_domicilios_fossa_rudimentar='', qtd_domicilios_esgotamento_rio=''):
-        titulo = html.H4(
+        titulo = html.H2(
             f'Detalhes do setor {str(codigo_setor)}'
         )
 
@@ -198,8 +198,31 @@ if __name__ == '__main__':
 
         return html.Div(campos, id='detalhes_setor_')
 
-    def componente_detalhes_distrito():
-        pass
+    def componente_detalhes_distrito(nm_distrito_municipal=''):
+        titulo = html.H3('Distrito', id='distrito_header',
+                         className='layer_header')
+
+        botao = daq.BooleanSwitch(
+            id='distrito_toggle',
+            label="Exibir no mapa",
+            on=False,
+            className='layer_toggle',
+        )
+
+        input = dbc.Input(value=nm_distrito_municipal,
+                          type='text', readonly='readonly')
+
+        return html.Div([
+            html.Div(
+                [
+                    titulo,
+                    botao,
+                ],
+                id='distrito_header'
+            ),
+            input
+        ], id='distrito_wrapper'
+        )
 
     # Create example app.
     app = Dash(external_stylesheets=[dbc.themes.MATERIA])
@@ -337,17 +360,7 @@ if __name__ == '__main__':
                 dbc.Card(
                     [
                         componente_detalhes_setor('', 0, 0, 0, 0),
-                        html.Div([
-                            html.H2('Distrito', id='distrito_header',
-                                    className='layer_header'),
-                            daq.BooleanSwitch(
-                                id='distrito_toggle',
-                                label="Exibir no mapa",
-                                on=False,
-                                className='layer_toggle',
-                            )
-                        ], id='distrito_wrapper'
-                        )],
+                        componente_detalhes_distrito()],
                     id='card_detalhes',
                     className='p-3'
                 )

@@ -9,7 +9,7 @@
     grid-auto-flow: column;
 }
 
-#distrito_wrapper {
+#distrito_header {
     display: flex;
 }
 
