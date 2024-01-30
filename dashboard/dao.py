@@ -8,6 +8,8 @@ from geopandas import (
     GeoSeries
 )
 
+from utils import duckdb_relation_to_gdf
+
 class DuckDBDAO():
     '''
     IO manager para carregar os arquivos parquet do bucket S3.
@@ -59,17 +61,7 @@ class DuckDBDAO():
         return s3_path
 
     def duckdb_relation_to_gdf(self, relation: DuckDBPyRelation, geometry_columns: list = ['geometry'], default_geometry=None) -> GeoDataFrame:
-        default_geometry = default_geometry if default_geometry != None else geometry_columns[
-            0]
-
-        gdf = GeoDataFrame(relation.df())
-        for col in geometry_columns:
-            gdf.loc[:, col] = GeoSeries.from_wkt(gdf.loc[:, col])
-        gdf = gdf.set_geometry(default_geometry)
-        gdf = gdf.set_crs(epsg=31983)
-        gdf = gdf.to_crs(epsg=4326)
-
-        return gdf
+        return duckdb_relation_to_gdf(relation, geometry_columns, default_geometry)
 
     def load_parquet(self, table_name: str, bucket_name: str = None, geometry_columns=['geometry'], default_geometry=None, lazy_loading=False) -> DuckDBPyRelation | GeoDataFrame:
 
