@@ -15,7 +15,10 @@ from etls import (
     DistritoTransformer,
     SetoresTransformer,
 )
-from utils import gdf_to_geobuf
+from utils import gdf_to_geobuf, load_s3_vars
+from services import MunicipioService
+
+dao = DuckDBDAO(**load_s3_vars())
 
 def setores_overlay_children(setor_geobuf: str) -> dl.Pane:
     pane = dl.Pane(dl.GeoJSON(data=setor_geobuf, id="setores", format='geobuf',
@@ -52,7 +55,21 @@ def setor_detalhes_overlay_children(setor_geobuf: str) -> dl.Pane:
                     )
     return pane
 
-def map_children():
+def load_limite_municipal(dao:DuckDBDAO) -> str:
+    ms = MunicipioService(dao)
+    
+    return ms.get_geobuf()
+
+def limite_municipal_children(limite_municipal_geobuf:str) -> dl.GeoJSON:
+    geojson = dl.GeoJSON(data=limite_municipal_geobuf, id="limite_municipal", format='geobuf',
+                                        options={
+                                            "style": {'color': '#949494',
+                                                    'fillColor': '#c0c0c0',
+                                                    'fillOpacity': 0.5}},
+                                        )
+    return geojson
+
+def map_children(dao:DuckDBDAO):
     base = [dl.BaseLayer(
         dl.TileLayer(),
         name='Base',
@@ -60,6 +77,20 @@ def map_children():
     )]
     overlay = []
     zindex = 401
+    overlay.append(
+        dl.Overlay(dl.Pane(children=[],
+                    id='limite_municipal_pane',
+                    name='limite_municipal_pane',
+                    # O z-index padrão do overlay pane é 400 e o próximo pane (shadow) é 500,
+                    # portanto os valores personalizados devem estar entre 400 e 500
+                    style={'zIndex': zindex}
+                    ),
+                    id='limite_municipal_ol',
+                    name='limite_municipal_ol',
+                    checked=True
+            )
+    )
+    zindex += 1
     overlay.append(
         dl.Overlay(dl.Pane(dl.GeoJSON(id="distritos", format='geobuf',
                                         options={
@@ -356,23 +387,23 @@ def filter_setores(basico_n_clicks, filtro_tipo, filtro_coluna, filtro_operacao,
 
     return setores_overlay_children(setor_geobuf), msg, dados_setor, cols
 
-def init_data():
-    data = filter_setores(
-        n_clicks=0,
-        filtro_tipo='Básico',
-        filtro_coluna='qtd_domicilios_esgotamento_rio',
-        filtro_operacao='>',
-        filtro_valor='0'
-    )
-
-    return data
+@app.callback(
+    Output('limite_municipal_pane', 'children'),
+    Input('initial_load_span', 'children')
+)
+def initial_load(children):
+    print('initial_load_span children updated')
+    geobuf = load_limite_municipal(dao)
+    return limite_municipal_children(geobuf)
 
 app.layout = html.Div([
+    # Span para detectar o carregamento inicial da página
+    html.Span(id='initial_load_span', style={'display': 'none'}),
     # Mapa no painel esquerdo
     dcc.Loading(
         dl.Map(center=[-23.5475, -46.6375],
                 zoom=10,
-                children=map_children(),
+                children=map_children(dao),
                 id="map",
                 className='p-3')
     ),
