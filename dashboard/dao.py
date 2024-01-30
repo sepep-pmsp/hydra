@@ -68,11 +68,14 @@ class DuckDBDAO():
         s3_path = self._get_s3_path_for(table_name)
         print(f'Gerando query para o arquivo {s3_path}...')
 
-        geom_exclude = 'EXCLUDE (' + \
-            ', '.join([f'{col}' for col in geometry_columns]) + ')'
-        geom_as_text = ', '.join(
-            [f'ST_AsText(ST_GeomFromWKB({col})) AS {col}' for col in geometry_columns])
-        geom_fix = f'{geom_exclude}, {geom_as_text}'
+        geom_fix = ''
+
+        if geometry_columns and len(geometry_columns):
+            geom_exclude = 'EXCLUDE (' + \
+                ', '.join([f'{col}' for col in geometry_columns]) + ')'
+            geom_as_text = ', '.join(
+                [f'ST_AsText(ST_GeomFromWKB({col})) AS {col}' for col in geometry_columns])
+            geom_fix = f'{geom_exclude}, {geom_as_text}'
         sql_query = f'SELECT * {geom_fix} FROM read_parquet("{s3_path}")'
         print('Query gerada:')
         print(sql_query)
