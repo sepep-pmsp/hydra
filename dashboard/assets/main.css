@@ -13,7 +13,7 @@
     display: flex;
 }
 
-#distrito_wrapper .layer_header, #info_panel .layer_toggle {
+#distrito_wrapper .layer_title, #info_panel .layer_toggle {
     width: 25vw;
 }
 
@@ -49,15 +49,5 @@
 }
 
 tr:has(td.cell--selected)>td {
-    /* --accent: hotpink;
-    --border: lightgrey;
-    --text-color: #3c3c3c;
-    --hover: #fdfdfd;
-    --background-color-ellipses: #fdfdfd;
-    --faded-text: #fafafa;
-    --faded-text-header: #b4b4b4;
-    --selected-background: rgba(255, 65, 54, 0.2);
-    --faded-dropdown: #f0f0f0;
-    --muted: #c8c8c8; */
     background-color: var(--selected-background) !important;
 }

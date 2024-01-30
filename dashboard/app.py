@@ -187,8 +187,8 @@ def componente_detalhes_setor(codigo_setor, qtd_domicilios, qtd_domicilios_rede_
     return html.Div(campos, id='detalhes_setor_')
 
 def componente_detalhes_distrito(nm_distrito_municipal):
-    titulo = html.H3('Distrito', id='distrito_header',
-                        className='layer_header')
+    titulo = html.H3('Distrito', id='distrito_title',
+                        className='layer_title')
 
     botao = daq.BooleanSwitch(
         id='distrito_toggle',
