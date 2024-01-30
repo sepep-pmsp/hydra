@@ -175,7 +175,7 @@ if __name__ == '__main__':
 
         return card
 
-    def componente_detalhes_setor(codigo_setor='', qtd_domicilios='', qtd_domicilios_rede_geral='', qtd_domicilios_fossa_rudimentar='', qtd_domicilios_esgotamento_rio=''):
+    def componente_detalhes_setor(codigo_setor, qtd_domicilios, qtd_domicilios_rede_geral, qtd_domicilios_fossa_rudimentar, qtd_domicilios_esgotamento_rio):
         titulo = html.H2(
             f'Detalhes do setor {str(codigo_setor)}'
         )
@@ -198,7 +198,7 @@ if __name__ == '__main__':
 
         return html.Div(campos, id='detalhes_setor_')
 
-    def componente_detalhes_distrito(nm_distrito_municipal=''):
+    def componente_detalhes_distrito(nm_distrito_municipal):
         titulo = html.H3('Distrito', id='distrito_header',
                          className='layer_header')
 
@@ -223,6 +223,26 @@ if __name__ == '__main__':
             input
         ], id='distrito_wrapper'
         )
+
+    def card_detalhes_children(
+            codigo_setor='',
+            qtd_domicilios='',
+            qtd_domicilios_rede_geral='',
+            qtd_domicilios_fossa_rudimentar='',
+            qtd_domicilios_esgotamento_rio='',
+            nm_distrito_municipal=''
+            ):
+        children = [
+            componente_detalhes_setor(
+            codigo_setor,
+            qtd_domicilios,
+            qtd_domicilios_rede_geral,
+            qtd_domicilios_fossa_rudimentar,
+            qtd_domicilios_esgotamento_rio
+            ),
+            componente_detalhes_distrito(nm_distrito_municipal)
+        ]
+        return children
 
     # Create example app.
     app = Dash(external_stylesheets=[dbc.themes.MATERIA])
@@ -358,9 +378,7 @@ if __name__ == '__main__':
             ),
             dcc.Loading(
                 dbc.Card(
-                    [
-                        componente_detalhes_setor('', 0, 0, 0, 0),
-                        componente_detalhes_distrito()],
+                    card_detalhes_children(),
                     id='card_detalhes',
                     className='p-3'
                 )
