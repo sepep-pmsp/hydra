@@ -91,7 +91,7 @@ if __name__ == '__main__':
             ),
         ]
 
-    def componente_filtro(colunas: list[str] = [''], coluna_selecionada:str=None) -> list:
+    def componente_filtro(colunas: list[str] = [''], coluna_selecionada: str = None) -> list:
         filtro_tipo = dbc.RadioItems(
             ['Básico', 'Avançado'], 'Básico',
             id='filtro_tipo'
@@ -170,12 +170,12 @@ if __name__ == '__main__':
             filtro_avancado_collapse,
             filtro_botao,
             message_text
-            ],
+        ],
             class_name='p-3')
 
         return card
 
-    def componente_detalhes_setor(codigo_setor = '', qtd_domicilios = '', qtd_domicilios_rede_geral = '', qtd_domicilios_fossa_rudimentar = '', qtd_domicilios_esgotamento_rio = ''):
+    def componente_detalhes_setor(codigo_setor='', qtd_domicilios='', qtd_domicilios_rede_geral='', qtd_domicilios_fossa_rudimentar='', qtd_domicilios_esgotamento_rio=''):
         titulo = html.H4(
             f'Detalhes do setor {str(codigo_setor)}'
         )
@@ -195,7 +195,7 @@ if __name__ == '__main__':
         ]
 
         campos.insert(0, titulo)
-        
+
         return html.Div(campos, id='detalhes_setor_')
 
     def componente_detalhes_distrito():
@@ -221,22 +221,21 @@ if __name__ == '__main__':
             return False, True
         if filtro_tipo_value == 'Avançado':
             return True, False
-    
-        
+
     @app.callback(
-            Output('detalhes_setor', 'children', allow_duplicate=True),
-            Input('dados_setores', 'active_cell'),
-            prevent_initial_call='initial_duplicate'
+        Output('detalhes_setor', 'children', allow_duplicate=True),
+        Input('dados_setores', 'active_cell'),
+        prevent_initial_call='initial_duplicate'
     )
     def load_details_from_table(active_cell):
         if active_cell:
             print(active_cell)
             return str(active_cell) if active_cell else "Click the table"
-        
+
     @app.callback(
-            Output('detalhes_setor', 'children', allow_duplicate=True),
-            Input('setores', 'click_feature'),
-            prevent_initial_call='initial_duplicate'
+        Output('detalhes_setor', 'children', allow_duplicate=True),
+        Input('setores', 'click_feature'),
+        prevent_initial_call='initial_duplicate'
     )
     def load_details_from_map(feature):
         if feature:
@@ -267,7 +266,7 @@ if __name__ == '__main__':
 
             setores = SetoresTransformer(
                 filtro_personalizado=filtro)
-            
+
         setor_gdf = setores()
         setor_geobuf = gdf_to_geobuf(setor_gdf)
 
@@ -283,7 +282,8 @@ if __name__ == '__main__':
         setor_df['id'] = setor_df['codigo_setor']
         dados_setor = setor_df.to_dict('records')
 
-        cols = [{'id': col, 'name': col} for col in setor_df.columns if col != 'id']
+        cols = [{'id': col, 'name': col}
+                for col in setor_df.columns if col != 'id']
 
         return setor_overlay_children(setor_geobuf), msg, dados_setor, cols
 
@@ -302,11 +302,11 @@ if __name__ == '__main__':
         # Mapa no painel esquerdo
         dcc.Loading(
             dl.Map(center=[-23.5475, -46.6375],
-                zoom=10,
-                children=map_children(None, None, False),
-                id="map",
-                className='p-3')
-            ),
+                   zoom=10,
+                   children=map_children(None, None, False),
+                   id="map",
+                   className='p-3')
+        ),
         # Filtro e detalhes no painel direito
         html.Div([
             html.Div(componente_filtro(
@@ -323,31 +323,31 @@ if __name__ == '__main__':
                 dash_table.DataTable(
                     id='dados_setores',
                     page_action="native",
-                    page_current= 0,
-                    page_size= 10,
+                    page_current=0,
+                    page_size=10,
                     style_header={
-                            'fontFamily': 'var(--bs-body-font-family)',
-                            'fontSize': 'var(--bs-body-font-size)',
-                            'fontWeight': 'var(--bs-body-font-weight)',
-                            'lineHeight': 'var(--bs-body-line-height)'
+                        'fontFamily': 'var(--bs-body-font-family)',
+                        'fontSize': 'var(--bs-body-font-size)',
+                        'fontWeight': 'var(--bs-body-font-weight)',
+                        'lineHeight': 'var(--bs-body-line-height)'
                     }
                 )
             ),
             dcc.Loading(
                 dbc.Card(
-                        [
+                    [
                         componente_detalhes_setor('', 0, 0, 0, 0),
                         html.Div([
-                        html.H2('Distrito', id='distrito_header',
-                                className='layer_header'),
-                        daq.BooleanSwitch(
-                            id='distrito_toggle',
-                            label="Exibir no mapa",
-                            on=False,
-                            className='layer_toggle',
-                        )
-                    ], id='distrito_wrapper'
-                    )],
+                            html.H2('Distrito', id='distrito_header',
+                                    className='layer_header'),
+                            daq.BooleanSwitch(
+                                id='distrito_toggle',
+                                label="Exibir no mapa",
+                                on=False,
+                                className='layer_toggle',
+                            )
+                        ], id='distrito_wrapper'
+                        )],
                     id='card_detalhes',
                     className='p-3'
                 )
