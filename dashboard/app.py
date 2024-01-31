@@ -327,7 +327,7 @@ def carregar_detalhes_setor(codigo_setor:str):
 
     ds = DistritoService(dao)
     
-    distrito_geobuf = ds.find_by_setor(codigo_setor, format='geobuf')
+    distrito_geobuf = ds.find_by_setor(codigo_setor, format='geobuf', tooltip_column='nm_distrito_municipal')
 
     return (
         card_detalhes_children(**setor),

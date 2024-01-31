@@ -19,9 +19,7 @@ class BaseService(ABC):
         """Return a GeoDataFrame with all the itens on the parquet file.
         """
 
-    def get_geobuf(self, columns:list[str]=None) -> str:
+    def get_geobuf(self, **kwargs) -> str:
         """Return a geobuf string of the GeoDataFrame with all the itens on the parquet file.
         """
-        if columns:
-            return gdf_to_geobuf(self.get_geodataframe(columns))
-        return gdf_to_geobuf(self.get_geodataframe())
+        return gdf_to_geobuf(self.get_geodataframe(**kwargs))
