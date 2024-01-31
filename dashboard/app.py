@@ -299,12 +299,12 @@ def card_detalhes_children(
 # Create example app.
 app = Dash(external_stylesheets=[dbc.themes.MATERIA])
 
-# @app.callback(
-#     Output('distritos_ol', 'checked'),
-#     Input('distrito_toggle', 'on')
-# )
-# def update_checked_layers(value):
-#     return value
+@app.callback(
+    Output('distritos_ol', 'checked'),
+    Input('distrito_toggle', 'on')
+)
+def update_checked_layers(value):
+    return value
 
 @app.callback(
     Output('filtro_avancado_collapse', 'is_open'),
@@ -327,7 +327,11 @@ def carregar_detalhes_setor(codigo_setor:str):
 
     ds = DistritoService(dao)
     
-    distrito_geobuf = ds.find_by_setor(codigo_setor, format='geobuf', tooltip_column='nm_distrito_municipal')
+    distrito_gdf = ds.find_by_setor(codigo_setor, format='geodataframe', tooltip_column='nm_distrito_municipal')
+    setor['nm_distrito_municipal'] = distrito_gdf['nm_distrito_municipal'].iloc[0]
+    setor['nm_distrito_municipal'] = setor['nm_distrito_municipal'].title()
+
+    distrito_geobuf = gdf_to_geobuf(distrito_gdf)
 
     return (
         card_detalhes_children(**setor),
