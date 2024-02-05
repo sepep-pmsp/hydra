@@ -10,6 +10,9 @@ from dotenv import load_dotenv
 import os
 import json
 from dash_bootstrap_templates import ThemeSwitchAIO
+from dash import dcc
+from dash import State
+from dash import callback_context
 
 from dao import DuckDBDAO
 from etls import (
@@ -27,14 +30,18 @@ dbc_css = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.1/dbc.min.css"
 )
 
-template_theme1 = "sketchy"
-template_theme2 = "darkly"
+template_theme1 = "materia"
+template_theme2 = "cyborg"
 url_theme1 = dbc.themes.MATERIA
-url_theme2 = dbc.themes.DARKLY
+url_theme2 = dbc.themes.CYBORG
 
 
-url = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
-attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
+default_url = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
+default_attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
+
+tyle_layer_theme1 = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
+tyle_layer_theme2 = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
+
 
 dao = DuckDBDAO(**load_s3_vars())
 
@@ -98,7 +105,7 @@ def distrito_municipal_children(distrito_geobuf:str) -> dl.GeoJSON:
                                         )
     return geojson
 
-def map_children():
+def map_children(url:str = default_url, attribution:str = default_attribution):
     base = [dl.BaseLayer(
         dl.TileLayer(url=url, maxZoom=20, attribution=attribution),
         name='Base',
@@ -312,7 +319,7 @@ def card_detalhes_children(
     return children
 
 # Create example app.
-app = Dash(external_stylesheets=[dbc.themes.MATERIA, dbc_css])
+app = Dash(external_stylesheets=[dbc_css])
 
 @app.callback(
     Output('distritos_ol', 'checked'),
@@ -434,6 +441,35 @@ def initial_load(children):
     geobuf = load_limite_municipal(dao)
     return limite_municipal_children(geobuf)
 
+
+@app.callback(
+    Output('map', 'children'),
+    Input('theme-store', 'data'),
+    prevent_initial_call=True
+)
+def update_tile_layer(theme):
+    tyle_layer = tyle_layer_theme1 if theme else tyle_layer_theme2
+
+    url = tyle_layer
+    
+    attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
+
+    return map_children(url, attribution)
+
+
+@app.callback(
+    Output('theme-store', 'data'),
+    Input(ThemeSwitchAIO.ids.switch("theme"), 'value'),
+    prevent_initial_call=True
+)
+def update_theme(theme_value):
+    print('ESSE AQUI É O TEMA ATUALIZANDO TOMA')
+
+    print(theme_value)
+    return theme_value
+
+
+
 app.layout = html.Div([
     # Span para detectar o carregamento inicial da página
     html.Span(id='initial_load_span', style={'display': 'none'}),
@@ -488,13 +524,15 @@ app.layout = html.Div([
         dbc.Row(
             [
                 dbc.Col([ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2],)]),
+                dcc.Store(id='theme-store', storage_type='memory', data='theme1')
                 
             ]
         ),
     ],
     className="m-4 dbc",
     fluid=True,
-)
+),
+        
 ],
     id="wrapper",
     className='m-3'
