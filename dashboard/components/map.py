@@ -18,7 +18,7 @@ class Map:
         self.attribuition = attribution
         
         
-        self.style = {'height': '50vh'}
+        self.style = {'height': '80vh'}
         self.classNames = 'map'
         self.id = 'map'
         self.center = [-23.5475, -46.6375]
