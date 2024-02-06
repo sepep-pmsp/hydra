@@ -11,15 +11,19 @@ class Map:
     def __init__(self, 
                  url:str = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', 
                  attribution:str = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> ',
-                 callback_load_children:bool = False) -> None:
+                 callback_load_children:bool = False,
+                 ) -> None:
+        
+
         
         self.callback_load_children = callback_load_children
         self.url = url
         self.attribuition = attribution
         
         
-        self.style = {'height': '80vh'}
-        self.classNames = 'map'
+        self.style = {  'position': 'absolute',
+                        'height': '80vh'}
+        self.classNames = 'base_map_div'
         self.id = 'map'
         self.center = [-23.5475, -46.6375]
         self.zoom = 10
@@ -95,6 +99,8 @@ class Map:
             ))
             ,
         ]
+
+        
 
     def generate_base_map(self,map_children) -> html.Div :
         base_map = dl.Map(center=self.center,
