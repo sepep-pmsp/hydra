@@ -1,0 +1,37 @@
+
+
+.base_map_div{
+    margin-top: 8rem;
+    margin-left: 1rem;
+    border-radius: 15px;
+    width: 45%;
+    height: 100rem;
+}
+
+.theme_switch_div{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    margin: 1rem;
+}
+
+.navbar{padding: 1rem!important;}
+
+.navbar_div{
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+.filtros_tipo_div{
+    padding-left: 1rem;
+}
+
+.filtro_operacao{
+
+    padding-right: 25rem;
+}
+
+.filtro_selecionar_coluna{
+    padding-bottom: 0!important;
+}
