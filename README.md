@@ -32,7 +32,7 @@ Este projeto visa criar um ambiente robusto para coleta, conformação, armazena
 
 3. **Configurar Variáveis de Ambiente**: Renomeie o arquivo `.env.example` para `.env` e configure as variáveis de ambiente necessárias, como chaves do MinIO, informações do banco de dados Postgres, etc.
 
-4. **Iniciar os Contêineres**: Navegue até o diretório `/docker-compose` e execute o seguinte comando para iniciar os contêineres:
+4. **Iniciar os Contêineres**: Navegue até o diretório principal do projeto e execute o seguinte comando para iniciar os contêineres:
 
    ```bash
    docker-compose -f [arquivo do ambiente escolhido] up -d
