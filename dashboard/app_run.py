@@ -1,5 +1,5 @@
 from dash import Dash, html, dcc, dash_table, Output, Input, State
-from components import (ThemeSwitch, Map)
+from components import (ThemeSwitch, Map, NavBar)
 from dash_bootstrap_templates import ThemeSwitchAIO
 
 
@@ -8,17 +8,21 @@ dbc_css = ("https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.
 tyle_layer_theme1 = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
 tyle_layer_theme2 = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
 
+
+navbar_constructor = NavBar()
+navbar_div = navbar_constructor.pipeline()
+
 theme_switch_constructor = ThemeSwitch()
 theme_switch_div = theme_switch_constructor.pipeline()
+
 map_constructor = Map()
 map_div = map_constructor.pipeline()
-store_theme_div = html.Div(dcc.Store(id='theme-store', storage_type='memory', data='theme1'))
 
 
 app = Dash(external_stylesheets=[dbc_css])
 
 
-app.layout = html.Div([theme_switch_div, map_div,store_theme_div])
+app.layout = html.Div([theme_switch_div, map_div,navbar_div])
 
 @app.callback(
     Output('map', 'children'),
