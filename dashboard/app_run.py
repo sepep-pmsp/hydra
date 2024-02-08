@@ -8,6 +8,9 @@ dbc_css = ("https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.
 tyle_layer_theme1 = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
 tyle_layer_theme2 = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
 
+external_stylesheets = [ dbc_css, 'https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap']
+
+
 
 navbar_constructor = NavBar()
 navbar_div = navbar_constructor.pipeline()
@@ -19,7 +22,7 @@ map_constructor = Map()
 map_div = map_constructor.pipeline()
 
 
-app = Dash(external_stylesheets=[dbc_css])
+app = Dash(external_stylesheets=external_stylesheets)
 
 
 app.layout = html.Div([theme_switch_div, map_div,navbar_div])
