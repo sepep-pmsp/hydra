@@ -21,8 +21,9 @@ class Map:
         self.attribuition = attribution
         
         
-        self.style = {  'position': 'absolute',
-                        'height': '80vh'}
+        self.style = {
+            'z-index': '0',
+            'height': '80vh'}
         self.classNames = 'base_map_div'
         self.id = 'map'
         self.center = [-23.5475, -46.6375]
