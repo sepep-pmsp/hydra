@@ -72,4 +72,5 @@ width: 17rem!important;
 
 .filter{
     display: flex;
+    gap: 0.5rem;
 }
