@@ -23,17 +23,8 @@
     margin-top: 1rem;
 }
 
-#filtro_coluna {
-    width: 30%;
-}
 
-#filtro_operador {
-    width: 10%;
-}
 
-#filtro_basico_valor{
-    width: 60%;
-}
 
 #filtro_avancado_valor{
     width: 100%;

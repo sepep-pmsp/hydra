@@ -1,4 +1,10 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto Mono', monospace;
 
+}
 
 .base_map_div{
     margin-top: 8rem;
@@ -28,10 +34,42 @@
 }
 
 .filtro_operacao{
-
-    padding-right: 25rem;
+    width: 15rem!important;
+    padding-right: 15rem!important;
 }
 
 .filtro_selecionar_coluna{
-    padding-bottom: 0!important;
+width: 17rem!important;
+}
+
+.form-control{
+    padding: 0!important;
+}
+
+
+
+#filtro_basico_valor{
+    width: auto;
+    height: 2.4rem;
+    text-align: center;
+}
+
+.Select-menu-outer{ 
+    background-color: rgb(134, 134, 134)!important;
+    z-index: 9999;
+}
+
+.Select-clear{
+    width: 0!important;
+    display: none;
+}
+
+.navbar-nav{
+    width: 100%;
+    justify-content: space-evenly;
+
+}
+
+.filter{
+    display: flex;
 }
