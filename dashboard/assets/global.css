@@ -6,6 +6,8 @@
 
 }
 
+
+
 .base_map_div{
     margin-top: 8rem;
     margin-left: 1rem;
@@ -21,7 +23,7 @@
     margin: 1rem;
 }
 
-.navbar{padding: 1rem!important;}
+.navbar{padding: 0.1rem!important;}
 
 .navbar_div{
     position: fixed;

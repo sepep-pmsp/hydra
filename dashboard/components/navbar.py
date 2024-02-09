@@ -6,7 +6,7 @@ class NavBar:
 
     def __init__(self) -> None:
         self.class_names = 'navbar_div'
-        self.brand = "Hydra"
+        self.brand = html.Img(src='../assets/images/logo_hydra.png', height= '90', width= '110')
         self.brand_href = "#"
         self.color = 'dark'
         
@@ -74,7 +74,8 @@ class NavBar:
         brand=self.brand,
         brand_href=self.brand_href,
         color=self.color, 
-        dark=True
+        dark=True,
+        style={'padding': '0!important'}
     )
         
         navbar_div = html.Div(children=[navbar], className=self.class_names)
