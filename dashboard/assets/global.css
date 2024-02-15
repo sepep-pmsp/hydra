@@ -76,3 +76,25 @@ width: 17rem!important;
     display: flex;
     gap: 0.5rem;
 }
+
+.layer_div{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-bottom: 1rem;
+}
+.layer_toggle_div{
+    width: 100%;
+}
+
+.layer_toggle_div > div{
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: space-between;
+
+}
+
+.layer_div h6{
+    color: #2fa4e7!important;
+}

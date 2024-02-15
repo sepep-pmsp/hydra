@@ -1,5 +1,5 @@
 from dash import Dash, html, dcc, dash_table, Output, Input, State
-from components import (ThemeSwitch, Map, NavBar)
+from components import (ThemeSwitch, Map, NavBar, LayersOffCanvas)
 from dash_bootstrap_templates import ThemeSwitchAIO
 
 
@@ -10,7 +10,8 @@ tyle_layer_theme2 = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/
 
 external_stylesheets = [ dbc_css, 'https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap']
 
-
+offcanvas_constructor = LayersOffCanvas()
+offcanvas_div = offcanvas_constructor.pipeline()[0]
 
 navbar_constructor = NavBar()
 navbar_div = navbar_constructor.pipeline()
@@ -25,7 +26,7 @@ map_div = map_constructor.pipeline()
 app = Dash(external_stylesheets=external_stylesheets)
 
 
-app.layout = html.Div([theme_switch_div, map_div,navbar_div])
+app.layout = html.Div([theme_switch_div, map_div,navbar_div,offcanvas_div])
 
 @app.callback(
     Output('map', 'children'),
@@ -47,6 +48,17 @@ def update_tile_layer(theme):
 def update_theme(theme_value):
     
     return theme_value
+
+@app.callback(
+    Output("offcanvas-placement", "is_open"),
+    Input("open-offcanvas-placement", "n_clicks"),
+    [State("offcanvas-placement", "is_open")],
+)
+def toggle_offcanvas(n1, is_open):
+    if n1:
+        return not is_open
+    return is_open
+
 
 
 if __name__ == '__main__':
