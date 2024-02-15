@@ -11,6 +11,7 @@ from services import MunicipioService, DistritoService
 from etls import SetoresTransformer
 from utils import gdf_to_geobuf, load_s3_vars
 from view.map import Map
+from view.table import Table
 from view.details_card import DetailsCard
 
 dao = DuckDBDAO(**load_s3_vars())
@@ -18,8 +19,8 @@ dao = DuckDBDAO(**load_s3_vars())
 @callback(
     Output('setores_ol', 'children'),
     Output('message', 'children'),
-    Output('dados_setores', 'data'),
-    Output('dados_setores', 'columns'),
+    Output('dados_setores', 'rowData'),
+    Output('dados_setores', 'columnDefs'),
     Input('filtro_botao', 'n_clicks'),
     State('filtro_tipo', 'value'),
     State('filtro_coluna', 'value'),
@@ -55,8 +56,7 @@ def filter_setores(basico_n_clicks, filtro_tipo, filtro_coluna, filtro_operacao,
     setor_df['id'] = setor_df['codigo_setor']
     dados_setor = setor_df.to_dict('records')
 
-    cols = [{'id': col, 'name': col}
-            for col in setor_df.columns if col != 'id']
+    cols = Table.get_columns(setor_df.columns)
 
     return Map.setores_overlay_children(setor_geobuf), msg, dados_setor, cols
 
@@ -94,13 +94,14 @@ def carregar_detalhes_setor(codigo_setor:str):
     Output('card_detalhes', 'children', allow_duplicate=True),
     Output('setor_detalhes_ol', 'children', allow_duplicate=True),
     Output('distritos_pane', 'children', allow_duplicate=True),
-    Input('dados_setores', 'active_cell'),
+    Input('dados_setores', 'selectedRows'),
     prevent_initial_call='initial_duplicate'
 )
-def load_details_from_table(active_cell):
-    if active_cell:
-        print(active_cell)
-        return carregar_detalhes_setor(active_cell['row_id'])
+def load_details_from_table(selectedRows):
+    if selectedRows:
+        selected_row = selectedRows[0]
+        print(selected_row)
+        return carregar_detalhes_setor(selected_row['codigo_setor'])
     return None, None, None
 
 @callback(
