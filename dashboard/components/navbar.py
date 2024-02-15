@@ -3,10 +3,14 @@ import dash_bootstrap_components as dbc
 from dash import html, dcc
 
 from .filter import BasicFilter
+from .layers_offcanvas import LayersOffCanvas
 
 class NavBar:
 
     def __init__(self) -> None:
+        
+        self.offcanvas_constructor = LayersOffCanvas()
+        self.offcanvas_button = self.offcanvas_constructor()[1]
         
         self.filter_constructor = BasicFilter()
         
@@ -26,8 +30,10 @@ class NavBar:
         navbar = dbc.NavbarSimple(
             children=[
             self.filter[0],
+            self.filter[1],
             dbc.NavItem(dbc.Button("Filtrar", href="#", id='filtro_botao')),
-            self.filter[1]
+            
+            self.offcanvas_button
         ],
             
         brand=self.brand,
