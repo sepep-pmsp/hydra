@@ -98,3 +98,27 @@ width: 17rem!important;
 .layer_div h6{
     color: #2fa4e7!important;
 }
+
+#filtros_tipo{
+    z-index: 1;
+}
+
+
+
+#inital_card_div{
+    position: absolute;
+    top: 8rem;
+    right: 1rem;
+    border-radius: 15px;
+    width: 50%;
+    height: 40vh;
+    z-index: -1;
+}
+
+#inital_card_div> div{
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+
+}
