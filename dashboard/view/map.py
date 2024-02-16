@@ -13,10 +13,16 @@ from dash_leaflet import (
 
 
 class Map:
+    SETORES_OVERLAY_ID='setores_ol'
+    LIMITE_MUNICIPAL_PANE_ID='limite_municipal_pane'
+    DISTRITOS_PANE_ID='distritos_pane'
+    SETOR_DETALHES_OVERLAY_ID='setor_detalhes_ol'
+    SETORES_GEOJSON_ID='setores'
+    DISTRITOS_OVERLAY_ID='distritos_ol'
     
     @staticmethod
     def setores_overlay_children(setor_geobuf: str) -> Pane:
-        pane = Pane(GeoJSON(data=setor_geobuf, id="setores", format='geobuf',
+        pane = Pane(GeoJSON(data=setor_geobuf, id=Map.SETORES_GEOJSON_ID, format='geobuf',
                             hideout=dict(
                                 selected=[]),
                             options={
@@ -84,8 +90,8 @@ class Map:
         zindex = 401
         overlay.append(
             Overlay(Pane(children=[],
-                         id='limite_municipal_pane',
-                         name='limite_municipal_pane',
+                         id=Map.LIMITE_MUNICIPAL_PANE_ID,
+                         name=Map.LIMITE_MUNICIPAL_PANE_ID,
                          # O z-index padrão do overlay pane é 400 e o próximo pane (shadow) é 500,
                          # portanto os valores personalizados devem estar entre 400 e 500
                          style={'zIndex': zindex}
@@ -98,14 +104,14 @@ class Map:
         zindex += 1
         overlay.append(
             Overlay(Pane(children=[],
-                         id='distritos_pane',
-                         name='distritos_pane',
+                         id=Map.DISTRITOS_PANE_ID,
+                         name=Map.DISTRITOS_PANE_ID,
                          # O z-index padrão do overlay pane é 400 e o próximo pane (shadow) é 500,
                          # portanto os valores personalizados devem estar entre 400 e 500
                          style={'zIndex': zindex}
                          ),
-                    id='distritos_ol',
-                    name='distritos_ol',
+                    id=Map.DISTRITOS_OVERLAY_ID,
+                    name=Map.DISTRITOS_OVERLAY_ID,
                     checked=False
                     )
         )
@@ -113,16 +119,16 @@ class Map:
 
         overlay.append(
             Overlay(children=[],
-                    id="setores_ol",
-                    name='setores_ol',
+                    id=Map.SETORES_OVERLAY_ID,
+                    name=Map.SETORES_OVERLAY_ID,
                     checked=True
                     )
         )
 
         overlay.append(
             Overlay(children=[],
-                    id="setor_detalhes_ol",
-                    name='setor_detalhes_ol',
+                    id=Map.SETOR_DETALHES_OVERLAY_ID,
+                    name=Map.SETOR_DETALHES_OVERLAY_ID,
                     checked=True
                     )
         )

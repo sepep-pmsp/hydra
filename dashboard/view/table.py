@@ -3,13 +3,7 @@ from dash.dash_table import DataTable
 from dash_ag_grid import AgGrid
 
 class Table:
-    columnDefs = [
-        {'field': 'codigo_setor'},
-        {'field': 'qtd_domicilios'},
-        {'field': 'qtd_domicilios_rede_geral'},
-        {'field': 'qtd_domicilios_fossa_rudimentar'},
-        {'field': 'qtd_domicilios_esgotamento_rio'},
-    ]
+    COMPONENT_ID='tabela_setores'
 
     @staticmethod
     def get_columns(columns:list[str], table_type:str='AgGrid'):
@@ -27,7 +21,7 @@ class Table:
     @staticmethod
     def data_table_component():
         return DataTable(
-                id='dados_setores',
+                id=Table.COMPONENT_ID,
                 page_action="native",
                 page_current=0,
                 page_size=10,
@@ -42,7 +36,7 @@ class Table:
     @staticmethod
     def ag_grid_component():
         return AgGrid(
-            id='dados_setores',
+            id=Table.COMPONENT_ID,
             dashGridOptions={
                 'pagination':True,
                 'rowSelection': 'single'},

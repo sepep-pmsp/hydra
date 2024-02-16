@@ -6,11 +6,13 @@ from view.map import Map
 from view.table import Table
 
 class Layout:
+    INITIAL_LOAD_SPAN_ID='initial_load_span'
+
     @staticmethod
     def get_layout():
         return Div([
         # Span para detectar o carregamento inicial da página
-        Span(id='initial_load_span', style={'display': 'none'}),
+        Span(id=Layout.INITIAL_LOAD_SPAN_ID, style={'display': 'none'}),
         # Mapa no painel esquerdo
         Map.get_component(),
         # Filtro e detalhes no painel direito

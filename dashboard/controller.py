@@ -10,6 +10,8 @@ from dao import DuckDBDAO
 from services import MunicipioService, DistritoService
 from etls import SetoresTransformer
 from utils import gdf_to_geobuf, load_s3_vars
+from view import Layout
+from view.filter import Filter
 from view.map import Map
 from view.table import Table
 from view.details_card import DetailsCard
@@ -17,16 +19,16 @@ from view.details_card import DetailsCard
 dao = DuckDBDAO(**load_s3_vars())
 
 @callback(
-    Output('setores_ol', 'children'),
-    Output('message', 'children'),
-    Output('dados_setores', 'rowData'),
-    Output('dados_setores', 'columnDefs'),
-    Input('filtro_botao', 'n_clicks'),
-    State('filtro_tipo', 'value'),
-    State('filtro_coluna', 'value'),
-    State('filtro_operacao', 'value'),
-    State('filtro_basico_valor', 'value'),
-    State('filtro_avancado_valor', 'value'),
+    Output(Map.SETORES_OVERLAY_ID, 'children'),
+    Output(Filter.MESSAGE_TEXT_ID, 'children'),
+    Output(Table.COMPONENT_ID, 'rowData'),
+    Output(Table.COMPONENT_ID, 'columnDefs'),
+    Input(Filter.FILTER_BUTTON_ID, 'n_clicks'),
+    State(Filter.TYPE_SELECT_ID, 'value'),
+    State(Filter.COLUMN_SELECT_ID, 'value'),
+    State(Filter.OPERATOR_SELECT_ID, 'value'),
+    State(Filter.BASIC_VALUE_TEXT_ID, 'value'),
+    State(Filter.ADVANCED_VALUE_TEXT_ID, 'value'),
 )
 def filter_setores(basico_n_clicks, filtro_tipo, filtro_coluna, filtro_operacao, filtro_basico_valor, filtro_avancado_valor):
     print('Filtrando setores...')
@@ -61,8 +63,8 @@ def filter_setores(basico_n_clicks, filtro_tipo, filtro_coluna, filtro_operacao,
     return Map.setores_overlay_children(setor_geobuf), msg, dados_setor, cols
 
 @callback(
-    Output('limite_municipal_pane', 'children'),
-    Input('initial_load_span', 'children')
+    Output(Map.LIMITE_MUNICIPAL_PANE_ID, 'children'),
+    Input(Layout.INITIAL_LOAD_SPAN_ID, 'children')
 )
 def initial_load(children):
     geobuf = MunicipioService(dao).get_geobuf()
@@ -91,10 +93,10 @@ def carregar_detalhes_setor(codigo_setor:str):
     )
 
 @callback(
-    Output('card_detalhes', 'children', allow_duplicate=True),
-    Output('setor_detalhes_ol', 'children', allow_duplicate=True),
-    Output('distritos_pane', 'children', allow_duplicate=True),
-    Input('dados_setores', 'selectedRows'),
+    Output(DetailsCard.COMPONENT_ID, 'children', allow_duplicate=True),
+    Output(Map.SETOR_DETALHES_OVERLAY_ID, 'children', allow_duplicate=True),
+    Output(Map.DISTRITOS_PANE_ID, 'children', allow_duplicate=True),
+    Input(Table.COMPONENT_ID, 'selectedRows'),
     prevent_initial_call='initial_duplicate'
 )
 def load_details_from_table(selectedRows):
@@ -105,10 +107,10 @@ def load_details_from_table(selectedRows):
     return None, None, None
 
 @callback(
-    Output('card_detalhes', 'children', allow_duplicate=True),
-    Output('setor_detalhes_ol', 'children', allow_duplicate=True),
-    Output('distritos_pane', 'children', allow_duplicate=True),
-    Input('setores', 'click_feature'),
+    Output(DetailsCard.COMPONENT_ID, 'children', allow_duplicate=True),
+    Output(Map.SETOR_DETALHES_OVERLAY_ID, 'children', allow_duplicate=True),
+    Output(Map.DISTRITOS_PANE_ID, 'children', allow_duplicate=True),
+    Input(Map.SETORES_GEOJSON_ID, 'click_feature'),
     prevent_initial_call='initial_duplicate'
 )
 def load_details_from_map(feature):
@@ -119,16 +121,16 @@ def load_details_from_map(feature):
 
 
 @callback(
-    Output('distritos_ol', 'checked'),
-    Input('distrito_toggle', 'on')
+    Output(Map.DISTRITOS_OVERLAY_ID, 'checked'),
+    Input(DetailsCard.DISTRITO_SWITCH_ID, 'on')
 )
 def update_checked_layers(value):
     return value
 
 @callback(
-    Output('filtro_avancado_collapse', 'is_open'),
-    Output('filtro_basico_collapse', 'is_open'),
-    Input('filtro_tipo', 'value')
+    Output(Filter.ADVANCED_FILTER_COLLAPSE_ID, 'is_open'),
+    Output(Filter.BASIC_FILTER_COLLAPPSE_ID, 'is_open'),
+    Input(Filter.TYPE_SELECT_ID, 'value')
 )
 def selecionar_filtro(filtro_tipo_value: str) -> tuple[bool, bool]:
     if filtro_tipo_value == 'Básico':

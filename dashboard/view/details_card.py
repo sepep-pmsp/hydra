@@ -12,6 +12,9 @@ from dash_bootstrap_components import (
 from dash_daq import BooleanSwitch
 
 class DetailsCard:
+    COMPONENT_ID='card_detalhes'
+    DISTRITO_SWITCH_ID='distrito_toggle'
+
     @staticmethod
     def componente_detalhes_setor(codigo_setor, qtd_domicilios, qtd_domicilios_rede_geral, qtd_domicilios_fossa_rudimentar, qtd_domicilios_esgotamento_rio):
         titulo = H2(
@@ -42,7 +45,7 @@ class DetailsCard:
                             className='layer_title')
 
         botao = BooleanSwitch(
-            id='distrito_toggle',
+            id=DetailsCard.DISTRITO_SWITCH_ID,
             label="Exibir no mapa",
             on=False,
             className='layer_toggle',
@@ -89,7 +92,7 @@ class DetailsCard:
         return Loading(
             Card(
                 DetailsCard.card_detalhes_children(),
-                id='card_detalhes',
+                id=DetailsCard.COMPONENT_ID,
                 className='p-3'
             )
         )
