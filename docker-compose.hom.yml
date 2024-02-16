@@ -201,6 +201,28 @@ services:
       - ${GOLD_DB_PORT}:${GOLD_DB_PORT}
     command: -p ${GOLD_DB_PORT}
 
+  dash:
+    build:
+      context: ./dashboard
+      args:
+        DASH_HOME: ${DASH_HOME}
+        PORT: ${DASH_PORT}
+    container_name: dash
+    environment:
+      MINIO_SILVER_BUCKET_NAME:
+      MINIO_ROOT_USER:
+      MINIO_ROOT_PASSWORD:
+      MINIO_ENDPOINT_URL:
+      PORT: ${DASH_PORT}
+    expose:
+      - ${DASH_PORT}
+    ports:
+      - ${DASH_PORT}:${DASH_PORT}
+    networks:
+      - datalake_network
+    depends_on:
+      - minio
+
 volumes:
   dagster-db-data:
   minio-data:
