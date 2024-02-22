@@ -122,7 +122,7 @@ def load_details_from_map(feature):
 
 @callback(
     Output(Map.DISTRITOS_OVERLAY_ID, 'checked'),
-    Input(DetailsCard.DISTRITO_SWITCH_ID, 'on')
+    Input("distrito_municipal_toggle", 'on')
 )
 def update_checked_layers(value):
     return value
