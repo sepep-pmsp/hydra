@@ -29,6 +29,7 @@
     position: fixed;
     top: 0;
     width: 100%;
+    z-index: 10;
 }
 
 .filtros_tipo_div{
@@ -58,7 +59,7 @@ width: 17rem!important;
 
 .Select-menu-outer{ 
     background-color: rgb(134, 134, 134)!important;
-    z-index: 9999;
+    z-index: 1;
 }
 
 .Select-clear{
@@ -75,6 +76,8 @@ width: 17rem!important;
 .filter{
     display: flex;
     gap: 0.5rem;
+    width: 100%;
+
 }
 
 .layer_div{
@@ -104,24 +107,22 @@ width: 17rem!important;
 }
 
 
-.tab{
+.tab_div{
     position: absolute;
     top: 8rem;
     right: 1rem;
     border-radius: 15px;
     width: 50%;
     height: 80vh;
+    z-index: 0;
 }
 
 
-
-#inital_card_div{
-    position: absolute;
-    top: 12rem;
-    right: 1rem;
-    border-radius: 15px;
-    width: 50%;
-    height: 40vh;
-    z-index: -1;
+#filtro_avancado_collapse{
+    width: 100%;
+    padding-top: 0.5rem;
 }
 
+.ms-auto.navbar-nav{
+    gap: 1rem;
+}
