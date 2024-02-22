@@ -1,6 +1,7 @@
 from dash import Dash, html, dcc, dash_table, Output, Input, State
-from components import (ThemeSwitch, Map, NavBar, LayersOffCanvas, initialCard, Tab)
+from components import (ThemeSwitch, Map, NavBar, LayersOffCanvas, Tab, Table,DetailsCard)
 from dash_bootstrap_templates import ThemeSwitchAIO
+import controller
 
 
 
@@ -9,6 +10,8 @@ tyle_layer_theme1 = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{
 tyle_layer_theme2 = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
 
 external_stylesheets = [ dbc_css, 'https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap']
+
+
 
 tab_constructor = Tab()
 tab_div = tab_constructor()
@@ -27,6 +30,7 @@ map_div = map_constructor.pipeline()
 
 
 app = Dash(external_stylesheets=external_stylesheets)
+
 
 
 app.layout = html.Div([theme_switch_div, map_div,navbar_div,offcanvas_div, tab_div])
