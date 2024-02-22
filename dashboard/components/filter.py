@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 class BasicFilter:
     
     def __init__(self, 
-                 columns: list[str] = ['Indicador Número 1', 'Indicador Número 2', 'Indicador Número 3', 'Indicador Número 4'], 
+                 columns: list[str] = [""], 
                  selected_columns: str = None, 
                  active_operation:str = ">") -> None:
         
@@ -62,6 +62,20 @@ class BasicFilter:
         
         return filter_basic_value
     
+    def generate_basic_filter_collapse(self,filter_column,filter_operation,filter_basic_value):
+        return dbc.Collapse(
+            html.Div(
+                [
+                    filter_column,
+                    filter_operation,
+                    filter_basic_value
+                ],
+                className='d-md-flex'
+            ),
+            id="filtro_basico_collapse",
+            is_open=False
+        )
+    
     
     def generate_filter_type(self)->dbc.RadioItems:
         
@@ -84,14 +98,29 @@ class BasicFilter:
                 label="Filtros",)
         
         return dropdown
+    
+    def generate_advanced_filter(self):
+        return dbc.Input(
+            type='text',
+            id="filtro_avancado_valor",
+            value='qtd_domicilios_esgotamento_rio > 0'
+        )
         
+    def generate_advanced_filter_collapse(self,advanced_filter):
+        return dbc.Collapse(
+            [
+                advanced_filter
+            ],
+            id="filtro_avancado_collapse",
+            is_open=True
+        )
         
     
     
-    def generate_filter_div(self,column_select,filter_operation_select,filter_value) -> html.Div:
-        return html.Div([column_select,
-                        filter_operation_select,
-                        filter_value,], className=self.class_names.get('filter_div'))
+    def generate_filter_div(self,advanced_filter_collapse,basic_filter_collapse) -> html.Div:
+        return html.Div([advanced_filter_collapse,
+                        basic_filter_collapse], 
+                        className=self.class_names.get('filter_div'))
         
         
     
@@ -103,11 +132,16 @@ class BasicFilter:
         filter_operation_select = self.generate_filter_operation()
         filter_value = self.generate_filter_value()
         
+        advanced_filter = self.generate_advanced_filter()
+        
         filter_type_select = self.generate_filter_type()
         
         filter_type_dropdown = self.generate_dropdown_filtering_options(filter_type_select) 
         
-        filter_div = self.generate_filter_div(column_select,filter_operation_select,filter_value)
+        filter_basic_collapse = self.generate_basic_filter_collapse(column_select,filter_operation_select,filter_value)
+        filter_advanced_collapse = self.generate_advanced_filter_collapse(advanced_filter)
+        
+        filter_div = self.generate_filter_div(filter_basic_collapse,filter_advanced_collapse)
         
         
         return [filter_div, filter_type_dropdown]
