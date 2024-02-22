@@ -12,7 +12,15 @@ class NavBar:
         self.offcanvas_constructor = LayersOffCanvas()
         self.offcanvas_button = self.offcanvas_constructor()[1]
         
-        self.filter_constructor = BasicFilter()
+        self.filter_constructor = BasicFilter(columns= [
+                'codigo_setor',
+                'qtd_domicilios',
+                'qtd_domicilios_rede_geral',
+                'qtd_domicilios_fossa_rudimentar',
+                'qtd_domicilios_esgotamento_rio',
+            ],
+            selected_columns='qtd_domicilios_esgotamento_rio'
+        )
         
         self.filter = self.filter_constructor()
         
