@@ -1,7 +1,9 @@
 from typing import Any
 import dash_bootstrap_components as dbc
 from dash import html
-from .initial_card import initialCard
+from .initial_card import initialCardFactory
+from .table import Table
+from.details_card import DetailsCard
 
 
 
@@ -13,13 +15,18 @@ class Tab:
 
         
         self.class_names = {"tab" : " tab",
-                            "" : "",
+                            "tab_div" : "tab_div",
                             "":"",
                             "":"",
                             "" : ""}
         
-        self.initial_card_constructor = initialCard()
-        self.initial_card = self.initial_card_constructor()
+        create_initial_card = initialCardFactory()
+        self.initial_card = create_initial_card()
+
+        self.table = Table.get_component()
+        
+        
+        
         
         
         self.ids = {"": "",
@@ -33,18 +40,15 @@ class Tab:
     def generate_tabs_content(self) -> Any :
         first_tab = self.initial_card
         
-        second_tab = dbc.Card(
-            dbc.CardBody(
-                [
-                    html.P("This is tab 2!", className="card-text"),
-                    dbc.Button("Click here", color="success"),
-                ]
-            ),
-            className="mt-3",
-        )
+        second_tab = self.table
+        
+        third_tab = dbc.Card([dbc.CardBody([DetailsCard.get_component(), dbc.CardFooter(html.P(
+        id='message',
+        className='mx-auto',
+    ))])])
         
         
-        tab_content = [first_tab,second_tab]
+        tab_content = [first_tab,second_tab,third_tab]
         
         return tab_content
         
@@ -53,8 +57,9 @@ class Tab:
         
         tabs = dbc.Tabs(
     [
-        dbc.Tab(tab_content[0], label="Detalhes do setor"),
+        dbc.Tab(tab_content[0], label="Detalhes do uso"),
         dbc.Tab(tab_content[1], label="Dados do filtro"),
+        dbc.Tab(tab_content[2], label="Dados do Setor"),
     ],
     class_name= self.class_names.get("tab") ,
 )
@@ -69,7 +74,7 @@ class Tab:
         print(tab_content)
         tab = self.generate_tab(tab_content)
         
-        return tab
+        return html.Div(tab, className=self.class_names.get("tab_div"))
     
     def __call__(self) -> Any:
         
