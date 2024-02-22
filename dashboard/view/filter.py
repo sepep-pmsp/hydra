@@ -4,7 +4,7 @@ from dash_bootstrap_components import RadioItems, Collapse, Button, Card, Input
 
 class Filter:
     FILTER_BUTTON_ID='filtro_botao'
-    TYPE_SELECT_ID='filtro_tipo'
+    TYPE_SELECT_ID='filtros_tipo'
     COLUMN_SELECT_ID='filtro_coluna'
     OPERATOR_SELECT_ID='filtro_operacao'
     BASIC_VALUE_TEXT_ID='filtro_basico_valor'
