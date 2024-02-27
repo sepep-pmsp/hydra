@@ -1,7 +1,7 @@
 from dash import Dash
 import dash_bootstrap_components as dbc
 
-from view import Layout
+from dashboard.components.deprecated_components import Layout
 import controller
 
 # Create example app.
