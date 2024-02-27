@@ -40,6 +40,10 @@ class Table:
             dashGridOptions={
                 'pagination':True,
                 'rowSelection': 'single'},
+            csvExportParams={
+                "fileName": "dados_hydra_filtro.csv",
+                "columnSeparator" : ";"
+            }
         )
 
     @staticmethod

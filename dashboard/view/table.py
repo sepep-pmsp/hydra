@@ -40,6 +40,9 @@ class Table:
             dashGridOptions={
                 'pagination':True,
                 'rowSelection': 'single'},
+            csvExportParams={
+                "fileName": "ag_grid_test.csv",
+            },
         )
 
     @staticmethod

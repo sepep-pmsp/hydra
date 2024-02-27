@@ -40,7 +40,7 @@ class Tab:
     def generate_tabs_content(self) -> Any :
         first_tab = self.initial_card
         
-        second_tab = self.table
+        second_tab = dbc.Card([dbc.CardBody(self.table),dbc.CardFooter(dbc.Button("Download CSV", id="csv-button", n_clicks=0))])
         
         third_tab = dbc.Card([dbc.CardBody([DetailsCard.get_component(), dbc.CardFooter(html.P(
         id='message',

@@ -137,3 +137,11 @@ def selecionar_filtro(filtro_tipo_value: str) -> tuple[bool, bool]:
         return False, True
     if filtro_tipo_value == 'Avançado':
         return True, False
+@callback(
+    Output(Table.COMPONENT_ID, "exportDataAsCsv"),
+    Input("csv-button", "n_clicks"),
+)
+def export_data_as_csv(n_clicks):
+    if n_clicks:
+        return True
+    return False
