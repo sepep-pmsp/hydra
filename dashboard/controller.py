@@ -10,25 +10,25 @@ from dao import DuckDBDAO
 from services import MunicipioService, DistritoService
 from etls import SetoresTransformer
 from utils import gdf_to_geobuf, load_s3_vars
-from view import Layout
-from view.filter import Filter
-from view.map import Map
-from view.table import Table
-from view.details_card import DetailsCard
+from dash_bootstrap_templates import ThemeSwitchAIO
+
+
+from components import (Map,BasicFilter,NavBar,Tab,ThemeSwitch,Table,LayersOffCanvas,initialCardFactory,DetailsCard, BaseLayout)
+
 
 dao = DuckDBDAO(**load_s3_vars())
 
 @callback(
     Output(Map.SETORES_OVERLAY_ID, 'children'),
-    Output(Filter.MESSAGE_TEXT_ID, 'children'),
+    Output(Tab.MESSAGE_TEXT_ID, 'children'),
     Output(Table.COMPONENT_ID, 'rowData'),
     Output(Table.COMPONENT_ID, 'columnDefs'),
-    Input(Filter.FILTER_BUTTON_ID, 'n_clicks'),
-    State(Filter.TYPE_SELECT_ID, 'value'),
-    State(Filter.COLUMN_SELECT_ID, 'value'),
-    State(Filter.OPERATOR_SELECT_ID, 'value'),
-    State(Filter.BASIC_VALUE_TEXT_ID, 'value'),
-    State(Filter.ADVANCED_VALUE_TEXT_ID, 'value'),
+    Input(NavBar.FILTER_BUTTON_ID, 'n_clicks'),
+    State(BasicFilter.TYPE_SELECT_ID, 'value'),
+    State(BasicFilter.COLUMN_SELECT_ID, 'value'),
+    State(BasicFilter.OPERATOR_SELECT_ID, 'value'),
+    State(BasicFilter.BASIC_VALUE_TEXT_ID, 'value'),
+    State(BasicFilter.ADVANCED_VALUE_TEXT_ID, 'value'),
 )
 def filter_setores(basico_n_clicks, filtro_tipo, filtro_coluna, filtro_operacao, filtro_basico_valor, filtro_avancado_valor):
     print('Filtrando setores...')
@@ -64,7 +64,7 @@ def filter_setores(basico_n_clicks, filtro_tipo, filtro_coluna, filtro_operacao,
 
 @callback(
     Output(Map.LIMITE_MUNICIPAL_PANE_ID, 'children'),
-    Input(Layout.INITIAL_LOAD_SPAN_ID, 'children')
+    Input(BaseLayout.INITIAL_LOAD_SPAN_ID, 'children')
 )
 def initial_load(children):
     geobuf = MunicipioService(dao).get_geobuf()
@@ -128,9 +128,9 @@ def update_checked_layers(value):
     return value
 
 @callback(
-    Output(Filter.ADVANCED_FILTER_COLLAPSE_ID, 'is_open'),
-    Output(Filter.BASIC_FILTER_COLLAPPSE_ID, 'is_open'),
-    Input(Filter.TYPE_SELECT_ID, 'value')
+    Output(BasicFilter.ADVANCED_FILTER_COLLAPSE_ID, 'is_open'),
+    Output(BasicFilter.BASIC_FILTER_COLLAPPSE_ID, 'is_open'),
+    Input(BasicFilter.TYPE_SELECT_ID, 'value')
 )
 def selecionar_filtro(filtro_tipo_value: str) -> tuple[bool, bool]:
     if filtro_tipo_value == 'Básico':
@@ -145,3 +145,40 @@ def export_data_as_csv(n_clicks):
     if n_clicks:
         return True
     return False
+
+
+tyle_layer_theme1 = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
+tyle_layer_theme2 = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
+map_constructor = Map()
+
+
+@callback(
+    Output('map', 'children'),
+    Input('theme-store', 'data'),
+    prevent_initial_call=True
+)
+def update_tile_layer(theme):
+    tyle_layer = tyle_layer_theme1 if theme else tyle_layer_theme2
+    url = tyle_layer
+    attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
+
+    return map_constructor.generate_map_children(url, attribution)
+
+@callback(
+    Output('theme-store', 'data'),
+    Input(ThemeSwitchAIO.ids.switch("theme"), 'value'),
+    prevent_initial_call=True
+)
+def update_theme(theme_value):
+    
+    return theme_value
+
+@callback(
+    Output("offcanvas-placement", "is_open"),
+    Input("open-offcanvas-placement", "n_clicks"),
+    [State("offcanvas-placement", "is_open")],
+)
+def toggle_offcanvas(n1, is_open):
+    if n1:
+        return not is_open
+    return is_open
