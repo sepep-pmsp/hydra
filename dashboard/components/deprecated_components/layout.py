@@ -1,9 +1,9 @@
 from dash.html import Div, Span
 
-from view.details_card import DetailsCard
-from view.filter import Filter
-from view.map import Map
-from view.table import Table
+from dashboard.components.deprecated_components.details_card import DetailsCard
+from dashboard.components.deprecated_components.filter import Filter
+from dashboard.components.deprecated_components.map import Map
+from dashboard.components.deprecated_components.table import Table
 
 class Layout:
     INITIAL_LOAD_SPAN_ID='initial_load_span'

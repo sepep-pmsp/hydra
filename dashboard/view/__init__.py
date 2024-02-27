@@ -1,1 +1,0 @@
-from view.layout import Layout
