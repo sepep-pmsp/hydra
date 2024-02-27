@@ -3,6 +3,17 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 class BasicFilter:
+    TYPE_SELECT_ID='filtros_tipo'
+    COLUMN_SELECT_ID='filtro_coluna'
+    OPERATOR_SELECT_ID='filtro_operacao'
+    BASIC_VALUE_TEXT_ID='filtro_basico_valor'
+    ADVANCED_VALUE_TEXT_ID='filtro_avancado_valor'
+    ADVANCED_FILTER_COLLAPSE_ID='filtro_avancado_collapse'
+    BASIC_FILTER_COLLAPPSE_ID='filtro_basico_collapse'
+
+
+
+
     
     def __init__(self, 
                  columns: list[str] = [""], 
@@ -25,10 +36,13 @@ class BasicFilter:
             }
 
         self.ids = {
-            'filter_column_select' : 'filtro_coluna',
-            'filter_operation_select' : 'filtro_operacao',
-            'filter_type_select' : 'filtros_tipo',
-            'filter_basic_value' : 'filtro_basico_valor'
+            'filter_column_select' : BasicFilter.COLUMN_SELECT_ID,
+            'filter_operation_select' : BasicFilter.OPERATOR_SELECT_ID,
+            'filter_type_select' : BasicFilter.TYPE_SELECT_ID,
+            'filter_basic_value' : BasicFilter.BASIC_VALUE_TEXT_ID,
+            'filter_advanced_value' : BasicFilter.ADVANCED_VALUE_TEXT_ID,
+            'advanced_filter_collapse' : BasicFilter.ADVANCED_FILTER_COLLAPSE_ID,
+            'basic_filter_collapse' : BasicFilter.BASIC_FILTER_COLLAPPSE_ID
             
 
         }
@@ -72,7 +86,7 @@ class BasicFilter:
                 ],
                 className='d-md-flex'
             ),
-            id="filtro_basico_collapse",
+            id=self.ids.get("basic_filter_collapse"),
             is_open=False
         )
     
@@ -102,7 +116,7 @@ class BasicFilter:
     def generate_advanced_filter(self):
         return dbc.Input(
             type='text',
-            id="filtro_avancado_valor",
+            id=self.ids.get('filter_advanced_value'),
             value='qtd_domicilios_esgotamento_rio > 0'
         )
         
@@ -111,7 +125,7 @@ class BasicFilter:
             [
                 advanced_filter
             ],
-            id="filtro_avancado_collapse",
+            id=self.ids.get('advanced_filter_collapse'),
             is_open=True
         )
         

@@ -7,6 +7,10 @@ import dash_daq as daq
 
 
 class LayersOffCanvas:
+    
+    OPEN_LAYERS_BUTTON_ID = 'open-offcanvas-placement'
+    OFFCANVAS_ID = 'offcanvas-placement'
+
 
     def __init__(self) -> None:
         
@@ -19,8 +23,8 @@ class LayersOffCanvas:
                             "layer" : "layer_div"}
         
         
-        self.ids = {"on_off_layer_button": "open-offcanvas-placement",
-                    "offcanvas":"offcanvas-placement"}
+        self.ids = {"on_off_layer_button": LayersOffCanvas.OPEN_LAYERS_BUTTON_ID,
+                    "offcanvas": LayersOffCanvas.OFFCANVAS_ID}
         
         
         self.placement = "start"

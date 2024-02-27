@@ -9,6 +9,9 @@ from.details_card import DetailsCard
 
 
 class Tab:
+    MESSAGE_TEXT_ID='message'
+    DOWNLOAD_CSV_BUTTON_ID= 'csv-button'
+
 
     def __init__(self) -> None:
         
@@ -40,10 +43,10 @@ class Tab:
     def generate_tabs_content(self) -> Any :
         first_tab = self.initial_card
         
-        second_tab = dbc.Card([dbc.CardBody(self.table),dbc.CardFooter(dbc.Button("Download CSV", id="csv-button", n_clicks=0))])
+        second_tab = dbc.Card([dbc.CardBody(self.table),dbc.CardFooter(dbc.Button("Download CSV", id=Tab.DOWNLOAD_CSV_BUTTON_ID, n_clicks=0))])
         
         third_tab = dbc.Card([dbc.CardBody([DetailsCard.get_component(), dbc.CardFooter(html.P(
-        id='message',
+        id=Tab.MESSAGE_TEXT_ID,
         className='mx-auto',
     ))])])
         
@@ -71,7 +74,6 @@ class Tab:
     def pipeline(self) -> Any:
 
         tab_content = self.generate_tabs_content()
-        print(tab_content)
         tab = self.generate_tab(tab_content)
         
         return html.Div(tab, className=self.class_names.get("tab_div"))

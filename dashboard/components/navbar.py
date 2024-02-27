@@ -6,6 +6,8 @@ from .filter import BasicFilter
 from .layers_offcanvas import LayersOffCanvas
 
 class NavBar:
+    FILTER_BUTTON_ID='filtro_botao'
+
 
     def __init__(self) -> None:
         
@@ -39,7 +41,7 @@ class NavBar:
             children=[
             self.filter[0],
             self.filter[1],
-            dbc.NavItem(dbc.Button("Filtrar", href="#", id='filtro_botao')),
+            dbc.NavItem(dbc.Button("Filtrar", href="#", id=NavBar.FILTER_BUTTON_ID)),
             
             self.offcanvas_button
         ],

@@ -11,13 +11,14 @@ PLACEHOLDER_TEXT = ("Minim officia enim ipsum elit cillum dolore. Cillum dolor o
             "ex qui elit quis elit laborum non ipsum nisi in tempor. Aliquip id laborum "
             "excepteur laborum cupidatat non consectetur consectetur mollit ut labore ea.")
 
-INITIAL_CARD_ID = "inital_card_div"
 TEXT_TITLE = "Instruções básicas"
 CLASS_NAMES = {"inital_card" : "initial_card p-5 text-white bg-dark rounded-3 ",
                             "initial_card_div" : "initial_card_div",}   
 
 class initialCardFactory:
-   
+    
+    INITIAL_CARD_ID = "inital_card_div"
+
     
     
     def __init__(self, card_id:str=INITIAL_CARD_ID, placeholder_text:str=PLACEHOLDER_TEXT, placeholder_text_title=TEXT_TITLE, class_names = CLASS_NAMES):

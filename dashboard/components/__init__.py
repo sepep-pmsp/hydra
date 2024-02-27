@@ -6,3 +6,5 @@ from .initial_card import initialCardFactory
 from .tab import Tab
 from .table import Table
 from .details_card import DetailsCard
+from .filter import BasicFilter
+from .layout import BaseLayout
