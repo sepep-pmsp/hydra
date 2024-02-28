@@ -1,15 +1,19 @@
 from dash import Dash
-import dash_bootstrap_components as dbc
+from components import (BaseLayout)
 
-from dashboard.components.deprecated_components import Layout
 import controller
 
-# Create example app.
-app = Dash(external_stylesheets=[dbc.themes.MATERIA])
 
-app.layout = Layout.get_layout()
 
-server = app.server
+
+layout = BaseLayout()
+def servir_layout():
+    return layout()
+
+
+app = Dash(external_stylesheets=BaseLayout.get_style_sheets())
+app.layout = servir_layout()
+
 
 if __name__ == '__main__':
     app.run_server(debug=True, port=7777)
