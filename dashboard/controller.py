@@ -161,8 +161,10 @@ def update_tile_layer(theme):
     tyle_layer = tyle_layer_theme1 if theme else tyle_layer_theme2
     url = tyle_layer
     attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
+    
+    map = Map(url= url, attribution= attribution)
 
-    return map_constructor.generate_map_children(url, attribution)
+    return map()
 
 @callback(
     Output('theme-store', 'data'),

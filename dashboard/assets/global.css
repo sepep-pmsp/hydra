@@ -126,3 +126,23 @@ width: 17rem!important;
 .ms-auto.navbar-nav{
     gap: 1rem;
 }
+
+.input_details_fixed{
+    align-items: center;
+    gap: 4rem;
+
+}
+
+.input_details_fixed> input{
+    width: 40%;
+}
+
+.label_details_fixed{
+    width: 100%;
+}
+
+.detalhes_setor_{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

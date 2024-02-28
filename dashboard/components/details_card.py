@@ -1,5 +1,6 @@
 from dash.dcc import Loading
 from dash.html import(
+    Span,
     H2,
     H3,
     Div,
@@ -15,8 +16,8 @@ class DetailsCard:
 
     @staticmethod
     def componente_detalhes_setor(codigo_setor, qtd_domicilios, qtd_domicilios_rede_geral, qtd_domicilios_fossa_rudimentar, qtd_domicilios_esgotamento_rio):
-        titulo = H2(
-            f'Detalhes do setor {str(codigo_setor)}'
+        titulo = H3(
+            [Span("Detalhes do setor: "),Span("{}".format(codigo_setor))],
         )
 
         campos_dict = {
@@ -28,9 +29,9 @@ class DetailsCard:
 
         campos = [
             Div([
-                Label(label),
+                Label(label, class_name="label_details_fixed"),
                 Input(value=value, type='text', readonly='readonly'),
-            ], className='d-flex') for label, value in campos_dict.items()
+            ], className='input_details_fixed d-flex') for label, value in campos_dict.items()
         ]
 
         campos.insert(0, titulo)
