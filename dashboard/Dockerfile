@@ -24,4 +24,4 @@ WORKDIR ${DASH_HOME}
 
 ENTRYPOINT [ "gunicorn" ]
 
-CMD ["app:app"]
+CMD ["app:server"]
