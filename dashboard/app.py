@@ -13,3 +13,4 @@ def servir_layout():
 
 app = Dash(external_stylesheets=BaseLayout.get_style_sheets())
 app.layout = servir_layout()
+server=app.server
