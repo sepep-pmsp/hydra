@@ -11,5 +11,3 @@ logs
 .logs_queue
 .telemetry
 .nux
-docker-compose.yml
-*_enviroment
