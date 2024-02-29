@@ -13,7 +13,3 @@ def servir_layout():
 
 app = Dash(external_stylesheets=BaseLayout.get_style_sheets())
 app.layout = servir_layout()
-
-
-if __name__ == '__main__':
-    app.run_server(debug=True, port=7777)
