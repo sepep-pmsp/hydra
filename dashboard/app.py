@@ -1,0 +1,19 @@
+from dash import Dash
+from components import (BaseLayout)
+
+import controller
+
+
+
+
+layout = BaseLayout()
+def servir_layout():
+    return layout()
+
+
+app = Dash(external_stylesheets=BaseLayout.get_style_sheets())
+app.layout = servir_layout()
+
+
+if __name__ == '__main__':
+    app.run_server(debug=True, port=7777)
