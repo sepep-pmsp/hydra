@@ -1,7 +1,8 @@
-import hashlib
 import json
 import os
 
+
+from .hash import generate_hash_from_bytes
 
 def read_json(file, path=None):
     if path:
@@ -11,5 +12,4 @@ def read_json(file, path=None):
 
 
 def generate_file_hash(file_content: bytes) -> str:
-    readable_hash = hashlib.sha256(file_content).hexdigest()
-    return readable_hash
+    return generate_hash_from_bytes(file_content)
