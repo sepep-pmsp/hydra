@@ -47,7 +47,7 @@ def __build_raw_asset(name, group_name="geosampa_bronze") -> AssetsDefinition:
             if 'SHA256 Hash da camada' in metadata:
                 previous_checksum = metadata['SHA256 Hash da camada'].value
 
-        if previous_checksum != None and checksum != previous_checksum:
+        if previous_checksum == None or checksum != previous_checksum:
             context.log.info(f"A camada {name} foi alterada e será atualizada agora.")
             yield Output(
                 camada,
