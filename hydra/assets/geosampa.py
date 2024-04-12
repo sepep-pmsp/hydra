@@ -8,7 +8,7 @@ from dagster import (
 
 from ..resources import GeosampaClient
 from ..config import GeosampaConfig
-from ..utils.io.hash import generate_hash_from_obj
+from ..utils.io.hash import generate_hash_from_feature_collection
 
 
 def __build_raw_asset(name, group_name="geosampa_bronze") -> AssetsDefinition:
@@ -30,12 +30,10 @@ def __build_raw_asset(name, group_name="geosampa_bronze") -> AssetsDefinition:
 
         assert camada["type"] == "FeatureCollection"
 
-        # Para que o checksum funcione conforme esperado, o timestamp de
-        # consulta dos dados deve ser removido
-        camada_checksum = camada.copy()
-        camada_checksum['timeStamp'] = None
-
-        checksum = generate_hash_from_obj(camada_checksum)
+        # Algumas camadas estão recebendo valores de id aleatórios para as features,
+        # provavelmente ligados ao timestamp da consulta. Por isso, preciso gerar o
+        # hash de checksum usando apenas as geometrias e propriedades de cada feature
+        checksum = generate_hash_from_feature_collection(camada)
 
         materialization_event = context.instance.get_latest_materialization_event(
             AssetKey([name])
