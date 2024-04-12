@@ -114,11 +114,11 @@ services:
       - "traefik.http.routers.dagster.entrypoints=web"
       - "traefik.http.routers.dagster.rule=(Host(`${INTRANET_DOMAIN}`) || Host(`www.${INTRANET_DOMAIN}`)) && PathPrefix(`${DAGSTER_PATH}`)"
       - "traefik.http.services.dagster.loadbalancer.server.port=3000"
-      - "traefik.http.routers.dagster.middlewares=dagster-ratelimit"
+      - "traefik.http.routers.dagster.middlewares=dagster-ratelimit,simpleauth"
       - "traefik.http.middlewares.dagster-ratelimit.ratelimit.average=1000"
       - "traefik.http.middlewares.dagster-ratelimit.ratelimit.period=10s"
       - "traefik.http.middlewares.dagster-ratelimit.ratelimit.burst=500"
-      - "traefik.http.middlewares.test-auth.basicauth.users=${TRAEFIK_BASICAUTH_USERS}"
+      - "traefik.http.middlewares.simpleauth.basicauth.users=${TRAEFIK_BASICAUTH_USERS}"
 
   # This service runs dagster-webserver, which loads your user code from the user code container.
   # Since our instance uses the QueuedRunCoordinator, any runs submitted from the webserver will be put on
