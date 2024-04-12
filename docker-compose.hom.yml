@@ -104,7 +104,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - dagster_network
-      - traefik_network
     depends_on:
       - dagster_db
       - dagster_grpc
@@ -247,6 +246,7 @@ services:
       - "--entrypoints.web.address=:80"
     networks:
       - traefik_network
+      - dagster_network
     ports:
       - "80:80"
       - "8080:8080"
