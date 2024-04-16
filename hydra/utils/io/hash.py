@@ -15,4 +15,4 @@ def generate_hash_from_feature_collection(feat_coll: object) -> str:
 
 def generate_hash_from_bytes(content: bytes) -> str:
     readable_hash = hashlib.sha256(content).hexdigest()
-    return 
+    return readable_hash
