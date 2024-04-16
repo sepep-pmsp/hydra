@@ -81,6 +81,8 @@ services:
       - "3000"
       - -w
       - workspace.yaml
+      - --path-prefix
+      - ${DAGSTER_PATH}
     container_name: dagster_webserver
     expose:
       - 3000
@@ -107,6 +109,16 @@ services:
       - dagster_grpc
       - minio
       - gold_db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dagster.entrypoints=web"
+      - "traefik.http.routers.dagster.rule=(Host(`${INTRANET_DOMAIN}`) || Host(`www.${INTRANET_DOMAIN}`)) && PathPrefix(`${DAGSTER_PATH}`)"
+      - "traefik.http.services.dagster.loadbalancer.server.port=3000"
+      - "traefik.http.routers.dagster.middlewares=dagster-ratelimit,simpleauth"
+      - "traefik.http.middlewares.dagster-ratelimit.ratelimit.average=1000"
+      - "traefik.http.middlewares.dagster-ratelimit.ratelimit.period=10s"
+      - "traefik.http.middlewares.dagster-ratelimit.ratelimit.burst=500"
+      - "traefik.http.middlewares.simpleauth.basicauth.users=${TRAEFIK_BASICAUTH_USERS}"
 
   # This service runs dagster-webserver, which loads your user code from the user code container.
   # Since our instance uses the QueuedRunCoordinator, any runs submitted from the webserver will be put on
@@ -223,6 +235,24 @@ services:
     depends_on:
       - minio
 
+  # This service is responsible for the edge routing of all the other services 
+  traefik:
+    image: "traefik:v3.0"
+    container_name: "traefik"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    networks:
+      - traefik_network
+      - dagster_network
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
 volumes:
   dagster-db-data:
   minio-data:
@@ -235,3 +265,4 @@ networks:
   datalake_network:
     driver: bridge
     name: datalake_network
+  traefik_network:
