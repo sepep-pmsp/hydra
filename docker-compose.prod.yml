@@ -240,6 +240,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.dash.entrypoints=websecure"
       - "traefik.http.routers.dash.rule=Host(`${INTERNET_DOMAIN}`) || Host(`www.${INTERNET_DOMAIN}`)"
+      - "traefik.http.routers.dash.tls.certresolver=main-certificate"
       - "traefik.http.routers.dash.tls=true"
       - "traefik.http.routers.dash.tls.domains[0].main=${INTERNET_DOMAIN}"
       - "traefik.http.routers.dash.tls.domains[1].main=www.${INTERNET_DOMAIN}"
