@@ -1,0 +1,290 @@
+version: "3.7"
+
+services:
+  # This service runs the postgres DB used by dagster for run storage, schedule storage,
+  # and event log storage.
+  dagster_db:
+    image: postgres:11
+    container_name: ${DAGSTER_PG_HOST}
+    environment:
+      POSTGRES_USER: ${DAGSTER_PG_USERNAME}
+      POSTGRES_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      POSTGRES_DB: ${DAGSTER_PG_DB}
+    volumes:
+      - dagster-db-data:/var/lib/postgresql/data
+    networks:
+      - dagster_network
+
+  # This service runs the gRPC server that loads your user code, in both dagster-webserver
+  # and dagster-daemon. By setting DAGSTER_CURRENT_IMAGE to its own image, we tell the
+  # run launcher to use this same image when launching runs in a new container as well.
+  # Multiple containers like this can be deployed separately - each just needs to run on
+  # its own port, and have its own entry in the workspace.yaml file that's loaded by the
+  # webserver.
+  dagster_grpc:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_gRPC
+      args:
+        DAGSTER_HOME: ${DAGSTER_HOME}
+        DAGSTER_MODULE_NAME: ${DAGSTER_MODULE_NAME}
+    container_name: dagster_grpc
+    image: dagster_grpc
+    environment:
+      DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
+      DAGSTER_PG_PORT: ${DAGSTER_PG_PORT}
+      DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
+      DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      DAGSTER_PG_DB: ${DAGSTER_PG_DB}
+      DAGSTER_CURRENT_IMAGE: "dagster_grpc"
+      DAGSTER_GRPC_HOST: "0.0.0.0"
+      DAGSTER_GRPC_PORT: "4000"
+      DAGSTER_WORKING_DIRECTORY: ${DAGSTER_HOME}
+      DAGSTER_MODULE_NAME: ${DAGSTER_MODULE_NAME}
+      DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR: ${DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR}
+      DAGSTER_COMPUTE_LOGS_BUCKET: ${DAGSTER_COMPUTE_LOGS_BUCKET}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BRONZE_BUCKET_NAME: ${MINIO_BRONZE_BUCKET_NAME}
+      MINIO_SILVER_BUCKET_NAME: ${MINIO_SILVER_BUCKET_NAME}
+      MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      GOLD_DB_HOST: ${GOLD_DB_HOST}
+      GOLD_DB_PORT: ${GOLD_DB_PORT}
+      GOLD_DB_USER: ${GOLD_DB_USER}
+      GOLD_DB_PASSWORD: ${GOLD_DB_PASSWORD}
+      GOLD_DB_NAME: ${GOLD_DB_NAME}
+    entrypoint:
+      - dagster
+      - api
+      - grpc
+    restart: always
+    networks:
+      - dagster_network
+      - datalake_network
+
+  # This service runs dagster-webserver, which loads your user code from the user code container.
+  # Since our instance uses the QueuedRunCoordinator, any runs submitted from the webserver will be put on
+  # a queue and later dequeued and launched by dagster-daemon.
+  dagster_webserver:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_dagster
+      args:
+        DAGSTER_HOME: ${DAGSTER_HOME}
+    entrypoint:
+      - dagster-webserver
+      - -h
+      - "0.0.0.0"
+      - -p
+      - "3000"
+      - -w
+      - workspace.yaml
+      - --path-prefix
+      - ${DAGSTER_PATH}
+    container_name: dagster_webserver
+    expose:
+      - 3000
+    environment:
+      DAGSTER_HOME: ${DAGSTER_HOME}
+      DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
+      DAGSTER_PG_PORT: ${DAGSTER_PG_PORT}
+      DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
+      DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      DAGSTER_PG_DB: ${DAGSTER_PG_DB}
+      DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR: ${DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR}
+      DAGSTER_COMPUTE_LOGS_BUCKET: ${DAGSTER_COMPUTE_LOGS_BUCKET}
+      MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - dagster_network
+    depends_on:
+      - dagster_db
+      - dagster_grpc
+      - minio
+      - gold_db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dagster.entrypoints=websecure"
+      - "traefik.http.routers.dagster.rule=(Host(`${INTRANET_DOMAIN}`) || Host(`www.${INTRANET_DOMAIN}`)) && PathPrefix(`${DAGSTER_PATH}`)"
+      - "traefik.http.routers.dagster.tls=true"
+      - "traefik.http.services.dagster.loadbalancer.server.port=3000"
+      - "traefik.http.routers.dagster.middlewares=dagster-ratelimit,simpleauth"
+      - "traefik.http.middlewares.dagster-ratelimit.ratelimit.average=1000"
+      - "traefik.http.middlewares.dagster-ratelimit.ratelimit.period=10s"
+      - "traefik.http.middlewares.dagster-ratelimit.ratelimit.burst=500"
+      - "traefik.http.middlewares.simpleauth.basicauth.users=${TRAEFIK_BASICAUTH_USERS}"
+
+  # This service runs dagster-webserver, which loads your user code from the user code container.
+  # Since our instance uses the QueuedRunCoordinator, any runs submitted from the webserver will be put on
+  # a queue and later dequeued and launched by dagster-daemon.
+  dagster_daemon:
+    build:
+      context: .
+      dockerfile: ./Dockerfile_dagster
+      args:
+        DAGSTER_HOME: ${DAGSTER_HOME}
+    entrypoint:
+      - dagster-daemon
+      - run
+    container_name: dagster_daemon
+    environment:
+      DAGSTER_HOME: ${DAGSTER_HOME}
+      DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
+      DAGSTER_PG_PORT: ${DAGSTER_PG_PORT}
+      DAGSTER_PG_USERNAME: ${DAGSTER_PG_USERNAME}
+      DAGSTER_PG_PASSWORD: ${DAGSTER_PG_PASSWORD}
+      DAGSTER_PG_DB: ${DAGSTER_PG_DB}
+      DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR: ${DAGSTER_LOCAL_ARTIFACT_STORAGE_DIR}
+      DAGSTER_COMPUTE_LOGS_BUCKET: ${DAGSTER_COMPUTE_LOGS_BUCKET}
+      MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - dagster_network
+    depends_on:
+      - dagster_db
+      - dagster_grpc
+
+  # minio for bronze and silver tier database
+  minio:
+    image: minio/minio
+    container_name: ${MINIO_CONTAINER_NAME}
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
+    expose:
+      - 9000
+      - ${MINIO_CONSOLE_PORT}
+    networks:
+      - datalake_network
+    command:
+      - server
+      - /data
+      - --console-address
+      - :${MINIO_CONSOLE_PORT}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minioconsole.entrypoints=websecure"
+      - "traefik.http.routers.minioconsole.rule=Host(`${INTRANET_DOMAIN}`) || Host(`www.${INTRANET_DOMAIN}`)"
+      - "traefik.http.routers.minioconsole.tls=true"
+      - "traefik.http.services.minioconsole.loadbalancer.server.port=${MINIO_CONSOLE_PORT}"
+      - "traefik.http.routers.minioconsole.middlewares=minioconsole-ratelimit"
+      - "traefik.http.middlewares.minioconsole-ratelimit.ratelimit.average=1000"
+      - "traefik.http.middlewares.minioconsole-ratelimit.ratelimit.period=10s"
+      - "traefik.http.middlewares.minioconsole-ratelimit.ratelimit.burst=500"
+
+  # minio client for the creation of bronze and silver tier buckets
+  createbuckets:
+    image: minio/mc
+    container_name: createbuckets
+    depends_on:
+      - minio
+    networks:
+      - datalake_network
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set minio ${MINIO_ENDPOINT_URL} ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc mb minio/${DAGSTER_COMPUTE_LOGS_BUCKET};
+      /usr/bin/mc mb minio/${MINIO_BRONZE_BUCKET_NAME};
+      /usr/bin/mc version enable minio/${MINIO_BRONZE_BUCKET_NAME};
+      /usr/bin/mc mb minio/${MINIO_SILVER_BUCKET_NAME};
+      /usr/bin/mc version enable minio/${MINIO_SILVER_BUCKET_NAME};
+      exit 0;
+      "
+
+  # postgres for gold tier database
+  gold_db:
+    image: postgres:11
+    container_name: ${GOLD_DB_HOST}
+    environment:
+      POSTGRES_USER: ${GOLD_DB_USER}
+      POSTGRES_PASSWORD: ${GOLD_DB_PASSWORD}
+      POSTGRES_DB: ${GOLD_DB_NAME}
+    volumes:
+      - gold-db-data:/var/lib/postgresql/data
+    networks:
+      - datalake_network
+    expose:
+      - ${GOLD_DB_PORT}
+    command: -p ${GOLD_DB_PORT}
+
+  dash:
+    build:
+      context: ./dashboard
+      args:
+        DASH_HOME: ${DASH_HOME}
+        PORT: ${DASH_PORT}
+    container_name: dash
+    environment:
+      MINIO_SILVER_BUCKET_NAME:
+      MINIO_ROOT_USER:
+      MINIO_ROOT_PASSWORD:
+      MINIO_ENDPOINT_URL:
+      PORT: ${DASH_PORT}
+    expose:
+      - ${DASH_PORT}
+    networks:
+      - datalake_network
+    depends_on:
+      - minio
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dash.entrypoints=websecure"
+      - "traefik.http.routers.dash.rule=Host(`${INTERNET_DOMAIN}`) || Host(`www.${INTERNET_DOMAIN}`)"
+      - "traefik.http.routers.dash.tls=true"
+      - "traefik.http.services.dash.loadbalancer.server.port=${DASH_PORT}"
+      - "traefik.http.routers.dash.middlewares=dash-ratelimit"
+      - "traefik.http.middlewares.dash-ratelimit.ratelimit.average=1000"
+      - "traefik.http.middlewares.dash-ratelimit.ratelimit.period=10s"
+      - "traefik.http.middlewares.dash-ratelimit.ratelimit.burst=500"
+
+  # This service is responsible for the edge routing of all the other services 
+  traefik:
+    image: "traefik:v3.0"
+    container_name: "traefik"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.main-certificate.acme.caserver=${LE_ACME_URL}"
+      - "--certificatesresolvers.main-certificate.acme.httpchallenge=true"
+      - "--certificatesresolvers.main-certificate.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.main-certificate.acme.email=${LE_EMAIL}"
+      - "--certificatesresolvers.main-certificate.acme.storage=/letsencrypt/acme.json"
+    networks:
+      - dagster_network
+      - datalake_network
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "traefik-data:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+volumes:
+  dagster-db-data:
+  minio-data:
+  gold-db-data:
+  traefik-data:
+            
+networks:
+  dagster_network:
+    driver: bridge
+    name: dagster_network
+  datalake_network:
+    driver: bridge
+    name: datalake_network
