@@ -144,7 +144,7 @@ services:
       MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-    volumes: # Make docker client accessible so we can terminate containers from the webserver
+    volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - dagster_network
@@ -227,17 +227,15 @@ services:
       PORT: ${DASH_PORT}
     expose:
       - ${DASH_PORT}
-    ports:
-      - ${DASH_PORT}:${DASH_PORT}
     networks:
-      - traefik_network
       - datalake_network
     depends_on:
       - minio
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dash.entrypoints=websecure"
-      - "traefik.http.routers.dash.rule=Host(`${INTRANET_DOMAIN}`) || Host(`www.${INTRANET_DOMAIN}`)"
+      - "traefik.http.routers.dash.rule=Host(`${INTERNET_DOMAIN}`) || Host(`www.${INTERNET_DOMAIN}`)"
+      - "traefik.http.routers.dash.tls=true"
       - "traefik.http.services.dash.loadbalancer.server.port=${DASH_PORT}"
       - "traefik.http.routers.dash.middlewares=dash-ratelimit"
       - "traefik.http.middlewares.dash-ratelimit.ratelimit.average=1000"
@@ -265,6 +263,7 @@ services:
     networks:
       - traefik_network
       - dagster_network
+      - datalake_network
     ports:
       - "80:80"
       - "443:443"
