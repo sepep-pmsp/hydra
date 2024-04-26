@@ -215,8 +215,6 @@ services:
       - datalake_network
     expose:
       - ${GOLD_DB_PORT}
-    ports:
-      - ${GOLD_DB_PORT}:${GOLD_DB_PORT}
     command: -p ${GOLD_DB_PORT}
 
   dash:
