@@ -9,7 +9,7 @@ Aqui você pode consultar tanto os dados básicos dos setores censitários do Ce
 
 No modo básico, basta selecionar a coluna a ser pesquisada, o operador e o valor de comparação.
 
-No modo avançado, você pode escrever suas próprias consultas, incluindo a realização de cálculos matemáticos com cada coluna. Por exemplo, caso queira pesquisar os setores censitários onde mais de 60% dos domicílios possuam ligação à rede geral de esgotamento, pode utilizar a busca "qtd_domicilios_rede_geral/qtd_domicilios > 0.6".
+No modo avançado, você pode escrever suas próprias consultas, incluindo a realização de cálculos matemáticos com cada coluna. Por exemplo, caso queira pesquisar os setores censitários onde menos de 60% dos domicílios possuam ligação à rede geral de esgotamento, pode utilizar a busca "qtd_domicilios_rede_geral/qtd_domicilios < 0.6".
 
 A aba "Dados do filtro" exibe todos os setores censitários que atendem ao filtro desejado. Ao clicar em um dos setores na tabela, ele é destacado no mapa e seus dados são exibidos na aba "Dados do Setor".
 
