@@ -4,12 +4,17 @@ from dash import html
 import dash_daq as daq
 
 
-PLACEHOLDER_TEXT = ("Minim officia enim ipsum elit cillum dolore. Cillum dolor officia "
-            "consequat ullamco aute elit ex est magna magna eiusmod ad. Non qui amet "
-            "pariatur laboris amet cillum amet aute ipsum in nostrud minim. Sint dolor "
-            "duis eu veniam sit do aute in tempor id ex velit. Consequat eiusmod nulla "
-            "ex qui elit quis elit laborum non ipsum nisi in tempor. Aliquip id laborum "
-            "excepteur laborum cupidatat non consectetur consectetur mollit ut labore ea.")
+PLACEHOLDER_TEXT = """
+Aqui você pode consultar tanto os dados básicos dos setores censitários do Censo de 2010, quanto as informações calculadas a partir dos dados georreferenciados obtidos do Geosampa.
+
+No modo básico, basta selecionar a coluna a ser pesquisada, o operador e o valor de comparação.
+
+No modo avançado, você pode escrever suas próprias consultas, incluindo a realização de cálculos matemáticos com cada coluna. Por exemplo, caso queira pesquisar os setores censitários onde mais de 60% dos domicílios possuam ligação à rede geral de esgotamento, pode utilizar a busca "qtd_domicilios_rede_geral/qtd_domicilios > 0.6".
+
+A aba "Dados do filtro" exibe todos os setores censitários que atendem ao filtro desejado. Ao clicar em um dos setores na tabela, ele é destacado no mapa e seus dados são exibidos na aba "Dados do Setor".
+
+Ao clicar em um dos setores no mapa, ele é destacado no mapa e seus dados também são exibidos na aba "Dados do Setor".
+"""
 
 TEXT_TITLE = "Instruções básicas"
 CLASS_NAMES = {"inital_card" : "initial_card p-5 text-white bg-dark rounded-3 ",
@@ -37,9 +42,9 @@ class initialCardFactory:
         
         card_body = dbc.CardBody(
         [
-            html.H3(placeholder_text_title),
-            html.P(placeholder_text),
-
+            html.H3(placeholder_text_title)
+        ] + [
+            html.P(t) for t in placeholder_text.split("\n")
         ],
         
     )
