@@ -163,17 +163,24 @@ services:
       - minio-data:/data
     expose:
       - 9000
-      - 9001
-    ports:
-      - 9000:9000
-      - 9001:9001
+      - ${MINIO_CONSOLE_PORT}
     networks:
       - datalake_network
     command:
       - server
       - /data
       - --console-address
-      - :9001
+      - :${MINIO_CONSOLE_PORT}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minioconsole.entrypoints=websecure"
+      - "traefik.http.routers.minioconsole.rule=Host(`${INTRANET_DOMAIN}`) || Host(`www.${INTRANET_DOMAIN}`)"
+      - "traefik.http.routers.minioconsole.tls=true"
+      - "traefik.http.services.minioconsole.loadbalancer.server.port=${MINIO_CONSOLE_PORT}"
+      - "traefik.http.routers.minioconsole.middlewares=minioconsole-ratelimit"
+      - "traefik.http.middlewares.minioconsole-ratelimit.ratelimit.average=1000"
+      - "traefik.http.middlewares.minioconsole-ratelimit.ratelimit.period=10s"
+      - "traefik.http.middlewares.minioconsole-ratelimit.ratelimit.burst=500"
 
   # minio client for the creation of bronze and silver tier buckets
   createbuckets:
