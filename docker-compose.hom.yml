@@ -231,9 +231,19 @@ services:
     ports:
       - ${DASH_PORT}:${DASH_PORT}
     networks:
+      - traefik_network
       - datalake_network
     depends_on:
       - minio
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dash.entrypoints=web"
+      - "traefik.http.routers.dash.rule=Host(`${INTRANET_DOMAIN}`) || Host(`www.${INTRANET_DOMAIN}`)"
+      - "traefik.http.services.dash.loadbalancer.server.port=${DASH_PORT}"
+      - "traefik.http.routers.dash.middlewares=dash-ratelimit"
+      - "traefik.http.middlewares.dash-ratelimit.ratelimit.average=1000"
+      - "traefik.http.middlewares.dash-ratelimit.ratelimit.period=10s"
+      - "traefik.http.middlewares.dash-ratelimit.ratelimit.burst=500"
 
   # This service is responsible for the edge routing of all the other services 
   traefik:
@@ -266,3 +276,5 @@ networks:
     driver: bridge
     name: datalake_network
   traefik_network:
+    driver: bridge
+    name: traefik_network
