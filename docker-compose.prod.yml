@@ -261,7 +261,6 @@ services:
       - "--certificatesresolvers.main-certificate.acme.email=${LE_EMAIL}"
       - "--certificatesresolvers.main-certificate.acme.storage=/letsencrypt/acme.json"
     networks:
-      - traefik_network
       - dagster_network
       - datalake_network
     ports:
@@ -284,6 +283,3 @@ networks:
   datalake_network:
     driver: bridge
     name: datalake_network
-  traefik_network:
-    driver: bridge
-    name: traefik_network
