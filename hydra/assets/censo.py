@@ -10,6 +10,9 @@ import numpy as np
 from zipfile import ZipFile
 from io import BytesIO, StringIO
 import pandas as pd
+import json
+import itertools
+import geopandas as gpd
 
 from ..config import CensoConfig, CensoFiles
 from ..resources import CensoResource
@@ -39,6 +42,60 @@ def arquivo_zip_censo(
 
     return zip_content
 
+@asset(
+    io_manager_key='bronze_io_manager',
+    group_name= 'censo_2022_bronze'
+)
+
+def arquivo_zip_censo_2022(
+    context: AssetExecutionContext,
+    censo_resource: CensoResource
+) -> bytes:
+    
+    context.log.info(f'Baixando o arquivo zip de {censo_resource.URL_CENSO_2022}')
+
+    zip_content = censo_resource.download_zipfile(censo_year= "2022")
+    zip_hash = generate_file_hash(zip_content)
+
+    context.log.info('Arquivo baixado')
+
+    context.add_output_metadata(
+        metadata={
+            'SHA256 Hash do arquivo': zip_hash,
+        }
+    )
+
+    return zip_content
+
+
+@asset(
+    group_name="censo_2022_bronze",
+    io_manager_key='bronze_io_manager',
+)
+def SP_Malha_Preliminar_2022(
+    context: AssetExecutionContext,
+    arquivo_zip_censo_2022: bytes
+):
+    context.log.info('Lendo o conteúdo do arquivo')
+    with ZipFile(BytesIO(arquivo_zip_censo_2022), "r") as z:
+        for filename in z.namelist():  
+            print(filename)  
+            with z.open(filename) as f:  
+                json_string = [line.decode('latin1').strip()
+                                for line in f.readlines()]
+                context.log.info(f'Arquivo {filename} lido')
+                peek = json_string[:5]
+
+
+    
+    return Output(json_string, 
+                    metadata={
+                    'número de linhas': len(json_string),
+                    f'primeiras 5 linhas': '\n'.join(peek)
+                    })
+
+    
+        
 
 def __build_raw_asset(name: str, groupname: str = 'censo_bronze') -> AssetsDefinition:
     @asset(
@@ -74,6 +131,35 @@ def __build_raw_asset(name: str, groupname: str = 'censo_bronze') -> AssetsDefin
                 f'primeiras {n} linhas': '\n'.join(peek)
             })
     return _raw_asset
+
+@asset(
+    io_manager_key='bronze_io_manager',    
+    group_name='censo_2022_bronze',
+)
+def SP_Malha_Preliminar_2022_digested(
+    context: AssetExecutionContext,
+    SP_Malha_Preliminar_2022:list[str]
+) -> gpd.GeoDataFrame:
+    context.log.info(f'Carregando o JSON Censo 2022')
+
+
+    json_str = ''.join(SP_Malha_Preliminar_2022)
+    json_data = json.loads(json_str)
+    
+    df = gpd.GeoDataFrame.from_features(json_data["features"])
+
+
+    n = 10
+
+    context.add_output_metadata(
+        metadata={
+            'registros': df.shape[0],
+            f'amostra de {n} linhas': MetadataValue.md(df.sample(n).to_markdown()),
+        }
+    )
+
+    return df
+
 
 
 @asset(
@@ -189,3 +275,4 @@ def domicilio01_digest(
 
 globals().update({_asset.get('name'): __build_raw_asset(_asset.get('name'))
                   for _asset in CensoConfig.get_asset_config().get('censo')})
+
