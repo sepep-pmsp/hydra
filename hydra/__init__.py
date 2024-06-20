@@ -24,6 +24,7 @@ from .io import (
 from .schedules import (
     censo_schedule,
     geosampa_schedule,
+    censo_2022_schedule
 )
 
 all_assets = load_assets_from_modules([assets])
@@ -82,6 +83,7 @@ defs = Definitions(
     schedules=[
         geosampa_schedule,
         censo_schedule,
+        censo_2022_schedule
     ],
     resources={
         "bronze_io_manager": bronze_io_manager,

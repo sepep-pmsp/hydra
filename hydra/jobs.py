@@ -23,3 +23,8 @@ censo_job = define_asset_job(
     'censo_job',
     selection=AssetSelection.groups('censo_bronze')
 )
+
+censo_2022_job = define_asset_job(
+    'censo_2022_job',
+    selection=AssetSelection.groups('censo_2022_bronze')
+)
