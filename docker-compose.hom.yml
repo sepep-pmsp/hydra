@@ -28,8 +28,8 @@ services:
       args:
         DAGSTER_HOME: ${DAGSTER_HOME}
         DAGSTER_MODULE_NAME: ${DAGSTER_MODULE_NAME}
-    container_name: dagster_grpc
     image: dagster_grpc
+    container_name: dagster_grpc
     environment:
       DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
       DAGSTER_PG_PORT: ${DAGSTER_PG_PORT}
@@ -73,21 +73,7 @@ services:
       dockerfile: ./Dockerfile_dagster
       args:
         DAGSTER_HOME: ${DAGSTER_HOME}
-    entrypoint:
-      - dagster-webserver
-      - -h
-      - "0.0.0.0"
-      - -p
-      - "3000"
-      - -w
-      - workspace.yaml
-      - --path-prefix
-      - ${DAGSTER_PATH}
     container_name: dagster_webserver
-    expose:
-      - 3000
-    ports:
-      - 3000:3000
     environment:
       DAGSTER_HOME: ${DAGSTER_HOME}
       DAGSTER_PG_HOST: ${DAGSTER_PG_HOST}
@@ -100,6 +86,20 @@ services:
       MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    entrypoint:
+      - dagster-webserver
+      - -h
+      - "0.0.0.0"
+      - -p
+      - "3000"
+      - -w
+      - workspace.yaml
+      - --path-prefix
+      - ${DAGSTER_PATH}
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
     volumes: # Make docker client accessible so we can terminate containers from the webserver
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -129,9 +129,6 @@ services:
       dockerfile: ./Dockerfile_dagster
       args:
         DAGSTER_HOME: ${DAGSTER_HOME}
-    entrypoint:
-      - dagster-daemon
-      - run
     container_name: dagster_daemon
     environment:
       DAGSTER_HOME: ${DAGSTER_HOME}
@@ -145,6 +142,9 @@ services:
       MINIO_ENDPOINT_URL: ${MINIO_ENDPOINT_URL}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    entrypoint:
+      - dagster-daemon
+      - run
     volumes: # Make docker client accessible so we can terminate containers from the webserver
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -160,6 +160,11 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command:
+      - server
+      - /data
+      - --console-address
+      - :9001
     volumes:
       - minio-data:/data
     expose:
@@ -170,20 +175,11 @@ services:
       - 9001:9001
     networks:
       - datalake_network
-    command:
-      - server
-      - /data
-      - --console-address
-      - :9001
 
   # minio client for the creation of bronze and silver tier buckets
   createbuckets:
     image: minio/mc
     container_name: createbuckets
-    depends_on:
-      - minio
-    networks:
-      - datalake_network
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc alias set minio ${MINIO_ENDPOINT_URL} ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
@@ -194,6 +190,10 @@ services:
       /usr/bin/mc version enable minio/${MINIO_SILVER_BUCKET_NAME};
       exit 0;
       "
+    networks:
+      - datalake_network
+    depends_on:
+      - minio
 
   # postgres for gold tier database
   gold_db:
@@ -203,15 +203,15 @@ services:
       POSTGRES_USER: ${GOLD_DB_USER}
       POSTGRES_PASSWORD: ${GOLD_DB_PASSWORD}
       POSTGRES_DB: ${GOLD_DB_NAME}
-    volumes:
-      - gold-db-data:/var/lib/postgresql/data
-    networks:
-      - datalake_network
+    command: -p ${GOLD_DB_PORT}
     expose:
       - ${GOLD_DB_PORT}
     ports:
       - ${GOLD_DB_PORT}:${GOLD_DB_PORT}
-    command: -p ${GOLD_DB_PORT}
+    volumes:
+      - gold-db-data:/var/lib/postgresql/data
+    networks:
+      - datalake_network
 
   dash:
     build:
