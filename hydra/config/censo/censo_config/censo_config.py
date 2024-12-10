@@ -1,4 +1,4 @@
-
+from .censo_files import CensoFiles
 
 class CensoConfig:
     
@@ -52,8 +52,3 @@ class CensoConfig:
                     all_columns.pop(col)
 
         return  all_columns
-    
-class CensoFiles:
-    _SUFFIX = '_SP1'
-    BASICO = f'Basico{_SUFFIX}'
-    DOMICILIO_01 = f'Domicilio01{_SUFFIX}'

@@ -14,7 +14,7 @@ import json
 import itertools
 import geopandas as gpd
 
-from ..config import CensoConfig, CensoFiles
+from ..config.censo import CensoConfig, CensoFiles
 from ..resources import CensoResource
 from ..utils.io.files import generate_file_hash
 
@@ -27,7 +27,7 @@ def arquivo_zip_censo(
     context: AssetExecutionContext,
     censo_resource: CensoResource
 ) -> bytes:
-    context.log.info(f'Baixando o arquivo zip de {censo_resource.URL}')
+    context.log.info(f'Baixando o arquivo zip de {censo_resource.URL_CENSO_2010}')
 
     zip_content = censo_resource.download_zipfile()
     zip_hash = generate_file_hash(zip_content)
