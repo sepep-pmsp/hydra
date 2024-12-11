@@ -16,7 +16,7 @@ import geopandas as gpd
 
 from ..config.censo import CensoConfig, CensoFiles
 from ..resources import CensoResource
-from ..utils.io.files import generate_file_hash
+from ..utils.io.files import generate_file_hash, extract_text_file
 
 
 @asset(
@@ -108,18 +108,16 @@ def __build_raw_asset(name: str, groupname: str = 'censo_bronze') -> AssetsDefin
         context: AssetExecutionContext,
         arquivo_zip_censo: bytes
     ):
-        context.log.info('Lendo o conteúdo do arquivo')
-        zip_file = ZipFile(BytesIO(arquivo_zip_censo))
 
         base_path = 'Base informaçoes setores2010 universo SP_Capital/CSV/'
         file_format = '.csv'
-        csv_file_path = f'{base_path}{name}{file_format}'
-
-        context.log.info(f'Abrindo o csv {csv_file_path}')
-        csv_file = zip_file.open(csv_file_path, 'r')
-        csv_string = [line.decode('latin1').strip()
-                      for line in csv_file.readlines()]
-        context.log.info(f'Arquivo {csv_file_path} lido')
+        csv_string = extract_text_file(
+            zip_content=arquivo_zip_censo,
+            base_path=base_path,
+            file_name=name,
+            file_format=file_format,
+            logger=context.log
+        )
 
         n = 5
         peek = csv_string[:n]
