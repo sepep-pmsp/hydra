@@ -10,7 +10,7 @@ from dagster import (
 
 from .resources import CensoResource
 from .jobs import (
-    censo_job,
+    censo_2010_job,
     censo_2022_job,
     geosampa_job,
 )
@@ -25,11 +25,11 @@ geosampa_schedule = ScheduleDefinition(
 
 
 @schedule(
-    job=censo_job,
+    job=censo_2010_job,
     cron_schedule='0 3 * * *',
     default_status=DefaultScheduleStatus.RUNNING
 )
-def censo_schedule(
+def censo_2010_schedule(
         context: ScheduleEvaluationContext,
         censo_resource: CensoResource,
 ):

@@ -22,7 +22,7 @@ from .io import (
     geo_pandas_parquets3_io_manager
 )
 from .schedules import (
-    censo_schedule,
+    censo_2010_schedule,
     geosampa_schedule,
     censo_2022_schedule
 )
@@ -82,7 +82,7 @@ defs = Definitions(
     assets=all_assets,
     schedules=[
         geosampa_schedule,
-        censo_schedule,
+        censo_2010_schedule,
         censo_2022_schedule
     ],
     resources={

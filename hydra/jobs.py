@@ -19,8 +19,8 @@ geosampa_job = define_asset_job(
     executor_def=exec
 )
 
-censo_job = define_asset_job(
-    'censo_job',
+censo_2010_job = define_asset_job(
+    'censo_2010_job',
     selection=AssetSelection.groups('censo_2010_bronze')
 )
 
