@@ -62,6 +62,7 @@ class Censo2022Config:
                 'V00316'
             ]
         original_columns = [
+                'CD_setor',
                 'CD_SETOR',
                 'SITUACAO',
                 'CD_SIT',
