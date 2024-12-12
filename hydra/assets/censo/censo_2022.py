@@ -12,6 +12,7 @@ import pandas as pd
 
 
 from ...config.censo import (
+    Censo2022Config,
     Censo2022Files,
 )
 from ...resources import CensoResource
@@ -92,49 +93,12 @@ def basico_2022_digest(
 ) -> pd.DataFrame:
     context.log.info(f'Carregando o csv {Censo2022Files.BASICO}')
 
-    dtypes = {
-        'CD_SETOR': object,
-        'SITUACAO': object,
-        'CD_SIT': object,
-        'CD_TIPO': object,
-        'AREA_KM2': float,
-        'CD_REGIAO': object,
-        'NM_REGIAO': object,
-        'CD_UF': object,
-        'NM_UF': object,
-        'CD_MUN': object,
-        'NM_MUN': object,
-        'CD_DIST': object,
-        'NM_DIST': object,
-        'CD_SUBDIST': object,
-        'NM_SUBDIST': object,
-        'CD_BAIRRO': object,
-        'NM_BAIRRO': object,
-        'CD_NU': object,
-        'NM_NU': object,
-        'CD_FCU': object,
-        'NM_FCU': object,
-        'CD_AGLOM': object,
-        'NM_AGLOM': object,
-        'CD_RGINT': object,
-        'NM_RGINT': object,
-        'CD_RGI': object,
-        'NM_RGI': object,
-        'CD_CONCURB': object,
-        'NM_CONCURB': object,
-        'v0001': int,
-        'v0002': int,
-        'v0003': int,
-        'v0004': int,
-        'v0005': float,
-        'v0006': float,
-        'v0007': int
-    }
+    columns = Censo2022Config.get_columns_for_file(Censo2022Files.BASICO)
+    dtypes = {col: object for col in columns}
 
     df = pd.read_csv(
         StringIO('\n'.join(csv_string)),
         sep=';',
-        decimal=',',
         dtype=dtypes
     )
 

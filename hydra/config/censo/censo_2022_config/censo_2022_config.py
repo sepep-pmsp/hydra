@@ -22,6 +22,16 @@ class Censo2022Config:
     
     @staticmethod
     def get_columns_for_file(file:str, supressed_only:bool=False) -> dict:
+        if file == Censo2022Files.BASICO:
+            columns = [
+                'v0001',
+                'v0002',
+                'v0003',
+                'v0004',
+                'v0005',
+                'v0006',
+                'v0007'
+            ]
         if file == Censo2022Files.DOMICILIO_1:
             columns = [
                 'V00001',
@@ -51,16 +61,44 @@ class Censo2022Config:
                 'V00315',
                 'V00316'
             ]
-        original_columns = ['Cod_setor']
+        original_columns = [
+                'CD_SETOR',
+                'SITUACAO',
+                'CD_SIT',
+                'CD_TIPO',
+                'AREA_KM2',
+                'CD_REGIAO',
+                'NM_REGIAO',
+                'CD_UF',
+                'NM_UF',
+                'CD_MUN',
+                'NM_MUN',
+                'CD_DIST',
+                'NM_DIST',
+                'CD_SUBDIST',
+                'NM_SUBDIST',
+                'CD_BAIRRO',
+                'NM_BAIRRO',
+                'CD_NU',
+                'NM_NU',
+                'CD_FCU',
+                'NM_FCU',
+                'CD_AGLOM',
+                'NM_AGLOM',
+                'CD_RGINT',
+                'NM_RGINT',
+                'CD_RGI',
+                'NM_RGI',
+                'CD_CONCURB',
+                'NM_CONCURB'
+            ]
         renamed_columns = {col: file + '_' + col for col in columns}
 
         all_columns = {col: col for col in original_columns}
         all_columns.update(renamed_columns)
 
-        if supressed_only:
-            all_columns.pop('Cod_setor')
-            
-            for col in ['V001', 'V002']:
+        if supressed_only:            
+            for col in original_columns:
                 if col in all_columns.keys():
                     all_columns.pop(col)
 
