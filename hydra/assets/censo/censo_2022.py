@@ -101,18 +101,24 @@ def _open_and_filter_csv(
 
     columns = Censo2022Config.get_columns_for_file(file_name)
     dtypes = {col: object for col in columns}
+    chunksize = 5000
 
-    df = pd.read_csv(
-        StringIO('\n'.join(csv_string)),
-        sep=';',
-        dtype=dtypes
-    )
+    df = pd.DataFrame()
 
-    if cd_mun:
-        df = df[df['CD_MUN'] == cd_mun]
+    for chunk in pd.read_csv(StringIO('\n'.join(csv_string)),
+                             sep=';',
+                             dtype=dtypes,
+                             chunksize=chunksize):
+        if cd_mun:
+            chunk = chunk[chunk['CD_MUN'] == cd_mun]
 
-    if cd_setor:
-        df = df[df['CD_setor'].isin(cd_setor)]
+        if cd_setor:
+            chunk = chunk[chunk['CD_setor'].isin(cd_setor)]
+
+        if df.empty:
+            df = chunk
+        else:
+            df = pd.concat([df, chunk])
 
     n = 10
 
