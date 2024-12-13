@@ -16,7 +16,8 @@ class Censo2022Config:
     def _censo_file_list() -> list:
         files = [
             Censo2022Files.BASICO,
-            Censo2022Files.DOMICILIO_1
+            Censo2022Files.DOMICILIO_1,
+            Censo2022Files.DOMICILIO_2,
         ]
         return files
     
