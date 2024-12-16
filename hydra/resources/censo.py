@@ -18,4 +18,3 @@ class CensoResource(ConfigurableResource):
         r = requests.get(url)
         zip_content = r.content
         return zip_content
-        
