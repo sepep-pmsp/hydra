@@ -119,12 +119,12 @@ def _fill_na_by_nearest_neighbours(
 def setor_censitario_enriched(
     context: AssetExecutionContext,
     df_censo: pd.DataFrame,
-    setor_censitario_2010_digested: GeoDataFrame
+    setor_censitario_2022_digested: GeoDataFrame
 ) -> GeoDataFrame:
     context.log.info(f'Carregando os dados de {CensoFiles.DOMICILIO_01}')
 
     # Primeiro confiro se o tipo das duas colunas de identificação são iguais
-    assert setor_censitario_2010_digested['cd_original_setor_censitario'].dtype == df_censo['Cod_setor'].dtype
+    assert setor_censitario_2022_digested['cd_original_setor_censitario'].dtype == df_censo['Cod_setor'].dtype
 
     # Então filtro as colunas na tabela do censo
     cols = CensoConfig.get_columns_for_file(CensoFiles.DOMICILIO_01)
@@ -135,18 +135,18 @@ def setor_censitario_enriched(
     df_censo = df_censo.rename(columns=cols)
 
     context.log.info(
-        f'Total de registros antes do merge: {setor_censitario_2010_digested.shape[0]}'
+        f'Total de registros antes do merge: {setor_censitario_2022_digested.shape[0]}'
     )
 
     # Dissolvo os registros do geosampa para que o dataset contenha apenas uma linha
     # por setor sensitário de acordo com o código original do censo
-    setor_censitario_2010_digested = setor_censitario_2010_digested.dissolve(
+    setor_censitario_2022_digested = setor_censitario_2022_digested.dissolve(
         by='cd_original_setor_censitario',
         as_index=False
     )[['cd_original_setor_censitario', 'geometry']]
 
     # Faço o merge
-    df_setor_enriched = setor_censitario_2010_digested.merge(
+    df_setor_enriched = setor_censitario_2022_digested.merge(
         df_censo,
         how='left',
         left_on='cd_original_setor_censitario',
