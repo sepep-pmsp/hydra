@@ -7,24 +7,27 @@ from dagster import (
     asset,
 )
 import numpy as np
-from zipfile import ZipFile
-from io import BytesIO, StringIO
+from io import StringIO
 import pandas as pd
 
-from ..config import CensoConfig, CensoFiles
-from ..resources import CensoResource
-from ..utils.io.files import generate_file_hash
+from ...config.censo import (
+    CensoConfig,
+    CensoFiles,
+)
+from ...resources import CensoResource
+from ...utils.io.files import generate_file_hash, extract_text_file
 
 
 @asset(
     io_manager_key='bronze_io_manager',
-    group_name='censo_bronze',
+    group_name='censo_2010_bronze',
 )
 def arquivo_zip_censo(
     context: AssetExecutionContext,
     censo_resource: CensoResource
 ) -> bytes:
-    context.log.info(f'Baixando o arquivo zip de {censo_resource.URL}')
+    context.log.info(
+        f'Baixando o arquivo zip de {censo_resource.URL_CENSO_2010}')
 
     zip_content = censo_resource.download_zipfile()
     zip_hash = generate_file_hash(zip_content)
@@ -40,7 +43,7 @@ def arquivo_zip_censo(
     return zip_content
 
 
-def __build_raw_asset(name: str, groupname: str = 'censo_bronze') -> AssetsDefinition:
+def _build_raw_asset(name: str, groupname: str = 'censo_2010_bronze') -> AssetsDefinition:
     @asset(
         name=name,
         group_name=groupname,
@@ -51,18 +54,16 @@ def __build_raw_asset(name: str, groupname: str = 'censo_bronze') -> AssetsDefin
         context: AssetExecutionContext,
         arquivo_zip_censo: bytes
     ):
-        context.log.info('Lendo o conteúdo do arquivo')
-        zip_file = ZipFile(BytesIO(arquivo_zip_censo))
 
         base_path = 'Base informaçoes setores2010 universo SP_Capital/CSV/'
         file_format = '.csv'
-        csv_file_path = f'{base_path}{name}{file_format}'
-
-        context.log.info(f'Abrindo o csv {csv_file_path}')
-        csv_file = zip_file.open(csv_file_path, 'r')
-        csv_string = [line.decode('latin1').strip()
-                      for line in csv_file.readlines()]
-        context.log.info(f'Arquivo {csv_file_path} lido')
+        csv_string = extract_text_file(
+            zip_content=arquivo_zip_censo,
+            base_path=base_path,
+            file_name=name,
+            file_format=file_format,
+            logger=context.log
+        )
 
         n = 5
         peek = csv_string[:n]
@@ -79,7 +80,7 @@ def __build_raw_asset(name: str, groupname: str = 'censo_bronze') -> AssetsDefin
 @asset(
     io_manager_key='bronze_io_manager',
     ins={'csv_string': AssetIn(key=CensoFiles.BASICO)},
-    group_name='censo_bronze',
+    group_name='censo_2010_bronze',
 )
 def basico_digest(
     context: AssetExecutionContext,
@@ -137,7 +138,7 @@ def basico_digest(
 @asset(
     io_manager_key='bronze_io_manager',
     ins={'csv_string': AssetIn(key=CensoFiles.DOMICILIO_01)},
-    group_name='censo_bronze',
+    group_name='censo_2010_bronze',
 )
 def domicilio01_digest(
     context: AssetExecutionContext,
@@ -187,5 +188,5 @@ def domicilio01_digest(
     return df
 
 
-globals().update({_asset.get('name'): __build_raw_asset(_asset.get('name'))
+globals().update({_asset.get('name'): _build_raw_asset(_asset.get('name'))
                   for _asset in CensoConfig.get_asset_config().get('censo')})
