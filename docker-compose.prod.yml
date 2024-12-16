@@ -56,7 +56,6 @@ services:
       GOLD_DB_USER: ${GOLD_DB_USER}
       GOLD_DB_PASSWORD: ${GOLD_DB_PASSWORD}
       GOLD_DB_NAME: ${GOLD_DB_NAME}
-      DUCKDB_PATH:
     entrypoint:
       - dagster
       - api
@@ -100,9 +99,7 @@ services:
       - ${DAGSTER_PATH}
     expose:
       - 3000
-    ports:
-      - 3000:3000
-    volumes: # Make docker client accessible so we can terminate containers from the webserver
+    volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - dagster_network
@@ -114,8 +111,9 @@ services:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dagster.entrypoints=web"
+      - "traefik.http.routers.dagster.entrypoints=websecure"
       - "traefik.http.routers.dagster.rule=(Host(`${INTRANET_DOMAIN}`) || Host(`www.${INTRANET_DOMAIN}`)) && PathPrefix(`${DAGSTER_PATH}`)"
+      - "traefik.http.routers.dagster.tls=true"
       - "traefik.http.services.dagster.loadbalancer.server.port=3000"
       - "traefik.http.routers.dagster.middlewares=dagster-ratelimit,simpleauth"
       - "traefik.http.middlewares.dagster-ratelimit.ratelimit.average=1000"
@@ -148,7 +146,7 @@ services:
     entrypoint:
       - dagster-daemon
       - run
-    volumes: # Make docker client accessible so we can terminate containers from the webserver
+    volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - dagster_network
@@ -168,18 +166,25 @@ services:
       - server
       - /data
       - --console-address
-      - :9001
-    volumes:
-      - minio-data:/data
+      - :${MINIO_CONSOLE_PORT}
     expose:
       - 9000
-      - 9001
-    ports:
-      - 9000:9000
-      - 9001:9001
+      - ${MINIO_CONSOLE_PORT}
+    volumes:
+      - minio-data:/data
     networks:
       - datalake_network
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minioconsole.entrypoints=websecure"
+      - "traefik.http.routers.minioconsole.rule=Host(`${INTRANET_DOMAIN}`) || Host(`www.${INTRANET_DOMAIN}`)"
+      - "traefik.http.routers.minioconsole.tls=true"
+      - "traefik.http.services.minioconsole.loadbalancer.server.port=${MINIO_CONSOLE_PORT}"
+      - "traefik.http.routers.minioconsole.middlewares=minioconsole-ratelimit"
+      - "traefik.http.middlewares.minioconsole-ratelimit.ratelimit.average=1000"
+      - "traefik.http.middlewares.minioconsole-ratelimit.ratelimit.period=10s"
+      - "traefik.http.middlewares.minioconsole-ratelimit.ratelimit.burst=500"
 
   # minio client for the creation of bronze and silver tier buckets
   createbuckets:
@@ -211,8 +216,6 @@ services:
     command: -p ${GOLD_DB_PORT}
     expose:
       - ${GOLD_DB_PORT}
-    ports:
-      - ${GOLD_DB_PORT}:${GOLD_DB_PORT}
     volumes:
       - gold-db-data:/var/lib/postgresql/data
     networks:
@@ -234,18 +237,19 @@ services:
       PORT: ${DASH_PORT}
     expose:
       - ${DASH_PORT}
-    ports:
-      - ${DASH_PORT}:${DASH_PORT}
     networks:
-      - traefik_network
       - datalake_network
     depends_on:
       - minio
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dash.entrypoints=web"
-      - "traefik.http.routers.dash.rule=Host(`${INTRANET_DOMAIN}`) || Host(`www.${INTRANET_DOMAIN}`)"
+      - "traefik.http.routers.dash.entrypoints=websecure"
+      - "traefik.http.routers.dash.rule=Host(`${INTERNET_DOMAIN}`) || Host(`www.${INTERNET_DOMAIN}`)"
+      - "traefik.http.routers.dash.tls.certresolver=main-certificate"
+      - "traefik.http.routers.dash.tls=true"
+      - "traefik.http.routers.dash.tls.domains[0].main=${INTERNET_DOMAIN}"
+      - "traefik.http.routers.dash.tls.domains[1].main=www.${INTERNET_DOMAIN}"
       - "traefik.http.services.dash.loadbalancer.server.port=${DASH_PORT}"
       - "traefik.http.routers.dash.middlewares=dash-ratelimit"
       - "traefik.http.middlewares.dash-ratelimit.ratelimit.average=1000"
@@ -261,20 +265,31 @@ services:
       - "--providers.docker"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
-    networks:
-      - traefik_network
-      - dagster_network
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.main-certificate.acme.caserver=${LE_ACME_URL}"
+      - "--certificatesresolvers.main-certificate.acme.httpchallenge=true"
+      - "--certificatesresolvers.main-certificate.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.main-certificate.acme.email=${LE_EMAIL}"
+      - "--certificatesresolvers.main-certificate.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
-      - "8080:8080"
+      - "443:443"
     volumes:
+      - "traefik-data:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - dagster_network
+      - datalake_network
     restart: always
 
 volumes:
   dagster-db-data:
   minio-data:
   gold-db-data:
+  traefik-data:
             
 networks:
   dagster_network:
@@ -283,6 +298,3 @@ networks:
   datalake_network:
     driver: bridge
     name: datalake_network
-  traefik_network:
-    driver: bridge
-    name: traefik_network
