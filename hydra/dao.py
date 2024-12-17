@@ -117,7 +117,7 @@ class DuckDBS3():
         if not len(geometry_columns):
             return ''
 
-        geom_repl_str = [f'ST_AsText({g}) AS {g}' for g in geometry_columns]
+        geom_repl_str = [f'ST_AsText(ST_GeomFromWKB({g})) AS {g}' for g in geometry_columns]
         replace_str = f'REPLACE ({", ".join(geom_repl_str)})'
 
         return replace_str
@@ -127,7 +127,7 @@ class DuckDBS3():
         s3_path = self._get_s3_path_for(table_name)
         self.logger.info(f'Gerando query para o arquivo {s3_path}...')
             
-        table = self.connection.table(table_name)
+        table = self.connection.table(s3_path)
 
         geom_fix = self._geometry_columns_load_fix(geometry_columns, table)
 
