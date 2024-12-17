@@ -105,28 +105,31 @@ class DuckDBS3():
 
         return s3_path
 
-    def _geometry_columns_load_fix(self, geometry_columns: list[str]) -> str:
+    def _geometry_columns_load_fix(self, geometry_columns: list[str], table:DuckDBPyRelation) -> str:
         if geometry_columns == None:
-            return ''
+            geometry_columns = [None]
 
         geometry_columns = list(filter(None, geometry_columns))
 
         if not len(geometry_columns):
+            geometry_columns = [col for col, type in zip(table.columns, table.dtypes) if type == 'GEOMETRY']
+
+        if not len(geometry_columns):
             return ''
 
-        geom_exclude = 'EXCLUDE (' + \
-            ', '.join([f'{col}' for col in geometry_columns]) + ')'
-        geom_as_text = ', '.join(
-            [f'ST_AsText(ST_GeomFromWKB({col})) AS {col}' for col in geometry_columns])
-        geom_fix = f'{geom_exclude}, {geom_as_text}'
-        return geom_fix
+        geom_repl_str = [f'ST_AsText({g}) AS {g}' for g in geometry_columns]
+        replace_str = f'REPLACE ({", ".join(geom_repl_str)})'
+
+        return replace_str
 
     def load_parquet(self, table_name: str, geometry_columns: list[str] = None) -> DuckDBPyRelation:
 
         s3_path = self._get_s3_path_for(table_name)
         self.logger.info(f'Gerando query para o arquivo {s3_path}...')
+            
+        table = self.connection.table(table_name)
 
-        geom_fix = self._geometry_columns_load_fix(geometry_columns)
+        geom_fix = self._geometry_columns_load_fix(geometry_columns, table)
 
         sql_query = f'SELECT * {geom_fix} FROM read_parquet("{s3_path}") AS {table_name}'
         self.logger.info('Query gerada:')
