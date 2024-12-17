@@ -8,6 +8,7 @@ from logging import (
     Logger,
     getLogger,
 )
+from json import dumps, loads
 
 
 class DuckDBS3():
@@ -67,30 +68,23 @@ class DuckDBS3():
     def _get_writing_output_log_message(self, path: str) -> str:
         return f"Writing S3 object at: {path}"
 
-    def _geometry_columns_save_fix(self, geometry_columns: list[str]) -> str:
+    def _geometry_columns_save_fix(self, rel: DuckDBPyRelation, geometry_columns: list[str]) -> str:
+        if geometry_columns == None:
+            geometry_columns = [None]
+
         geometry_columns = list(filter(None, geometry_columns))
 
         if not len(geometry_columns):
             return ''
 
-        # O DuckDB ainda não trabalho com arquivos no formato GeopParquet, por isso transformo a geometria
-        # para salvar um parquet "compatível" de acordo com a especificação
-        # em https://github.com/opengeospatial/geoparquet/blob/main/format-specs/compatible-parquet.md
-        geom_as_blob = ', '.join(
-            [f"ST_AsWKB(ST_FlipCoordinates(ST_Transform(ST_GeomFromText({col}), 'EPSG:31983', 'EPSG:4326'))) AS {col}"
+        # O DuckDB trabalha parcialmente com arquivos GeopParquet, mas
+        # aceita apenas o CRS padrão, OGC:CRS84. Mais detalhes em
+        # https://github.com/duckdb/duckdb/pull/12503
+        transform_str = ', '.join(
+            [f"ST_Transform({col}, 'EPSG:31983', 'OGC:CRS84') AS {col}"
              for col in geometry_columns])
 
-        return f' , {geom_as_blob}'
-
-    def _to_compatible_geoparquet(self, rel: DuckDBPyRelation, geometry_columns: list[str] = None) -> DuckDBPyRelation:
-        geometry_columns = geometry_columns if geometry_columns != None else []
-        other_columns = [
-            col for col in rel.columns if col not in geometry_columns]
-        other_columns = ', '.join(other_columns)
-
-        geom_as_blob = self._geometry_columns_save_fix(geometry_columns)
-
-        return rel.select(f'{other_columns}{geom_as_blob}')
+        return f'REPLACE ({transform_str})'
 
     def save_parquet(self, table_name: str, rel: DuckDBPyRelation, geometry_columns: list[str] = None, **kwargs) -> str:
 
@@ -100,36 +94,65 @@ class DuckDBS3():
         self.logger.info(f'Columns: {rel.columns}')
         self.logger.info(f'Code to run: {rel.explain()}')
 
-        self._to_compatible_geoparquet(
-            rel, geometry_columns).to_parquet(s3_path, **kwargs)
+        geom_fix = self._geometry_columns_save_fix(
+            rel=rel, geometry_columns=geometry_columns)
+        rel.select(f'* {geom_fix}').to_parquet(s3_path, **kwargs)
 
         return s3_path
 
-    def _geometry_columns_load_fix(self, geometry_columns: list[str], table:DuckDBPyRelation) -> str:
+    def _get_geometry_columns_crs(
+            self,
+            s3_path: str,
+            geometry_columns: list[str]) -> dict:
+
+        sql = ("SELECT value "
+               f"FROM parquet_kv_metadata('{s3_path}') "
+               "WHERE key = 'geo'")
+        geo_metadata = loads(self.connection.sql(sql).fetchone()[0])
+
+        cols_crs = dict()
+        for col in geometry_columns:
+            col_crs = geo_metadata['columns'][col]['crs']
+            cols_crs.update({col: dumps(col_crs)})
+        
+        return cols_crs
+
+    def _geometry_columns_load_fix(
+            self,
+            geometry_columns: list[str],
+            s3_path: str,
+            default_crs:str = 'EPSG:31983') -> str:
         if geometry_columns == None:
             geometry_columns = [None]
 
         geometry_columns = list(filter(None, geometry_columns))
 
         if not len(geometry_columns):
-            geometry_columns = [col for col, type in zip(table.columns, table.dtypes) if type == 'GEOMETRY']
+            table = self.connection.table(s3_path).limit(1)
+            geometry_columns = [col for col, type in zip(
+                table.columns, table.dtypes) if type == 'GEOMETRY']
 
         if not len(geometry_columns):
             return ''
 
-        geom_repl_str = [f'ST_AsText(ST_GeomFromWKB({g})) AS {g}' for g in geometry_columns]
+        geom_cols_crs = self._get_geometry_columns_crs(s3_path,
+                                                       geometry_columns)
+
+        geom_repl_str = [
+            f"ST_Transform({col}, '{crs}', '{default_crs}') AS {col}"
+            for col, crs in geom_cols_crs.items()]
         replace_str = f'REPLACE ({", ".join(geom_repl_str)})'
 
         return replace_str
 
-    def load_parquet(self, table_name: str, geometry_columns: list[str] = None) -> DuckDBPyRelation:
+    def load_parquet(self,
+                     table_name: str,
+                     geometry_columns: list[str] = None) -> DuckDBPyRelation:
 
         s3_path = self._get_s3_path_for(table_name)
         self.logger.info(f'Gerando query para o arquivo {s3_path}...')
-            
-        table = self.connection.table(s3_path)
 
-        geom_fix = self._geometry_columns_load_fix(geometry_columns, table)
+        geom_fix = self._geometry_columns_load_fix(geometry_columns, s3_path)
 
         sql_query = f'SELECT * {geom_fix} FROM read_parquet("{s3_path}") AS {table_name}'
         self.logger.info('Query gerada:')
