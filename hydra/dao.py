@@ -13,10 +13,13 @@ from json import dumps, loads
 
 class DuckDBS3():
     '''
-    Classe criada para carregar e salvar os GeoDataFrames como arquivos parquet num bucket S3.
+    Classe criada para carregar e salvar os GeoDataFrames como arquivos 
+    parquet num bucket S3.
 
-    A princípio, funciona apenas recebendo todas as configurações de acesso (endpoint, access key e secret) nas configurações iniciais.
-    Futuramente, pode ser modificado para construir uma sessão com os valores padrão caso não receba os parâmetros.
+    A princípio, funciona apenas recebendo todas as configurações de 
+    acesso (endpoint, access key e secret) nas configurações iniciais.
+    Futuramente, pode ser modificado para construir uma sessão com os 
+    valores padrão caso não receba os parâmetros.
     '''
 
     def __init__(
@@ -68,7 +71,9 @@ class DuckDBS3():
     def _get_writing_output_log_message(self, path: str) -> str:
         return f"Writing S3 object at: {path}"
 
-    def _geometry_columns_save_fix(self, rel: DuckDBPyRelation, geometry_columns: list[str]) -> str:
+    def _geometry_columns_save_fix(self,
+                                   rel: DuckDBPyRelation,
+                                   geometry_columns: list[str]) -> str:
         if geometry_columns == None:
             geometry_columns = [None]
 
@@ -86,7 +91,11 @@ class DuckDBS3():
 
         return f'REPLACE ({transform_str})'
 
-    def save_parquet(self, table_name: str, rel: DuckDBPyRelation, geometry_columns: list[str] = None, **kwargs) -> str:
+    def save_parquet(self,
+                     table_name: str,
+                     rel: DuckDBPyRelation,
+                     geometry_columns: list[str] = None,
+                     **kwargs) -> str:
 
         s3_path = self._get_s3_path_for(table_name)
 
@@ -112,8 +121,13 @@ class DuckDBS3():
 
         cols_crs = dict()
         for col in geometry_columns:
-            col_crs = geo_metadata['columns'][col]['crs']
-            cols_crs.update({col: dumps(col_crs)})
+            if 'crs' in geo_metadata['columns'][col]:
+                col_crs = geo_metadata['columns'][col]['crs']
+                col_crs_authority = col_crs['id']['authority']
+                col_crs_code = col_crs['id']['code']
+                cols_crs.update({col: f'{col_crs_authority}:{col_crs_code}'})
+            else:
+                cols_crs.update({col: 'OGC:CRS84'})
         
         return cols_crs
 
@@ -140,8 +154,11 @@ class DuckDBS3():
 
         geom_repl_str = [
             f"ST_Transform({col}, '{crs}', '{default_crs}') AS {col}"
-            for col, crs in geom_cols_crs.items()]
-        replace_str = f'REPLACE ({", ".join(geom_repl_str)})'
+            for col, crs in geom_cols_crs.items()
+            if crs.lower() != default_crs.lower()]
+        
+        replace_str = (f'REPLACE ({", ".join(geom_repl_str)})'
+                       if len(geom_repl_str) else '')
 
         return replace_str
 
@@ -154,7 +171,8 @@ class DuckDBS3():
 
         geom_fix = self._geometry_columns_load_fix(geometry_columns, s3_path)
 
-        sql_query = f'SELECT * {geom_fix} FROM read_parquet("{s3_path}") AS {table_name}'
+        sql_query = (f'SELECT * {geom_fix} '
+                     f'FROM read_parquet("{s3_path}") AS {table_name}')
         self.logger.info('Query gerada:')
         self.logger.info(sqlparse.format(
             sql_query, reindent=True, keyword_case='upper'))
