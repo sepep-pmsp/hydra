@@ -16,6 +16,7 @@ from .resources import (
     IBGE_api,
     GeosampaClient,
     CensoResource,
+    DuckDBS3Resource
 )
 from .io import (
     postgres_pandas_io_manager,
@@ -38,6 +39,13 @@ geosampa_client = GeosampaClient()
 
 ibge_api = IBGE_api()
 
+duckdb_s3_resource = DuckDBS3Resource(
+    endpoint=EnvVar('MINIO_ENDPOINT_URL'),
+    access_key=EnvVar('MINIO_ROOT_USER'),
+    secret_key=EnvVar('MINIO_ROOT_PASSWORD'),
+    bucket_name=EnvVar('MINIO_SILVER_BUCKET_NAME'),
+    db_path=EnvVar('DUCKDB_PATH')
+)
 
 # Definições dos managers
 
@@ -93,5 +101,6 @@ defs = Definitions(
         'ibge_api': ibge_api,
         'geosampa_client': geosampa_client,
         'censo_resource': CensoResource(),
+        'duckdb_s3_resource': duckdb_s3_resource
     },
 )

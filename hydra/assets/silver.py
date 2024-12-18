@@ -19,6 +19,7 @@ from hydra.config.censo import (
 )
 from hydra.config.geosampa import GeosampaConfig
 from hydra.utils.geopandas import sjoin_largest
+from hydra.resources import DuckDBS3Resource
 
 
 def _get_log_masssages_setor_censitario(
@@ -384,29 +385,27 @@ intersections = [f'intersection_setor_{asset_}'
 
 
 @asset(
-    io_manager_key='gpd_silver_io_manager',
-    deps=intersections,
+    deps=intersections + ['setor_censitario_enriched'],
     group_name='silver',
 )
 def setor_censitario_enriched_geosampa(
     context: AssetExecutionContext,
-    setor_censitario_enriched: GeoDataFrame,
-) -> GeoDataFrame:
-    # Infelizmente, não encontrei um modo mais elegante de carregar
-    # os assets dinamicamente
-    # O import precisa estar dentro da função, porque no cabeçalho
-    # causaria referência circular
-    from hydra import defs
+    duckdb_s3_resource: DuckDBS3Resource
+) -> None:
+    duckdb_s3_resource.setup()
+    # Como as dependências não são gerenciadas pelo IOManager, preciso carregar
+    # as dependências individualmente
+    rel_setor = duckdb_s3_resource.load_parquet(
+        'setor_censitario_enriched', context, ['geometry'])
 
     # Primero removo os setores sem domicílios particulares
-    setor_censitario_enriched = setor_censitario_enriched[
-        setor_censitario_enriched['missing'] == False]
+    rel_setor = rel_setor.filter('missing = False')
 
     left_id_col = 'cd_original_setor_censitario'
 
     # Depois adapto o gdf de setores para minimizar o tamanho
-    df_inter = setor_censitario_enriched[[
-        'geometry', left_id_col]].copy()
+    setor_keep_columns = f'geometry, {left_id_col}'
+    rel_setor = rel_setor.select(setor_keep_columns)
 
     # Defino a lista de camadas a agregar ao gdf de setores censitários
     schemas_to_add = [
@@ -414,32 +413,93 @@ def setor_censitario_enriched_geosampa(
         if dep_key != 'setor_censitario_enriched'
     ]
 
+    # Crio uma variável para receber a relation com os joins
+    join_rel = None
+
     for dep_key in schemas_to_add:
         schema = dep_key.removesuffix('_digested')
         context.log.info(
             f'Agregando a camada {schema}'
         )
 
-        camada = defs.load_asset_value(dep_key)
-        camada = camada.rename(
-            columns={'intersection_pct': f'{schema}_intersection_pct'})
-        camada = camada.drop(columns=[
+        # Carrego o parquet da camada atual
+        camada = duckdb_s3_resource.load_parquet(dep_key, context)
+        # Defino uma lista de colunas a se descartar
+        # TODO: definir a lista de colunas nas configurações
+        drop_columns = [
             'geometry',
             'right_geometry',
             'intersection',
             'negative_buffer',
-        ])
+            '__index_level_0__',
+        ]
+        # Defino a lista de colunas a manter por exclusão com as colunas a descartar
+        keep_columns = [
+            col for col in camada.columns if col not in drop_columns]
 
-        df_inter = df_inter.merge(camada, how='left', on=left_id_col)
+        # Crio a string de seleção e seleciono as colunas
+        select_str = ', '.join(keep_columns)
+        camada = camada.select(select_str)
+
+        # Defino a lista de colunas a renomear
+        # TODO: renomear colunas nos assets anteriores ou resolver ambiguidades
+        # (nomes de colunas repetidos) automaticamente
+        rename_columns = [
+            'intersection_pct',
+            'dc_classe',
+            'sg_classe',
+            'dc_area_especial',
+            'nm_bacia',
+            'dt_ocorrencia',
+            'dc_tipo_ocorrencia',
+            'cd_identificador_subprefeitura',
+        ]
+        # Crio a nova lista de colunas, renomeando as colunas necessárias
+        keep_columns = [col if col not in rename_columns
+                        else f'{col} AS {dep_key.removeprefix("intersection_setor_")}_{col}'
+                        for col in keep_columns]
+
+        keep_columns.remove(left_id_col)
+
+        # Se a variável estiver vazia é a primeira execução, então crio o join com a partir
+        # da relation de setor censitário
+        if not join_rel:
+            join_condition = f'{rel_setor.alias}.{left_id_col} = {camada.alias}.{left_id_col}'
+
+            keep_columns = ['geometry',
+                            f'{rel_setor.alias}.{left_id_col}'] + keep_columns
+
+            join_rel = rel_setor.join(
+                camada, condition=join_condition, how='left')
+
+        # Caso contrário, já existe algum join anterior, então apenas encadeio um novo join
+        # ao join existente
+        else:
+            join_condition = f'{join_rel.alias}.{left_id_col} = {camada.alias}.{left_id_col}'
+
+            keep_columns = [
+                f'{join_rel.alias}.{col}' for col in join_rel.columns] + keep_columns
+
+            join_rel = join_rel.join(
+                camada, condition=join_condition, how='left')
+
+        # Depois do join, seleciono as colunas desejadas
+        select_str = ', '.join(keep_columns)
+        join_rel = join_rel.select(select_str)
+
+    # Depois de todas as iterações, salvo o parquet
+    duckdb_s3_resource.save_parquet(join_rel, context, geometry_columns=['geometry'])
 
     n = 10
 
-    peek = df_inter.drop(columns='geometry').sample(n)
+    s3_path = duckdb_s3_resource._dao._get_s3_path_for(
+        context.asset_key.to_python_identifier())
+    peek_sql = f'SELECT * EXCLUDE (geometry) FROM "{s3_path}" USING SAMPLE {n};'
+    peek = duckdb_s3_resource._dao.connection.sql(peek_sql).df()
 
     context.add_output_metadata(
         metadata={
-            'registros': df_inter.shape[0],
+            'registros': join_rel.count(left_id_col).fetchone()[0],
             f'amostra de {n} linhas': MetadataValue.md(peek.to_markdown()),
         }
     )
-    return df_inter
