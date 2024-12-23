@@ -56,6 +56,7 @@ services:
       GOLD_DB_USER: ${GOLD_DB_USER}
       GOLD_DB_PASSWORD: ${GOLD_DB_PASSWORD}
       GOLD_DB_NAME: ${GOLD_DB_NAME}
+      DUCKDB_PATH:
     entrypoint:
       - dagster
       - api
