@@ -15,7 +15,7 @@ RUN pip install \
     httpx==0.24.1 \
     tenacity==8.2.3 \
     xmltodict==0.13.0 \
-    duckdb==0.10.1 \
+    duckdb==1.1.3 \
     sqlparse==0.4.4
 
 ARG DAGSTER_HOME
