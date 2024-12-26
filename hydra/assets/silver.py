@@ -8,14 +8,15 @@ from dagster import (
 )
 import base64
 from io import BytesIO
-from geopandas import GeoDataFrame
+from geopandas import GeoDataFrame, GeoSeries
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+from logging import Logger, getLogger
 
 from hydra.config.censo import (
-    CensoConfig,
-    CensoFiles,
+    Censo2022Config,
+    Censo2022Files,
 )
 from hydra.config.geosampa import GeosampaConfig
 from hydra.utils.geopandas import sjoin_largest
@@ -33,7 +34,9 @@ def _get_log_masssages_setor_censitario(
 
     logs = []
     total_registros = df.shape[0]
-    logs.append(f'Total de registros depois do merge: {total_registros}')
+    logs.append(
+        f'Total de registros depois de todos os tratamentos: {total_registros}'
+    )
 
     total_missing = df[df[missing_col] == True].shape[0]
     logs.append(f'Total de missings no merge: {total_missing}')
@@ -86,6 +89,30 @@ def _fill_na_by_buffer(
 
     return new_gdf_to_fill
 
+def _fill_row_by_nearest_neighbours(
+        row_to_fill: GeoSeries,
+        columns_to_fill: list[str],
+        gdf_fill_from: GeoDataFrame,
+        geometry_column: str = 'geometry',
+        neighbours: int = 3
+) -> GeoSeries:
+
+        new_gdf_fill_from = gdf_fill_from.copy()
+        new_gdf_fill_from['dist'] = new_gdf_fill_from.distance(
+            row_to_fill[geometry_column])
+        
+        for col in columns_to_fill:
+            new_gdf_fill_from_ = new_gdf_fill_from.copy()
+            new_gdf_fill_from_ = \
+                    new_gdf_fill_from_[~new_gdf_fill_from_[col].isna()]
+
+            new_gdf_fill_from_ = new_gdf_fill_from_.nsmallest(neighbours, 'dist')
+
+            row_to_fill.loc[col] = new_gdf_fill_from_[col].mean()
+
+        na_cells = row_to_fill.loc[columns_to_fill].isna().sum()
+        assert na_cells == 0, f'A linha {row_to_fill.index} ainda contém {na_cells} células sem dados.'
+        return row_to_fill
 
 def _fill_na_by_nearest_neighbours(
         gdf_to_fill: GeoDataFrame,
@@ -95,49 +122,71 @@ def _fill_na_by_nearest_neighbours(
         neighbours: int = 3
 ) -> GeoDataFrame:
     new_gdf_to_fill = gdf_to_fill.copy()
-
-    for i, row in new_gdf_to_fill.iterrows():
-
-        new_gdf_fill_from = gdf_fill_from.copy()
-        new_gdf_fill_from['dist'] = new_gdf_fill_from.distance(
-            row[geometry_column])
-        new_gdf_fill_from = new_gdf_fill_from.nsmallest(neighbours, 'dist')
-
-        new_gdf_to_fill.loc[i,
-                            columns_to_fill] = new_gdf_fill_from[columns_to_fill].mean()
-
-        na_cells = new_gdf_to_fill.loc[i, columns_to_fill].isna().sum().sum()
-        assert na_cells == 0, f'A linha {i} ainda contém {na_cells} células sem dados.'
+    
+    new_gdf_to_fill = new_gdf_to_fill.apply(
+         _fill_row_by_nearest_neighbours,
+         axis=1,
+         columns_to_fill=columns_to_fill,
+         gdf_fill_from=gdf_fill_from,
+         geometry_column=geometry_column,
+         neighbours=neighbours)
 
     return new_gdf_to_fill
 
+def _merge_censo_2022(
+        setor_censitario_geosampa: GeoDataFrame,
+        df_censo: pd.DataFrame,
+        censo_file:str,
+        setor_censitario_geosampa_key_col: str = 'cd_original_setor_censitario',
+        df_censo_key_col: str = 'CD_SETOR',
+        logger:Logger = getLogger()) -> GeoDataFrame:
+    assert censo_file in Censo2022Config._censo_file_list()
 
-@asset(
-    io_manager_key='gpd_silver_io_manager',
-    ins={'df_censo': AssetIn(key='domicilio01_digest')},
-    group_name='silver',
-)
-def setor_censitario_enriched(
-    context: AssetExecutionContext,
-    df_censo: pd.DataFrame,
-    setor_censitario_2022_digested: GeoDataFrame
-) -> GeoDataFrame:
-    context.log.info(f'Carregando os dados de {CensoFiles.DOMICILIO_01}')
+    logger.info(f'Carregando os dados de {censo_file}')
 
     # Primeiro confiro se o tipo das duas colunas de identificação são iguais
-    assert setor_censitario_2022_digested['cd_original_setor_censitario'].dtype == df_censo['Cod_setor'].dtype
+    assert setor_censitario_geosampa[setor_censitario_geosampa_key_col].dtype == df_censo[df_censo_key_col].dtype
 
     # Então filtro as colunas na tabela do censo
-    cols = CensoConfig.get_columns_for_file(CensoFiles.DOMICILIO_01)
+    cols = Censo2022Config.get_columns_for_file(censo_file)
 
-    df_censo = df_censo[list(cols.keys())]
+    df_censo = df_censo[[col for col in list(cols.keys())
+                         if col in df_censo.columns]]
 
     # Renomeio as colunas para evitar duplicidade
     df_censo = df_censo.rename(columns=cols)
 
-    context.log.info(
-        f'Total de registros antes do merge: {setor_censitario_2022_digested.shape[0]}'
+    logger.info(
+        f'Total de registros antes do merge: {setor_censitario_geosampa.shape[0]}'
     )
+
+    # Faço o merge
+    df_setor_enriched = setor_censitario_geosampa.merge(
+        df_censo,
+        how='left',
+        left_on=setor_censitario_geosampa_key_col,
+        right_on=df_censo_key_col
+    )
+
+    logger.info(
+        f'Total de registros depois do merge: {df_setor_enriched.shape[0]}'
+    )
+    
+    return df_setor_enriched
+
+
+@asset(
+    io_manager_key='gpd_silver_io_manager',
+    ins={'df_censo_basico': AssetIn(key='basico_BR_digested'),
+         'df_censo_domicilio': AssetIn(key='caracteristicas_domicilio2_BR_digested')},
+    group_name='silver',
+)
+def setor_censitario_enriched(
+    context: AssetExecutionContext,
+    df_censo_basico: pd.DataFrame,
+    df_censo_domicilio: pd.DataFrame,
+    setor_censitario_2022_digested: GeoDataFrame
+) -> GeoDataFrame:
 
     # Dissolvo os registros do geosampa para que o dataset contenha apenas uma linha
     # por setor sensitário de acordo com o código original do censo
@@ -145,22 +194,35 @@ def setor_censitario_enriched(
         by='cd_original_setor_censitario',
         as_index=False
     )[['cd_original_setor_censitario', 'geometry']]
-
-    # Faço o merge
-    df_setor_enriched = setor_censitario_2022_digested.merge(
-        df_censo,
-        how='left',
-        left_on='cd_original_setor_censitario',
-        right_on='Cod_setor'
-    )
+    
+    df_setor_enriched = _merge_censo_2022(
+        setor_censitario_2022_digested,
+        df_censo_basico,
+        Censo2022Files.BASICO,
+        logger=context.log)
+    
+    df_setor_enriched = df_setor_enriched.drop(columns=['CD_SETOR'])
+    
+    df_setor_enriched = _merge_censo_2022(
+        df_setor_enriched,
+        df_censo_domicilio,
+        Censo2022Files.DOMICILIO_2,
+        df_censo_key_col='CD_setor',
+        logger=context.log)
 
     # Crio as colunas de missing e supressed
 
-    df_setor_enriched['missing'] = df_setor_enriched['Cod_setor'].isna()
+    df_setor_enriched['missing'] = df_setor_enriched['CD_setor'].isna()
     df_setor_enriched['missing'] = df_setor_enriched['missing'].fillna(False)
 
+    sup_cols = list(Censo2022Config.get_columns_for_file(
+        Censo2022Files.BASICO, supressed_only=True).values())
+    sup_cols += list(Censo2022Config.get_columns_for_file(
+        Censo2022Files.DOMICILIO_2, supressed_only=True).values())
+    sup_cols = [c for c in sup_cols if '_v' in c.lower()]
+
     df_setor_enriched['supressed'] = (df_setor_enriched['missing'] == False) & (
-        df_setor_enriched[CensoFiles.DOMICILIO_01 + '_V012'].isna())
+        df_setor_enriched[sup_cols].isna().any(axis=1))
     df_setor_enriched['supressed'] = df_setor_enriched['supressed'].fillna(
         False)
 
@@ -174,31 +236,30 @@ def setor_censitario_enriched(
     neighbours = 3
     sup_filter = df_setor_enriched['supressed'] == True
     miss_filter = df_setor_enriched['missing'] == True
-    sup_cols = list(CensoConfig.get_columns_for_file(
-        CensoFiles.DOMICILIO_01, supressed_only=True).values())
     subset_cols = sup_cols.copy()
     subset_cols.append('geometry')
 
-    context.log.info(
-        f'Preenchendo os valores suprimidos com base nos {neighbours} vizinhos mais próximos'
-    )
+    # removendo o preenchimento de nulos até pensar em um método mais eficiente
 
-    df_setor_enriched.loc[sup_filter, subset_cols] = _fill_na_by_nearest_neighbours(
-        gdf_to_fill=df_setor_enriched.loc[sup_filter, subset_cols],
-        columns_to_fill=sup_cols,
-        gdf_fill_from=df_setor_enriched.loc[(
-            ~sup_filter) & (~miss_filter), subset_cols],
-        neighbours=neighbours
-    )
+    # context.log.info(
+    #     f'Preenchendo os valores suprimidos com base nos {neighbours} vizinhos mais próximos'
+    # )
 
-    context.log.info(
-        f'Valores preenchidos. Avaliando se ainda existem valores nulos indevidos'
-    )
+    # df_setor_enriched.loc[sup_filter, subset_cols] = _fill_na_by_nearest_neighbours(
+    #     gdf_to_fill=df_setor_enriched.loc[sup_filter, subset_cols],
+    #     columns_to_fill=sup_cols,
+    #     gdf_fill_from=df_setor_enriched.loc[~miss_filter, subset_cols],
+    #     neighbours=neighbours
+    # )
 
-    na_cells = df_setor_enriched.loc[df_setor_enriched['missing']
-                                     == False, sup_cols].isna().sum().sum()
+    # context.log.info(
+    #     f'Valores preenchidos. Avaliando se ainda existem valores nulos indevidos'
+    # )
 
-    assert na_cells == 0, f'O dataset ainda contém {na_cells} células sem dados.'
+    # na_cells = df_setor_enriched.loc[df_setor_enriched['missing']
+    #                                  == False, sup_cols].isna().sum().sum()
+
+    # assert na_cells == 0, f'O dataset ainda contém {na_cells} células sem dados.'
 
     n = 10
 
