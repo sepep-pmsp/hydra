@@ -79,6 +79,11 @@ def _build_raw_asset(name: str,
             logger=context.log
         )
 
+        header = csv_string[0]
+        csv_string = [line for line in csv_string[1:]
+                      if line.lower().startswith('"3550308')]
+        csv_string.insert(0, header)
+
         n = 5
         peek = csv_string[:n]
 
@@ -134,6 +139,47 @@ def _open_and_filter_csv(
 
     return df
 
+def _resolve_conventions(df: DataFrame) -> DataFrame:
+        # Esses arquivos possuem uma supressão de valores com a letra X
+        # A página 26 do arquivo Agregados por setores censitários: 
+        # resultados do universo: nota metodológica n. 06 (disponível no 
+        # link https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&id=2102136
+        # explica em mais detalhes.
+        # Por isso, precisamos tratar esses dados, que deveriam ser 
+        # números inteiros
+        # Nesse momento, apenas substituo por valores nulos para 
+        # facilitar o armazenamento posterior
+        df.replace('X', np.nan, inplace=True)
+        # A página 5 (sumário) da nota metodológica também cita uma 
+        # convenção sobre arredondamento de variáveis, com "-" sendo
+        # utilizado para representar "Dado numérico igual a zero não 
+        # resultante de arredondamento". Apesar de não encontrar nenhum
+        # caso em algumas amostras dos arquivos, vale deixar o 
+        # tratamento para essa convenção
+        df.replace('-', 0, inplace=True)
+
+        # Também substituo ',' por '.', para casos de números decimais
+        df = df.map(lambda x: x.replace(',', '.') if isinstance(x, str) else x)
+
+        # Por último, converto as colunas de variáveis do Censo 
+        # (nomeadas V###) em float64, devido aos nulos
+        variable_columns = [col for col in df.columns if col.lower().startswith('v')]
+        float_dtypes = {col: 'float64' for col in variable_columns}
+        df = df.astype(float_dtypes)
+
+        return df
+
+def _censo_2022_digested_context_output(
+        df: DataFrame,
+        context: AssetExecutionContext,
+        preview_size:int=10) -> None:
+
+        context.add_output_metadata(
+            metadata={
+                'registros': df.shape[0],
+                f'amostra de {preview_size} linhas': MetadataValue.md(df.sample(preview_size).to_markdown()),
+            }
+        )
 
 @asset(
     io_manager_key='bronze_io_manager',
@@ -149,6 +195,10 @@ def basico_BR_digested(
         context=context,
         cd_mun='3550308'
     )
+
+    df = _resolve_conventions(df)
+
+    _censo_2022_digested_context_output(df, context)
 
     return df
 
@@ -171,7 +221,7 @@ def _build_digested_asset(
         name=f'{name}_digested',
         io_manager_key='bronze_io_manager',
         ins={'csv_string': AssetIn(key=name)},
-        group_name='censo_2022_bronze',
+        group_name=group_name,
     )
     def _digested_asset(
             context: AssetExecutionContext,
@@ -185,41 +235,9 @@ def _build_digested_asset(
             cd_setor=cd_setores_sp
         )
 
-        # Esses arquivos possuem uma supressão de valores com a letra X
-        # A página 26 do arquivo Agregados por setores censitários: 
-        # resultados do universo: nota metodológica n. 06 (disponível no 
-        # link https://biblioteca.ibge.gov.br/index.php/biblioteca-catalogo?view=detalhes&id=2102136
-        # explica em mais detalhes.
-        # Por isso, precisamos tratar esses dados, que deveriam ser 
-        # números inteiros
-        # Nesse momento, apenas substituo por valores nulos para 
-        # facilitar o armazenamento posterior
-        df.replace('X', np.nan, inplace=True)
-        # A página 5 (sumário) da nota metodológica também cita uma 
-        # convenção sobre arredondamento de variáveis, com "-" sendo
-        # utilizado para representar "Dado numérico igual a zero não 
-        # resultante de arredondamento". Apesar de não encontrar nenhum
-        # caso em algumas amostras dos arquivos, vale deixar o 
-        # tratamento para essa convenção
-        df.replace('-', 0, inplace=True)
+        df = _resolve_conventions(df)
 
-        # Também substituo ',' por '.', para casos de números decimais
-        df.replace(',', '.', inplace=True)
-
-        # Por último, converto as colunas de variáveis do Censo 
-        # (nomeadas V###) em float64, devido aos nulos
-        variable_columns = [col for col in df.columns if col.startswith('V')]
-        float_dtypes = {col: 'float64' for col in variable_columns}
-        df = df.astype(float_dtypes)
-
-        n = 10
-
-        context.add_output_metadata(
-            metadata={
-                'registros': df.shape[0],
-                f'amostra de {n} linhas': MetadataValue.md(df.sample(n).to_markdown()),
-            }
-        )
+        _censo_2022_digested_context_output(df, context)
 
         return df
     return _digested_asset
