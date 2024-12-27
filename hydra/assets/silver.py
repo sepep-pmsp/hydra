@@ -239,27 +239,28 @@ def setor_censitario_enriched(
     subset_cols = sup_cols.copy()
     subset_cols.append('geometry')
 
-    # removendo o preenchimento de nulos até pensar em um método mais eficiente
+    # O preenchimento dos nulos está levando cerca de 1h30 nos testes,
+    # posteriormente vale pensar em alterar por um método mais eficiente
 
-    # context.log.info(
-    #     f'Preenchendo os valores suprimidos com base nos {neighbours} vizinhos mais próximos'
-    # )
+    context.log.info(
+        f'Preenchendo os valores suprimidos com base nos {neighbours} vizinhos mais próximos'
+    )
 
-    # df_setor_enriched.loc[sup_filter, subset_cols] = _fill_na_by_nearest_neighbours(
-    #     gdf_to_fill=df_setor_enriched.loc[sup_filter, subset_cols],
-    #     columns_to_fill=sup_cols,
-    #     gdf_fill_from=df_setor_enriched.loc[~miss_filter, subset_cols],
-    #     neighbours=neighbours
-    # )
+    df_setor_enriched.loc[sup_filter, subset_cols] = _fill_na_by_nearest_neighbours(
+        gdf_to_fill=df_setor_enriched.loc[sup_filter, subset_cols],
+        columns_to_fill=sup_cols,
+        gdf_fill_from=df_setor_enriched.loc[~miss_filter, subset_cols],
+        neighbours=neighbours
+    )
 
-    # context.log.info(
-    #     f'Valores preenchidos. Avaliando se ainda existem valores nulos indevidos'
-    # )
+    context.log.info(
+        f'Valores preenchidos. Avaliando se ainda existem valores nulos indevidos'
+    )
 
-    # na_cells = df_setor_enriched.loc[df_setor_enriched['missing']
-    #                                  == False, sup_cols].isna().sum().sum()
+    na_cells = df_setor_enriched.loc[df_setor_enriched['missing']
+                                     == False, sup_cols].isna().sum().sum()
 
-    # assert na_cells == 0, f'O dataset ainda contém {na_cells} células sem dados.'
+    assert na_cells == 0, f'O dataset ainda contém {na_cells} células sem dados.'
 
     n = 10
 
