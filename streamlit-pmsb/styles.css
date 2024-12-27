@@ -1,0 +1,90 @@
+/*Imports*/
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+/*Whole page*/
+.stMainBlockContainer  {
+    /*width: 60%;*/
+    margin: 0 auto;
+}
+
+/*PRÉ-HEADER*/
+.st-emotion-cache-1dp5vir {
+    background-image: linear-gradient(90deg, #0d04ff, #0d04ff);
+}
+
+h1, h2, h3, h4{
+    font-family: "Roboto", sans-serif;
+    font-weight: 700;
+    font-style: bold;
+}
+
+h5, h6, p , a , q, li, ul, ol{
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-style: normal;
+}
+
+
+/*Container 1 cabeçalho*/
+.st-key-container1_header{
+    width: 300vw;
+    font-family: 'Roboto', sans-serif;
+    font-size: 17px;
+    font-weight: 100;
+    font-style: italic;
+    text-align: right;
+}
+
+/*  img*/
+.e115fcil1{
+    align-items: center;
+}
+
+
+
+/*Container 2 cabeçalho*/
+
+.st-key-container2_header{ 
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+    width: 50%;
+    margin: 0 auto;
+} 
+
+.e1f1d6gn2{
+    width: 80%;
+    margin: 0 auto;
+}
+
+/* title_numbered_blue_dot */
+.li-blue-dot { 
+    display: flex;
+    width: 100%;
+}
+
+.blue-dot {
+    font-family: "Roboto", sans-serif;
+    font-size: 33px;
+    width: 130px;  
+    height: 130px; 
+    background-color: #0d04ff;
+    color: white;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+}
+
+.title-blue-dot {
+    font-family: "Roboto", sans-serif;
+    font-weight: 700;
+    font-style: bold;
+    font-size: 33px;
+    display: flex;
+    justify-content: flex-start;  
+    align-items: center;
+    vertical-align: bottom; 
+    height: 100%;
+    padding-top: 5px;
+}
+
