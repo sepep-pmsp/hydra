@@ -9,10 +9,10 @@ class Transformer(BaseTransformer):
     def __init__(self, filtro_personalizado: str = None):
         colunas = [
             'cd_original_setor_censitario AS codigo_setor',
-            'Domicilio01_SP1_V002 AS qtd_domicilios',
-            'Domicilio01_SP1_V012 AS qtd_domicilios_rede_geral',
-            'Domicilio01_SP1_V019 AS qtd_domicilios_fossa_rudimentar',
-            'Domicilio01_SP1_V021 AS qtd_domicilios_esgotamento_rio',
+            'basico_BR_v0002 AS qtd_domicilios',
+            'caracteristicas_domicilio2_BR_V00309 AS qtd_domicilios_rede_geral',
+            'caracteristicas_domicilio2_BR_V00312 AS qtd_domicilios_fossa_rudimentar',
+            'caracteristicas_domicilio2_BR_V00314 AS qtd_domicilios_esgotamento_rio',
             'geometry'
         ]
 
