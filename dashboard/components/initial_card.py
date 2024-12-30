@@ -5,7 +5,7 @@ import dash_daq as daq
 
 
 PLACEHOLDER_TEXT = """
-Aqui você pode consultar tanto os dados básicos dos setores censitários do Censo de 2010, quanto as informações calculadas a partir dos dados georreferenciados obtidos do Geosampa.
+Aqui você pode consultar tanto os dados básicos dos setores censitários do Censo de 2022, quanto as informações calculadas a partir dos dados georreferenciados obtidos do Geosampa.
 
 No modo básico, basta selecionar a coluna a ser pesquisada, o operador e o valor de comparação.
 
