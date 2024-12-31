@@ -29,7 +29,9 @@ class DuckDBDAO():
         self.bucket_name = bucket_name
         self.access_key = access_key
         self.secret_key = secret_key
-        self.endpoint = endpoint.removeprefix("http://")
+        self.endpoint = (endpoint
+                         .removeprefix("http://")
+                         .removeprefix("https://"))
         self.db_path = db_path
         self._connection = None
 
@@ -67,20 +69,10 @@ class DuckDBDAO():
 
         s3_path = self._get_s3_path_for(table_name)
         print(f'Gerando query para o arquivo {s3_path}...')
-
-        geom_fix = ''
-
-        if geometry_columns and len(geometry_columns):
-            geom_exclude = 'EXCLUDE (' + \
-                ', '.join([f'{col}' for col in geometry_columns]) + ')'
-            geom_as_text = ', '.join(
-                [f'ST_AsText(ST_GeomFromWKB({col})) AS {col}' for col in geometry_columns])
-            geom_fix = f'{geom_exclude}, {geom_as_text}'
-        sql_query = f'SELECT * {geom_fix} FROM read_parquet("{s3_path}")'
+        rel = self.connection.read_parquet(s3_path)
         print('Query gerada:')
-        print(sql_query)
-
-        gdf = self.connection.sql(sql_query)
-        if not lazy_loading:
-            gdf = self.duckdb_relation_to_gdf(gdf, geometry_columns, default_geometry)
+        print(rel.sql_query())
+        if lazy_loading:
+            return rel
+        gdf = self.duckdb_relation_to_gdf(rel, geometry_columns, default_geometry)
         return gdf
