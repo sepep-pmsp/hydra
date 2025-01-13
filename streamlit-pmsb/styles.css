@@ -1,9 +1,12 @@
 /*Imports*/
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 /*Whole page*/
+
 .stMainBlockContainer  {
     margin: 0 auto;
+    overflow-x: hidden;
 }
+
 
 /*PRÉ-HEADER*/
 .st-emotion-cache-1dp5vir {
@@ -86,3 +89,16 @@ h5, h6, p , a , q, li, ul, ol{
     padding-top: 5px;
 }
 
+/*select box*/
+.st-dy {
+    border-bottom-color: #0d04ff;
+}
+.st-dx {
+    border-top-color:  #0d04ff;
+}
+.st-dw {
+    border-right-color:  #0d04ff;
+}
+.st-dv {
+    border-left-color:  #0d04ff;
+}
