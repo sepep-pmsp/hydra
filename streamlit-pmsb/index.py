@@ -40,7 +40,6 @@ unidades = pd.DataFrame(unidades_list, columns=['name', 'desc', 'gdf_name', 'col
 
 
 # Cabeçalho
-
 container1_header = st.container(border=False, key="container1_header")
 path_img = join("img", "img-init-streamlit.svg")
 container1_header.image(path_img)
