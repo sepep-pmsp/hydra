@@ -45,14 +45,12 @@ h5, h6, p , a , q, li, ul, ol{
 
 /*Container 2 cabeçalho*/
 .st-key-container2_header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%; 
+    width: 50%; 
     margin: 0 auto;
-    max-width: 800px; 
+    max-width: 800px;
+    align-items: center;
     text-align: center;
+    
 }
 
 
@@ -94,11 +92,33 @@ h5, h6, p , a , q, li, ul, ol{
     border-bottom-color: #0d04ff;
 }
 .st-dx {
-    border-top-color:  #0d04ff;
+    border-top-color: #0d04ff;
 }
 .st-dw {
     border-right-color:  #0d04ff;
+    border-left-color: #0d04ff;
 }
-.st-dv {
-    border-left-color:  #0d04ff;
+
+/*popover*/
+.st-emotion-cache-ocsh0s{
+    color: inherit;
+    border-color: inherit;
+    background-color: inherit;
+}
+
+.st-emotion-cache-ocsh0s:hover{
+    border-color: #0d04ff;
+    color: #0d04ff;
+}
+
+.st-emotion-cache-ocsh0s:active{
+    background-color: #0d04ff;
+    color: white;
+    border-color: #0d04ff;
+}
+
+/*Sidebar*/
+/*ratio*/
+.st-az {
+    background-color: #0d04ff;
 }
