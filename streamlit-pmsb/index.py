@@ -176,7 +176,7 @@ with cols_b2:
 functions.popover_metodologia(
     name_popover = "Metodologia Completa de Cálculo de População", 
     metodologia = ("""
-        Foram utilizadas as malhas disponíveis em duas bases de dados principais, a do Censo Demográfico de 2022, com as informações agregadas por setores censitários disponibilizada pelo IBGE1; e as das malhas das unidades de desagregação, disponibilizadas pelo GeoSampa2. 
+        Foram utilizadas as malhas disponíveis em duas bases de dados principais, a do Censo Demográfico de 2022, com as informações agregadas por setores censitários disponibilizada pelo IBGE1; e as das malhas das unidades de desagregação, disponibilizadas pelo GeoSampa. 
         Para a maior parte das unidades, nós selecionamos apenas os setores censitários que correspondessem ao município de São Paulo, mas para as sub bacias hidrográficas, que não se enquadram na precisão das fronteiras municipais, foram selecionados todos os municípios que tivessem ao menos alguma parte de seu território interseccionando com alguma das sub bacias da malha. 
         Para trabalhar com ambas as malhas, calculamos a similaridade entre elas, e realizamos a intersecção (com o método “overlay intersection” de uma biblioteca do Python chamada GeoPandas). Fizemos o cálculo de cada unidade individualmente, mas o processo permaneceu o mesmo na maioria dos casos. 
         Primeiro, identificamos as áreas de interseção, ou seja, as regiões onde os polígonos dos setores e das unidades se sobrepõe. e fazemos um recorte disso. Ou seja se há um setor que fica dividido pelo contorno de dois ou mais polígonos da unidade, dividiremos esse setor seguindo o contorno da unidade. Contudo, estabelecemos um tamanho mínimo de  10m para essas intersecções, evitando que uma falsa intersecção permanecesse. 
@@ -198,17 +198,19 @@ functions.columns_bullet_list(
     itens=unidades_list
 )
 
-with st.container(border=True):
-    cols_c1, cols_c2 = st.columns(2)
+with st.container(border=True, key="container_section2"):
+    cols_c1, cols_c2, cols_c3 = st.columns([0.45, 0.10 ,0.45], vertical_alignment='top')
     with cols_c1:
         st.text("Consumo por pessoa")
         st.subheader("140 L/dia")
-    with cols_c2:
+    with cols_c3:
         st.text("População por setor")
         st.markdown("<h3>População <i>α</i></h3>", unsafe_allow_html=True)
     
-    st.text("Demanda estimada por setor")
-    st.markdown("<h3>População <i>α</i> X 140</h3>", unsafe_allow_html=True)
+    cols_d1, cols_d2, cols_d3= st.columns([0.25, 0.5, 0.25], vertical_alignment='bottom')
+    with cols_d2:
+        st.text("Demanda estimada por setor")
+        st.markdown("<h3>População <i>α</i> X 140</h3>", unsafe_allow_html=True)
 
 st.markdown(
     """<p><strong>Acesso aos materiais</strong></p>
@@ -232,8 +234,8 @@ functions.title_numbered_blue_dot(
     title_name = "Análise da cobertua e distribuição da rede de abastecimento de água"
 )
 
-cols_d1, cols_d2 = st.columns(2)
-with cols_d1:
+cols_e1, cols_e2 = st.columns(2)
+with cols_e1:
     st.markdown("<h5>Desagregado por<h5>", unsafe_allow_html=True)
     st.markdown(
         """
@@ -242,7 +244,7 @@ with cols_d1:
             </ol>
         """, unsafe_allow_html=True
     )
-with cols_d2:
+with cols_e2:
     st.markdown("<h5>Resultado por<h5>", unsafe_allow_html=True)
     st.markdown(
         """

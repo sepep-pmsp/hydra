@@ -19,7 +19,7 @@ h1, h2, h3, h4{
     font-style: bold;
 }
 
-h5, h6, p , a , q, li, ul, ol{
+h5, h6, .st-emotion-cache-1b3332t, a , q, li, ul, ol{
     font-family: 'Roboto', sans-serif;
     font-weight: 500;
     font-style: normal;
@@ -100,18 +100,18 @@ h5, h6, p , a , q, li, ul, ol{
 }
 
 /*popover*/
-.st-emotion-cache-ocsh0s{
+.st-emotion-cache-ocsh0s, .st-emotion-cache-b0y9n5{
     color: inherit;
     border-color: inherit;
     background-color: inherit;
 }
 
-.st-emotion-cache-ocsh0s:hover{
+.st-emotion-cache-ocsh0s:hover, .st-emotion-cache-b0y9n5:hover{
     border-color: #0d04ff;
     color: #0d04ff;
 }
 
-.st-emotion-cache-ocsh0s:active{
+.st-emotion-cache-ocsh0s:active, .st-emotion-cache-b0y9n5:active{
     background-color: #0d04ff;
     color: white;
     border-color: #0d04ff;
@@ -121,4 +121,39 @@ h5, h6, p , a , q, li, ul, ol{
 /*ratio*/
 .st-az {
     background-color: #0d04ff;
+}
+
+/*2. Demanda da População por água*/
+.st-key-container_section2, .st-emotion-cache-qcpnpn, .st-emotion-cache-4uzi61{
+    background-color: #0d04ff;
+    border-color: #0d04ff;
+    color: white;
+
+}
+
+.st-key-container_section2{
+    align-items: center;
+    width: 100%;
+}
+
+.st-emotion-cache-qcpnpn{
+    align-self: center;
+    width: 50%;
+}
+
+.st-emotion-cache-ocqkz7{
+    align-content: center;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+}
+
+
+.st-emotion-cache-ocqkz7 .st-emotion-cache-w9jsfw{
+    align-tracks: center;
+
+}
+
+.st-emotion-cache-1b3332t {
+    color: white;
 }

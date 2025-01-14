@@ -45,9 +45,7 @@ def popover_metodologia(name_popover, metodologia, obstaculos):
             "<ol>" 
             + ""
             .join(
-                [f"""
-                    <li>{line}</li>
-                """ for line in lines]
+                [f"<li>{line}</li>" for line in lines]
             ) 
             + 
             "</ol>", 
