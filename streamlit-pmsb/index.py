@@ -176,7 +176,7 @@ with cols_b2:
 functions.popover_metodologia(
     name_popover = "Metodologia Completa de Cálculo de População", 
     metodologia = ("""
-        Foram utilizadas as malhas disponíveis em duas bases de dados principais, a do Censo Demográfico de 2022, com as informações agregadas por setores censitários disponibilizada pelo IBGE1; e as das malhas das unidades de desagregação, disponibilizadas pelo GeoSampa2. 
+        Foram utilizadas as malhas disponíveis em duas bases de dados principais, a do Censo Demográfico de 2022, com as informações agregadas por setores censitários disponibilizada pelo IBGE1; e as das malhas das unidades de desagregação, disponibilizadas pelo GeoSampa. 
         Para a maior parte das unidades, nós selecionamos apenas os setores censitários que correspondessem ao município de São Paulo, mas para as sub bacias hidrográficas, que não se enquadram na precisão das fronteiras municipais, foram selecionados todos os municípios que tivessem ao menos alguma parte de seu território interseccionando com alguma das sub bacias da malha. 
         Para trabalhar com ambas as malhas, calculamos a similaridade entre elas, e realizamos a intersecção (com o método “overlay intersection” de uma biblioteca do Python chamada GeoPandas). Fizemos o cálculo de cada unidade individualmente, mas o processo permaneceu o mesmo na maioria dos casos. 
         Primeiro, identificamos as áreas de interseção, ou seja, as regiões onde os polígonos dos setores e das unidades se sobrepõe. e fazemos um recorte disso. Ou seja se há um setor que fica dividido pelo contorno de dois ou mais polígonos da unidade, dividiremos esse setor seguindo o contorno da unidade. Contudo, estabelecemos um tamanho mínimo de  10m para essas intersecções, evitando que uma falsa intersecção permanecesse. 
@@ -198,75 +198,19 @@ functions.columns_bullet_list(
     itens=unidades_list
 )
 
-with st.container(border=True):
-    cols_c1, cols_c2 = st.columns(2)
+with st.container(border=True, key="container_section2"):
+    cols_c1, cols_c2, cols_c3 = st.columns([0.45, 0.10 ,0.45], vertical_alignment='top')
     with cols_c1:
         st.text("Consumo por pessoa")
         st.subheader("140 L/dia")
-    with cols_c2:
+    with cols_c3:
         st.text("População por setor")
         st.markdown("<h3>População <i>α</i></h3>", unsafe_allow_html=True)
     
-    st.text("Demanda estimada por setor")
-    st.markdown("<h3>População <i>α</i> X 140</h3>", unsafe_allow_html=True)
-
-st.markdown(
-    """<p><strong>Acesso aos materiais</strong></p>
-    <ol>
-        <li>Shapefiles</li>
-        <li>Mapas Interativos</li>
-        <li>Notebooks</li>
-    </ol>
-    """,
-    unsafe_allow_html=True)
-
-st.markdown("""
-    <p><strong>Fontes de Dados</strong></p>
-    <p></p>
-    """,
-    unsafe_allow_html=True)
-
-#3. Análise da cobertua e distribuição da rede de abastecimento de água
-functions.title_numbered_blue_dot(
-    num= 3,
-    title_name = "Análise da cobertua e distribuição da rede de abastecimento de água"
-)
-
-cols_d1, cols_d2 = st.columns(2)
-with cols_d1:
-    st.markdown("<h5>Desagregado por<h5>", unsafe_allow_html=True)
-    st.markdown(
-        """
-            <ol>
-                <li><strong>Subprefeitura</strong></li>
-            </ol>
-        """, unsafe_allow_html=True
-    )
-with cols_d2:
-    st.markdown("<h5>Resultado por<h5>", unsafe_allow_html=True)
-    st.markdown(
-        """
-            <ol>
-                <li><strong>Logradouros cobertos</strong></li>
-                <li><strong>Logradouros não cobertos</strong></li>
-            </ol>
-        """, unsafe_allow_html=True
-    )
-
-#st.bar_chart()
-
-functions.popover_metodologia(
-    name_popover = "Metodologia Completa de Cálculo", 
-    metodologia = ("""
-        Foi realizado o cruzamento entre as feições da rede de abastecimento de água e as feições de logradouros oficiais para identificar e quantificar a cobertura de abastecimento de água no município. Os logradouros são entendidos como via de acesso aos imóveis que necessitam de abastecimento de água e foram escolhidos por serem uma base georreferenciada mais precisa do que outras alternativas, como o CNEFE3. 
-        Foi aplicado um buffer ao redor das feições da rede de abastecimento para representar a área de cobertura potencial da rede. O buffer aplicado foi de 20 metros, representando aproximadamente uma via de 2 faixas + passeio, considerando que a tubulação pode estar representada em um dos extremos da via, enquanto o próprio logradouro provavelmente estará representado no centro da via.
-        Depois, foi calculada a interseção entre as linhas dos logradouros e a geometria da área de cobertura da rede para obtenção dos trechos de logradouro que possuem cobertura (potencial) de abastecimento de água. 
-        Finalmente, foi calculada a diferença entre as linhas dos logradouros e a geometria da área de cobertura da rede para obtenção dos trechos de logradouro que não possuem cobertura de abastecimento de água. 
-        """),
-    obstaculos = (
-        """Utilizar a rua/logradouro como unidade de acesso ao domicílio vai contabilizar a ausência de rede mesmo onde não tem domicílio."""
-    )
-)
+    cols_d1, cols_d2, cols_d3= st.columns([0.25, 0.5, 0.25], vertical_alignment='bottom')
+    with cols_d2:
+        st.text("Demanda estimada por setor")
+        st.markdown("<h3>População <i>α</i> X 140</h3>", unsafe_allow_html=True)
 
 st.markdown(
     """<p><strong>Acesso aos materiais</strong></p>
