@@ -7,10 +7,10 @@ def sidebar_created():
             "Navegação",
             ["Dados de abastecimento de Água", "Dados de cobertura de esgoto"]
         )
-        st.write("""
-                Este material tem por objetivo registrar a metodologia referente ao processamento de dados elaborado por Codata para a elaboração do diagnóstico do Plano Municipal de Saneamento Básico (2024/2025). Nesse sentido, ele deve ser resultado de um processo enquanto as análises estão sendo realizadas.
+        st.write("""Os dados aqui expostos foram trabalhados na Secretaria Executiva de Planejamento e Entregas Prioritárias (SEPEP), em uma colaboração entre a Cordenadoria de Tecnologia e Dados (CODATA) e a Coordenadoria de Segurança Hídrica (COSH), em que a primeira se comprometia a utilizar dados abertos para desenvolver mapas e tabelas segundo as demandas da equipe da segunda para o desenvolvimento do Plano Municipal de Saneamento Básico (PMSB).
                 \n **O PMSB aborda o saneamento básico como base para a construção de Saúde Única e Desenvolvimento Sustentável no município de São Paulo, fortalecendo continuamente a Segurança Hídrica municipal. Com isso, o Plano busca assegurar, para além da universalização, a melhoria contínua de aspectos de equidade, eficiência dos serviços, sustentabilidade transparência, mitigação e adaptação climática.**
                  \n *(Plano Municipal de Saneamento Básico - Diagnóstico Preliminar, 2024)*
+                \n \n 
     """)
         
 

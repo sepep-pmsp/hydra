@@ -27,10 +27,11 @@ fcu = gpd.read_file(join("data", "2024_11_26", "pop_fcu"))
 
 
 unidades_list = [
+    ("Sub Bacias Hidrográficas", "Lorem ipsum dolor sit amet...", 'subbac', 'nm_bacia_h'),
     ("Subprefeituras", "Lorem ipsum dolor sit amet...", 'subpref', 'nm_subpref'),
     ("Distritos", "Lorem ipsum dolor sit amet...", 'distrito', 'nm_distrit'),
-    ("Favelas e Comunidades Urbanas", "Lorem ipsum dolor sit amet...", 'fcu', 'nm_fcu'),
-    ("Sub Bacias Hidrográficas", "Lorem ipsum dolor sit amet...", 'subbac', 'nm_bacia_h')
+    ("Favelas e Comunidades Urbanas", "Lorem ipsum dolor sit amet...", 'fcu', 'nm_fcu')
+    
 ]
 unidades = pd.DataFrame(unidades_list, columns=['name', 'desc', 'gdf_name', 'column_name'])
 
