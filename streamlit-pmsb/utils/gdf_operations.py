@@ -1,5 +1,7 @@
 import geopandas as gpd
 from os.path import join
+from os import makedirs
+
 # Dados
 def get_distritos():
     distrito = gpd.read_file(join("data", "2024_11_26", "03_consumo_distrito"))
@@ -16,3 +18,4 @@ def get_subpref():
 def get_fcu():
     fcu = gpd.read_file(join("data", "2024_11_26", "pop_fcu"))
     return fcu
+

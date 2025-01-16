@@ -62,6 +62,12 @@ def find_lat_lon(gdf):
         gdf.at[index, 'lon'] = centroid.x
     return gdf
 
+def find_gdf_info(unidades_df, choice_unidade, info):    
+    unidades_df[unidades_df['name']==choice_unidade][info].values[0]
+
+
+
+
 
 
 
