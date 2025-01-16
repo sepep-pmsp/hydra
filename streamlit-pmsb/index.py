@@ -4,7 +4,7 @@ import pandas as pd
 import folium
 from streamlit_folium import st_folium
 from os.path import join
-from utils import (functions, create_sidebar)
+from utils import (functions, create_sidebar, gdf_operations)
 
 #page config
 st.set_page_config(
@@ -20,10 +20,10 @@ with open("styles.css") as f:
     )
 
 # Dados
-distrito = gpd.read_file(join("data", "2024_11_26", "03_consumo_distrito"))
-subbac = gpd.read_file(join("data", "2024_11_26", "03_consumo_subbac"))
-subpref = gpd.read_file(join("data", "2024_11_26", "03_consumo_subprefeitura"))
-fcu = gpd.read_file(join("data", "2024_11_26", "pop_fcu"))
+distrito = gdf_operations.get_distritos()
+subbac = gdf_operations.get_subbac()
+subpref = gdf_operations.get_subpref()
+fcu = gdf_operations.get_fcu()
 
 
 unidades_list = [
