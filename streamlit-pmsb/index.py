@@ -20,13 +20,10 @@ with open("styles.css") as f:
     )
 
 # Dados
-distrito = gdf_operations.get_distritos()
-subbac = gdf_operations.get_subbac()
-subpref = gdf_operations.get_subpref()
-fcu = gdf_operations.get_fcu()
-
-
-
+distrito = gdf_operations.get_dados('distrito')
+subbac = gdf_operations.get_dados('subbac')
+subpref = gdf_operations.get_dados('subpref')
+fcu = gdf_operations.get_dados('fcu')
 
 unidades_list = [
     ("Sub Bacias Hidrográficas", "Lorem ipsum dolor sit amet...", 'subbac', 'nm_bacia_h'),
@@ -35,7 +32,7 @@ unidades_list = [
     ("Favelas e Comunidades Urbanas", "Lorem ipsum dolor sit amet...", 'fcu', 'nm_fcu')
     
 ]
-unidades = pd.DataFrame(unidades_list, columns=['name', 'desc', 'gdf_name', 'column_name'])
+unidades_df = pd.DataFrame(unidades_list, columns=['name', 'desc', 'gdf_name', 'column_name'])
 
 
 
@@ -68,18 +65,19 @@ sum_mun = distrito['pop_total'].sum()
 st.markdown("<h5>Total do Município</h5>", unsafe_allow_html=True)
 st.subheader(f'{sum_mun:,} pessoas'.replace(",", "."))
 
-choice_unidade = st.selectbox("", unidades['name'])
+choice_unidade = st.selectbox("", unidades_df['name'])
 
 name_gdf_unidade= (
-    unidades[unidades['name']==choice_unidade]
+    unidades_df[unidades_df['name']==choice_unidade]
     ['gdf_name']
     .values[0]
 )
 name_column_unidade= (
-    unidades[unidades['name']==choice_unidade]
+    unidades_df[unidades_df['name']==choice_unidade]
     ['column_name']
     .values[0]
 )
+
 gdf_unidade = locals()[name_gdf_unidade]
 
 choice_name = st.selectbox(
@@ -100,6 +98,12 @@ if choice_name !=None:
             ]
             [pop_column]
             .values[0]
+        )
+    pitanga = gdf_operations.intersec_unidades(
+        unidades_df,
+        choice_unidade,
+        gdf_unidade, 
+        name_column_unidade
         )
 else:
     sum_unidade = gdf_unidade[pop_column].sum()
