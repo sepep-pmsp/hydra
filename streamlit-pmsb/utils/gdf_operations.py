@@ -3,31 +3,45 @@ import pandas as pd
 from os.path import join
 from os import makedirs
 
-# Dados
-def get_dados(dado:str):
-    if dado == 'distrito':
-        distrito = gpd.read_file(join("data", "2024_11_26", "03_consumo_distrito"))
-        return distrito
-    elif dado == 'subbac':
-        subbac = gpd.read_file(join("data", "2024_11_26", "03_consumo_subbac"))
-        return subbac
-    elif dado == 'subpref':
-        subpref = gpd.read_file(join("data", "2024_11_26", "03_consumo_subprefeitura"))
-        return subpref
-    elif dado == 'fcu':
-        fcu = gpd.read_file(join("data", "2024_11_26", "pop_fcu"))
-        return fcu
+def find_distrito_name(gdf, prefix:str):
+    gdf_cds = gpd.GeoDataFrame()
+    gdf_columns=gdf.columns
+    for column in gdf_columns:
+        if column.startswith(prefix):
+            gdf_cds[column]=gdf[column]
 
-def create_gdf_sorted(gdf, name_gdf, isIntersec:bool=False):
+    cd_columns = gdf_cds.columns
+    gdf_final=gpd.GeoDataFrame()
+    for column in cd_columns:
+        if column.endswith('distrit'):
+            gdf_final[column]=gdf[column]
+    
+    return gdf_final
+
+def create_gdf_sorted(
+    gdf, 
+    name_gdf, 
+    isIntersec:bool=False
+):
     gdf_sorted = gpd.GeoDataFrame()
     gdf_columns=gdf.columns
     
     if name_gdf == 'subbac':
-        gdf_sorted[['cd_subbac', 'nm_subbac']] = gdf[['cd_identif', 'nome_bacia_h']]
+        gdf_sorted[['cd_subbac', 'nm_subbac']] = (
+            gdf[['cd_identif', 'nome_bacia_h']]
+        )
+    
     else:
-        for column in gdf_columns:
-            if column == f'cd_{name_gdf}' or column== f'nm_{name_gdf}':
-                gdf_sorted[column] = gdf[column] 
+        if name_gdf == 'distrito':
+            gdf_sorted[['cd_distrit', 'nm_distrit']] == (
+                gdf[['cd_distrit', 'nm_distrit']] #create a get nm e a get cd
+            )
+        #return gdf_sorted.columns
+        
+        else:
+            for column in gdf_columns:
+                if column == f'cd_{name_gdf}' or column== f'nm_{name_gdf}':
+                    gdf_sorted[column] = gdf[column] 
     
     if isIntersec:
         gdf_sorted['geometry'] = gdf['geometry']
@@ -46,6 +60,23 @@ def create_gdf_sorted(gdf, name_gdf, isIntersec:bool=False):
     gdf_sorted = gdf_sorted.set_geometry('geometry')
 
     return gdf_sorted
+
+# Dados
+def get_dados(dado:str):
+    if dado == 'distrito':
+        distrito = gpd.read_file(join("data", "2024_11_26", "03_consumo_distrito"))
+        return distrito
+    elif dado == 'subbac':
+        subbac = gpd.read_file(join("data", "2024_11_26", "03_consumo_subbac"))
+        return subbac
+    elif dado == 'subpref':
+        subpref = gpd.read_file(join("data", "2024_11_26", "03_consumo_subprefeitura"))
+        return subpref
+    elif dado == 'fcu':
+        fcu = gpd.read_file(join("data", "2024_11_26", "pop_fcu"))
+        return fcu
+
+
 
 #Correct gdfs
 def intersec_unidades(
