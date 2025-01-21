@@ -3,26 +3,36 @@ import pandas as pd
 from os.path import join
 from os import makedirs
 
+
+# Dados
+def get_dados(dado:str):
+    if dado == 'distrito':
+        distrito = gpd.read_file(join("data", "2024_11_26", "03_consumo_distrito"))
+        return distrito
+    elif dado == 'subbac':
+        subbac = gpd.read_file(join("data", "2024_11_26", "03_consumo_subbac"))
+        return subbac
+    elif dado == 'subpref':
+        subpref = gpd.read_file(join("data", "2024_11_26", "03_consumo_subprefeitura"))
+        return subpref
+    elif dado == 'fcu':
+        fcu = gpd.read_file(join("data", "2024_11_26", "pop_fcu"))
+        return fcu
+
 def find_distrito_name(gdf, prefix:str):
-    gdf_cds = gpd.GeoDataFrame()
     gdf_columns=gdf.columns
     for column in gdf_columns:
         if column.startswith(prefix):
-            gdf_cds[column]=gdf[column]
+            if column.endswith('distrit'):
+                return column
 
-    cd_columns = gdf_cds.columns
-    gdf_final=gpd.GeoDataFrame()
-    for column in cd_columns:
-        if column.endswith('distrit'):
-            gdf_final[column]=gdf[column]
-    
-    return gdf_final
 
 def create_gdf_sorted(
     gdf, 
     name_gdf, 
     isIntersec:bool=False
 ):
+    
     gdf_sorted = gpd.GeoDataFrame()
     gdf_columns=gdf.columns
     
@@ -33,9 +43,10 @@ def create_gdf_sorted(
     
     else:
         if name_gdf == 'distrito':
-            gdf_sorted[['cd_distrit', 'nm_distrit']] == (
-                gdf[['cd_distrit', 'nm_distrit']] #create a get nm e a get cd
-            )
+            distrito_cd = find_distrito_name(gdf, 'cd_')
+            distrito_nm = find_distrito_name(gdf, 'nm_')
+            gdf_sorted[distrito_cd]=gdf[distrito_cd]
+            gdf_sorted[distrito_nm]=gdf[distrito_nm]
         #return gdf_sorted.columns
         
         else:
@@ -61,20 +72,7 @@ def create_gdf_sorted(
 
     return gdf_sorted
 
-# Dados
-def get_dados(dado:str):
-    if dado == 'distrito':
-        distrito = gpd.read_file(join("data", "2024_11_26", "03_consumo_distrito"))
-        return distrito
-    elif dado == 'subbac':
-        subbac = gpd.read_file(join("data", "2024_11_26", "03_consumo_subbac"))
-        return subbac
-    elif dado == 'subpref':
-        subpref = gpd.read_file(join("data", "2024_11_26", "03_consumo_subprefeitura"))
-        return subpref
-    elif dado == 'fcu':
-        fcu = gpd.read_file(join("data", "2024_11_26", "pop_fcu"))
-        return fcu
+
 
 
 
