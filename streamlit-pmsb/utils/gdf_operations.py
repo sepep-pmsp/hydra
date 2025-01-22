@@ -72,6 +72,67 @@ def create_gdf_sorted(
 
     return gdf_sorted
 
+def overlay_intersec(gdf_intersec, name_gdf_intersec, gdf_unidade, cd_unidade):
+    gdf_intersec = create_gdf_sorted(
+        gdf_intersec,
+        name_gdf_intersec,
+        isIntersec=True
+    )
+
+    overlay_unidade_intersec = gpd.overlay(
+        gdf_unidade,
+        gdf_intersec,
+        how='intersection',
+        keep_geom_type=True
+    )
+
+    overlay_unidade_intersec = (
+        overlay_unidade_intersec.explode(
+            index_parts=False
+        )
+    )
+
+    overlay_unidade_intersec['area'] = (
+        overlay_unidade_intersec['geometry'].area
+    )
+
+    overlay_unidade_intersec = overlay_unidade_intersec.sort_values(
+        by='area', 
+        ascending=False
+    )
+
+    gdf_final_unidade = get_uniques(overlay_unidade_intersec, cd_unidade)
+
+    return gdf_final_unidade
+
+def get_uniques(overlay_unidade_intersec, cd_unidade):
+
+    unique_unidades_overlay = (
+        overlay_unidade_intersec[cd_unidade]
+        .unique()
+        .tolist()
+    )
+
+    columns_overlay = overlay_unidade_intersec.columns
+    gdf_final_unidade=gpd.GeoDataFrame(columns=columns_overlay)
+
+    row_idx=0
+
+    for u in unique_unidades_overlay:
+        gdf_unique = (
+            overlay_unidade_intersec[
+                overlay_unidade_intersec[cd_unidade] == u
+            ].head(1)
+        )
+        
+        for _, linha in gdf_unique.iterrows():
+            gdf_final_unidade.loc[row_idx] = linha
+            row_idx +=1
+
+    return gdf_final_unidade
+
+
+
 
 
 
@@ -98,84 +159,6 @@ def intersec_unidades(
             polenta = overlay_intersec(unidades_df, choice_unidade, gdf_unidade, name_column_unidade)
             return polenta
         
-def overlay_intersec(unidades_df, choice_unidade, gdf_unidade, name_column_unidade):
-    name_gdf_intersec= (
-        unidades_df[
-            unidades_df['name']==choice_unidade
-            ]['gdf_name']
-            .values[0]
-        )
-    name_column_intersec= (
-        unidades_df[
-            unidades_df['name']==choice_unidade
-        ]['column_name']
-        .values[0]
-    )
-    gdf_intersec = get_dados(name_gdf_intersec)
-    gdf_intersec = create_gdf_sorted(
-        gdf_intersec, 
-        name_gdf_intersec,
-        isIntersec=True
-        )
 
-    overlay_unidade = gpd.overlay(
-        gdf_unidade,
-        gdf_intersec,
-        how= 'intersection',
-        keep_geom_type=True
-    )
-    overlay_unidade = (
-        overlay_unidade.explode(
-            index_parts=False
-        )
-    )
-    overlay_unidade['area'] = overlay_unidade['geometry'].area
 
-    overlay_unidade = (
-        overlay_unidade.sort_values(
-            by='area', 
-            ascending=False
-        )
-    )
-
-    return overlay_unidade
-
-def get_uniques():
-    unique_unidades = (
-        overlay_unidade[
-            name_column_unidade #trocar pelo cd
-        ].unique().tolist()
-    )
-    
-    for u in unique_unidades:
-        gdf_unique = (
-            overlay_unidade[
-                overlay_unidade[
-                    name_column_unidade #cd
-                ] == u
-            ]
-        )
-        gdf_unique = gdf_unique.head(2)
-
-        gdf_final_unidade[name_column_unidade]=( #cd
-            [u]   
-        ) 
-        for contador, e in enumerate(
-            gdf_unique.itertuples()
-        ):
-            gdf_final_unidade[f'intersec_{name_gdf_intersec}{contador}'] =(
-                e.name_column_intersec #cd
-            ) 
-                
-        resultados.append(gdf_final_unidade)
-    
-    resultados = gpd.GeoDataFrame(
-        pd.concat(
-            resultados, 
-            ignore_index=True
-            ), 
-        crs="EPSG:31983"
-    )
-    
-    return resultados
 
