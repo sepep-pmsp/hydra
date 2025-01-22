@@ -1,82 +1,19 @@
-import streamlit as st
-import geopandas as gpd
-import pandas as pd
-import folium
-from streamlit_folium import st_folium
-from os.path import join
-from utils import (functions, create_sidebar, gdf_operations)
-
-#page config
-st.set_page_config(
-    page_title="Dados de Saneamento em São Paulo", 
-    page_icon=None,
-    layout= "wide") #ou center
-
-#Read css
-with open("styles.css") as f:
-    st.markdown(
-        f"<style>{f.read()}</style>",
-        unsafe_allow_html=True
-    )
-
-# Dados
-distrito = gdf_operations.get_dados('distrito')
-subbac = gdf_operations.get_dados('subbac')
-subpref = gdf_operations.get_dados('subpref')
-fcu = gdf_operations.get_dados('fcu')
-
-unidades_list = [
-    ("Sub Bacias Hidrográficas", "Lorem ipsum dolor sit amet...", 'subbac', 'nm_bacia_h'),
-    ("Subprefeituras", "Lorem ipsum dolor sit amet...", 'subpref', 'nm_subpref'),
-    ("Distritos", "Lorem ipsum dolor sit amet...", 'distrito', 'nm_distrit'),
-    ("Favelas e Comunidades Urbanas", "Lorem ipsum dolor sit amet...", 'fcu', 'nm_fcu')
-    
-]
-unidades_df = pd.DataFrame(unidades_list, columns=['name', 'desc', 'gdf_name', 'column_name'])
-
-
-
-
-
-
-# Cabeçalho
-container1_header = st.container(border=False, key="container1_header")
-path_img = join("img", "img-init-streamlit.svg")
-container1_header.image(path_img)
-container1_header.text("""Análise de dados referente ao Plano Municipal de Saneamento 2024""")
-
-container2_header = st.container(border=False, key="container2_header")
-container2_header.title("Dados de Abastecimento de Água")
-container2_header.subheader("Metodologia de análise dos dados | PMSB 2024 | CODATA")
-container2_header.text("Este material tem por objetivo registrar a metodologia referente ao processamento de dados elaborado por Codata para a elaboração do diagnóstico do Plano Municipal de Saneamento Básico (2024/2025). Nesse sentido, ele deve ser resultado de um processo enquanto as análises estão sendo realizadas.")
-
-create_sidebar.sidebar_created()
-# 1: Cálculo populacional e de domicílios com base no Censo 2022
-functions.title_numbered_blue_dot(num = 1, title_name = "Cálculo populacional e de domicílios com base no Censo 2022")
 
 
 functions.columns_bullet_list(
     title_bullet_list = "Desagregado por", 
     itens=unidades_list)
 
-
-
 sum_mun = distrito['pop_total'].sum()
+
 st.markdown("<h5>Total do Município</h5>", unsafe_allow_html=True)
 st.subheader(f'{sum_mun:,} pessoas'.replace(",", "."))
 
 choice_unidade = st.selectbox("", unidades_df['name'])
 
-name_gdf_unidade= (
-    unidades_df[unidades_df['name']==choice_unidade]
-    ['gdf_name']
-    .values[0]
-)
-name_column_unidade= (
-    unidades_df[unidades_df['name']==choice_unidade]
-    ['column_name']
-    .values[0]
-)
+
+name_gdf_unidade= find_gdf_info(unidades_df, choice_unidade, 'gdf_name')
+name_column_unidade= find_gdf_info(unidades_df, choice_unidade, 'column_name')
 
 gdf_unidade = locals()[name_gdf_unidade]
 
@@ -98,12 +35,6 @@ if choice_name !=None:
             ]
             [pop_column]
             .values[0]
-        )
-    pitanga = gdf_operations.intersec_unidades(
-        unidades_df,
-        choice_unidade,
-        gdf_unidade, 
-        name_column_unidade
         )
 else:
     sum_unidade = gdf_unidade[pop_column].sum()
@@ -194,46 +125,4 @@ functions.popover_metodologia(
     """
     )
 )
-
-
-
-# 2. Demanda da População por água
-functions.title_numbered_blue_dot(num = 2, title_name = "Demanda da População por água")
-
-functions.columns_bullet_list(
-    title_bullet_list = "Desagregado por", 
-    itens=unidades_list
-)
-
-with st.container(border=True, key="container_section2"):
-    cols_c1, cols_c2, cols_c3 = st.columns([0.45, 0.10 ,0.45], vertical_alignment='top')
-    with cols_c1:
-        st.text("Consumo por pessoa")
-        st.subheader("140 L/dia")
-    with cols_c3:
-        st.text("População por setor")
-        st.markdown("<h3>População <i>α</i></h3>", unsafe_allow_html=True)
-    
-    cols_d1, cols_d2, cols_d3= st.columns([0.25, 0.5, 0.25], vertical_alignment='bottom')
-    with cols_d2:
-        st.text("Demanda estimada por setor")
-        st.markdown("<h3>População <i>α</i> X 140</h3>", unsafe_allow_html=True)
-
-st.markdown(
-    """<p><strong>Acesso aos materiais</strong></p>
-    <ol>
-        <li>Shapefiles</li>
-        <li>Mapas Interativos</li>
-        <li>Notebooks</li>
-    </ol>
-    """,
-    unsafe_allow_html=True)
-
-st.markdown("""
-    <p><strong>Fontes de Dados</strong></p>
-    <p></p>
-    """,
-    unsafe_allow_html=True)
-
-
 

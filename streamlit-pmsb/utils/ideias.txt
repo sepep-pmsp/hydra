@@ -1,0 +1,118 @@
+1- colar a max-width da tela a tela do meu notebook e a página principal centralizada, pq no meu computador ficou supimpa
+
+2- sobre colocar as infos nas unidades:
+#Correct gdfs
+def correct_gdf():
+    if gdf = subbac:
+        gdf_sorted['cd_subbac', 'nm_subbac'] = gdf['cd_identif', 'nome_bacia_h']
+    else:
+        for column in gdf.columns == [f'cd_{name_gdf}', f'nm_{name_gdf}']:
+            gdf_sorted[column_name] = gdf[column] 
+    
+    for column in gdf.columns == [starts with (pop, dom, con), 'densidade', 'geometry']:
+        gdf_sorted[column_name] = gdf[column]
+
+def intersec_unidades():
+    index_unidade = unidades_df[unidades_df['name'] = nm_unidade].index()
+    for i in unidades_df if unidades_df[i].index< index_unidade:
+
+        overlay_unidade = gpd.overlay(
+            gdf_sorted,
+            gdf_intersec,
+            how= 'intersection',
+            keep_geom_type=True
+        )
+        overlay_unidade = overlay_unidade.explode(index_parts=False)
+        overlay_unidade['area'] = overlay_unidade['geometry'].area
+
+        overlay_unidade = overlay_unidade.sort_values(
+            by=overlay_unidade['area'], 
+            ascending=False
+        )
+
+        
+
+        unique_unidades = overlay_unidade[cd_unidade].unique().tolist()
+        for u in unique_unidades:
+            gdf_novo_unidade = overlay_unidade[overlay_gdf['cd_unidade'] == u]
+            gdf_novo_unidade = gdf_novo_unidade.head(2)
+            contador = 0
+            for e in gdf_novo_unidade:
+                gdf_final_unidade[f'intersec_{name_intersec}{contador}'] = gdf_novo_unidade['cd_intersec']
+                contador = contador+1
+
+
+       
+
+def get_gdf_sorted(unidades_df, unidade, gdf_unidade):
+
+     overlay_unidade drop cols do correct_gdf
+
+    (fazer um mapper de cd_intersec pra nm_tersec)
+
+    contador=
+    for u in unique_unidades:
+        gdf_final_unidade[f'intersec_{name_intersec}1']= resultado['cd_intersec'], mas só o resultado[resultado['cd_unidade']==u].index=0
+    
+
+    
+
+
+
+        resultados = []
+        for unidade in overlay_df[cd_unidade].unique():
+            unidade_df = overlay_df[overlay_df[cd_unidade] == unidade]
+            if len(unidade_df) > 2:
+                unidade_df = unidade_df.head(2)
+
+                
+        
+        # Adiciona à lista de resultados
+        resultados.append(unidade_df)
+        
+        
+
+ name pop dom densidade con geometry
+drop o "resto" (obs subbac é um caso particular)
+
+add intersecs 
+
+save gdf = data/sorted/gdf_name
+
+#New data
+def if exists data/sorted/gdf_name:
+        gdf= data/sorted/gdf_name:
+    else: gdf= correct gdf ()
+    return gdf
+
+#Operations
+def operacoes_overlay(gdf1, gdf2, unidade_col='unidade', intersec_col='intersec', max_intersec=2):
+    # Realiza o overlay (interseção) entre os dois GeoDataFrames
+    overlay_df = gpd.overlay(gdf1, gdf2, how='intersection', keep_geom_type=True)
+    
+    # Explode geometrias compostas (se houver)
+    overlay_df = overlay_df.explode(index_parts=False)
+    
+    # Ordena pelo valor máximo da coluna de interseção
+    overlay_df = overlay_df.sort_values(by=intersec_col, ascending=False)
+
+    
+    
+    # Filtra as interseções de acordo com o número de elementos
+    resultados = []
+    
+    # Para cada unidade, verificar a quantidade de interseções
+    for unidade in overlay_df[unidade_col].unique():
+        unidade_df = overlay_df[overlay_df[unidade_col] == unidade]
+        
+        if len(unidade_df) > max_intersec:
+            # Seleciona as interseções, até o número máximo
+            unidade_df = unidade_df.head(max_intersec)
+        
+        # Adiciona à lista de resultados
+        resultados.append(unidade_df)
+    
+    # Concatena os resultados filtrados em um único DataFrame
+    return pd.concat(resultados, ignore_index=True)
+    # actually o melhor seria salvar no data
+

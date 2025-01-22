@@ -7,5 +7,10 @@ def sidebar_created():
             "Navegação",
             ["Dados de abastecimento de Água", "Dados de cobertura de esgoto"]
         )
-        st.text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam ac dolor malesuada, molestie leo ac, vulputate erat. Nulla ultrices suscipit leo rhoncus consequat. Cras bibendum eros vitae ipsum accumsan tristique et at justo. Donec vitae dapibus urna. Suspendisse iaculis odio et eros suscipit maximus ac ac lacus. Mauris euismod eleifend finibus. Morbi dapibus euismod erat, sed semper augue suscipit ullamcorper. Nullam aliquam eu mi sit amet tincidunt. Maecenas ac augue urna. Mauris sagittis lacus tellus, cursus dictum justo hendrerit ut. Suspendisse sapien ex, tincidunt eget lectus nec, aliquet pulvinar purus. Vivamus augue sem, dignissim vel feugiat sed, luctus ac mauris. Etiam viverra porttitor ultrices. Cras nec suscipit erat, a lobortis nisl. Cras  Vivamus augue sem")
+        st.write("""Os dados aqui expostos foram trabalhados na Secretaria Executiva de Planejamento e Entregas Prioritárias (SEPEP), em uma colaboração entre a Cordenadoria de Tecnologia e Dados (CODATA) e a Coordenadoria de Segurança Hídrica (COSH), em que a primeira se comprometia a utilizar dados abertos para desenvolver mapas e tabelas segundo as demandas da equipe da segunda para o desenvolvimento do Plano Municipal de Saneamento Básico (PMSB).
+                \n **O PMSB aborda o saneamento básico como base para a construção de Saúde Única e Desenvolvimento Sustentável no município de São Paulo, fortalecendo continuamente a Segurança Hídrica municipal. Com isso, o Plano busca assegurar, para além da universalização, a melhoria contínua de aspectos de equidade, eficiência dos serviços, sustentabilidade transparência, mitigação e adaptação climática.**
+                 \n *(Plano Municipal de Saneamento Básico - Diagnóstico Preliminar, 2024)*
+                \n \n 
+    """)
+        
 
