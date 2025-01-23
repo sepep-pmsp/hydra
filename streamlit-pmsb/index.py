@@ -67,12 +67,12 @@ functions.popover_metodologia(
     )
 )
 
+bullet_list_container = st.container(border=False)
+
+gdf_intersec = gpd.GeoDataFrame()
 
 
-section_1 = st.container(border=False)
-title_bullet_list = "Níveis de Desagregação:"
-section_1.markdown(f"<h5>{title_bullet_list}</h5>", unsafe_allow_html=True)
-section_1.write(functions.columns_bullet_list(itens=unidades_df))
+
 
 sum_mun = distrito['pop_total'].sum()
 st.markdown("<h5>Total do Município</h5>", unsafe_allow_html=True)
@@ -105,6 +105,7 @@ if name_gdf_unidade == 'fcu':
 else:
         pop_column = 'pop_total'
 if choice_name !=None:
+    unidades_df['teste'] = unidades_df['name']
     sum_unidade = (
             gdf_unidade[
                 gdf_unidade[name_column_unidade]==choice_name
@@ -116,6 +117,13 @@ else:
     sum_unidade = gdf_unidade[pop_column].sum()
     if name_gdf_unidade == 'subpref':
         sum_unidade = sum_unidade+2
+
+bullet_list_container.write(functions.columns_bullet_list(
+    title_bullet_list = "Níveis de Desagregação:", 
+    itens=unidades_df,
+    choice_unidade=choice_unidade,
+    choice_name=choice_name
+))
 
 st.subheader(f'{sum_unidade:,} pessoas'.replace(",", "."))
 
@@ -187,8 +195,6 @@ with cols_b2:
     )
 
 
-section_1.write(functions.columns_bullet_list( 
-    itens=unidades_df))
 
 
 
@@ -197,7 +203,7 @@ functions.title_numbered_blue_dot(num = 2, title_name = "Demanda da População 
 
 functions.columns_bullet_list(
     title_bullet_list = "Desagregado por", 
-    itens=unidades_list
+    itens=unidades_df
 )
 
 with st.container(border=True, key="container_section2"):
