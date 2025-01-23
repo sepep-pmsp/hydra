@@ -19,20 +19,18 @@ def title_numbered_blue_dot(num, title_name):
     #arrumar essa partezinha
     st.container(height= 2, border=False)
 
-def columns_bullet_list(title_bullet_list, itens):
-    st.markdown(f"<h5>{title_bullet_list}</h5>", unsafe_allow_html=True)
-
+def columns_bullet_list(itens):
     cols = st.columns(len(itens))  
-    for a, item in enumerate(itens):
+    for a, (index, item) in enumerate(itens.iterrows()):
         col = cols[a]  
         with col:
             st.markdown(
                 f"""<p >
                     <strong>
-                        {a + 1}. {item[0]}
+                        {item['name']}
                     </strong>
                     <br> 
-                    <div class = "description-bullet-list">{item[1]}</div>
+                    <div class = "description-bullet-list">{item['column_cd']}</div>
                 </p>""",
                 unsafe_allow_html=True
             )
