@@ -33,11 +33,12 @@ def save_intersec(
     file_name:str,
     **kwargs) -> None:
     
-    full_path = join(PATH_ORIGINAL, 'intersecs')
-    if not exists(full_path):
-        makedirs(full_path)
-    
-    gdf.to_file(join(full_path, file_name), **kwargs)
+    path = join(PATH_ORIGINAL, 'intersecs')
+    full_path = join(path, file_name)
+    if not exists(path):
+        makedirs(path)
+    if not exists(full_path): #fazer isso fora do save, antes de fazer o processo todo
+        gdf.to_file(full_path, **kwargs)
 
 def find_distrito_name(gdf, prefix:str): #apagar
     gdf_columns=gdf.columns
