@@ -1,6 +1,6 @@
 import geopandas as gpd
 import pandas as pd
-from os.path import join
+from os.path import join, exists
 from os import makedirs
 
 DATA_DATE = "2024_11_26"
@@ -28,7 +28,7 @@ def get_dados(dado:str):
         return fcu
 
 #Save gdf
-def save_gdf(
+def save_intersec(
     gdf:gpd.GeoDataFrame, 
     file_name:str,
     **kwargs) -> None:
