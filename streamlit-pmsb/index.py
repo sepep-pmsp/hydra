@@ -222,11 +222,8 @@ with st.container(border=True, key="container_section2"):
     with cols_d2:
         st.text("Demanda estimada por setor")
         st.markdown("<h3>População <i>α</i> X 140</h3>", unsafe_allow_html=True)
-
-gdf_unidade
+st.subheader("Consumo Estimado de Água por Distrito")
 container_barchart = st.container(height=500, border=False)
-
-container_barchart.subheader("Consumo Estimado de Água por Distrito")
 container_barchart.bar_chart(
             data=distrito.sort_values('consumo_di', ascending=True), 
             y='consumo_di', 
