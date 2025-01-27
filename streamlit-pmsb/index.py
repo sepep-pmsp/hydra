@@ -1,6 +1,7 @@
 import streamlit as st
 import geopandas as gpd
 import pandas as pd
+import plotly.express as px 
 import folium
 from streamlit_folium import st_folium
 from os.path import join
@@ -218,6 +219,39 @@ with st.container(border=True, key="container_section2"):
     with cols_d2:
         st.text("Demanda estimada por setor")
         st.markdown("<h3>População <i>α</i> X 140</h3>", unsafe_allow_html=True)
+
+gdf_unidade
+container_barchart = st.container(height=500, border=False)
+
+container_barchart.subheader("Consumo Estimado de Água por Distrito")
+container_barchart.bar_chart(
+            data=distrito.sort_values('consumo_di', ascending=True), 
+            y='consumo_di', 
+            x='nm_distrit', 
+            x_label='Cosumo Estimado', 
+            y_label='Distrito', 
+            color='consumo_di',
+            horizontal=True, 
+            stack=True, 
+            height=None)
+
+fig = px.bar(distrito,
+            y='nm_distrit',
+            x='consumo_di',
+            color='consumo_di',
+            orientation='h',
+            labels={'consumo_di': 'Consumo Estimado'},  # Renomeia a legenda
+            title="Consumo Estimado de Água por Distrito",
+            color_continuous_scale=px.colors.sequential.Blues)
+
+fig.update_layout(coloraxis_colorbar_title="Consumo em L/dia")
+
+# Exibe o gráfico no Streamlit
+st.plotly_chart(fig)
+
+
+
+
 
 st.markdown(
     """<p><strong>Acesso aos materiais</strong></p>
