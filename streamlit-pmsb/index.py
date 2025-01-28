@@ -29,14 +29,7 @@ subbac = gdf_operations.get_dados('subbac')
 subpref = gdf_operations.get_dados('subpref')
 fcu = gdf_operations.get_dados('fcu')
 
-unidades_list = [
-    ("Sub Bacias Hidrográficas", "Lorem ipsum dolor sit amet...", 'subbac', 'nm_bacia_h'),
-    ("Subprefeituras", "Lorem ipsum dolor sit amet...", 'subpref', 'nm_subpref'),
-    ("Distritos", "Lorem ipsum dolor sit amet...", 'distrito', 'nm_distrit'),
-    ("Favelas e Comunidades Urbanas", "Lorem ipsum dolor sit amet...", 'fcu', 'nm_fcu')
-    
-]
-unidades_df = pd.DataFrame(unidades_list, columns=['name', 'desc', 'gdf_name', 'column_name'])
+unidades_df = gdf_operations.listing_unidades(subbac)
 
 
 
@@ -55,13 +48,33 @@ container2_header.subheader("Metodologia de análise dos dados | PMSB 2024 | COD
 container2_header.text("Este material tem por objetivo registrar a metodologia referente ao processamento de dados elaborado por Codata para a elaboração do diagnóstico do Plano Municipal de Saneamento Básico (2024/2025). Nesse sentido, ele deve ser resultado de um processo enquanto as análises estão sendo realizadas.")
 
 create_sidebar.sidebar_created()
+
+
 # 1: Cálculo populacional e de domicílios com base no Censo 2022
 functions.title_numbered_blue_dot(num = 1, title_name = "Cálculo populacional e de domicílios com base no Censo 2022")
+st.text("Total estimado da população do município por níveis de desagregação, calculado a partir do processo de interseção entre dados abertos. As principais fontes de foram o GeoSampa e o IBGE, em especial os setores censitários do censo de 2022.")
 
 
-functions.columns_bullet_list(
-    title_bullet_list = "Desagregado por", 
-    itens=unidades_list)
+functions.popover_metodologia(
+    name_popover = "Metodologia Completa de Cálculo de População", 
+    metodologia = ("""
+        Foram utilizadas as malhas disponíveis em duas bases de dados principais, a do Censo Demográfico de 2022, com as informações agregadas por setores censitários disponibilizada pelo IBGE1; e as das malhas das unidades de desagregação, disponibilizadas pelo GeoSampa. 
+        Para a maior parte das unidades, nós selecionamos apenas os setores censitários que correspondessem ao município de São Paulo, mas para as sub bacias hidrográficas, que não se enquadram na precisão das fronteiras municipais, foram selecionados todos os municípios que tivessem ao menos alguma parte de seu território interseccionando com alguma das sub bacias da malha. 
+        Para trabalhar com ambas as malhas, calculamos a similaridade entre elas, e realizamos a intersecção (com o método “overlay intersection” de uma biblioteca do Python chamada GeoPandas). Fizemos o cálculo de cada unidade individualmente, mas o processo permaneceu o mesmo na maioria dos casos. 
+        Primeiro, identificamos as áreas de interseção, ou seja, as regiões onde os polígonos dos setores e das unidades se sobrepõe. e fazemos um recorte disso. Ou seja se há um setor que fica dividido pelo contorno de dois ou mais polígonos da unidade, dividiremos esse setor seguindo o contorno da unidade. Contudo, estabelecemos um tamanho mínimo de  10m para essas intersecções, evitando que uma falsa intersecção permanecesse. 
+        Calculando a área desses setores antes e após a intersecção, para realizarmos para cada polígono da intersecção o cálculo da porcentagem de área que ela representa do setor total (área da intersecção/área total do setor).
+        Para calcular o valor correspondente dos indicadores em cada intersecção, multiplicamos seus valores por sua percentagem da área do setor (valor do indicador total do setor * porcentagem da área do setor que corresponde ao polígono). Assim, é considerado que a variável, seja ela, por exemplo, população ou domicílios, está homogeneamente distribuída no setor e, portanto, a distribuição de seus valores pode ser equivalida à área da intersecção."""),
+    obstaculos = (
+        """Há uma incompatibilidade entre o limite municipal da malha do IBGE e a do GeoSampa, de forma que ao realizar o cálculo das intersecções alguns setores censitários ficaram para fora, enquanto regiões que deveriam ter setores estavam vazias. Para resolver isso, adicionamos os setores que haviam ficado de fora, independente da razão, manualmente. 
+        Nossa metodologia não permite que identifiquemos precisamente a distribuição das variáveis em casos onde elas são distribuídas de forma não homogênea. 
+    """
+    )
+)
+
+bullet_list_container = st.container(border=False)
+
+gdf_intersec = gpd.GeoDataFrame()
+
 
 
 
@@ -96,6 +109,7 @@ if name_gdf_unidade == 'fcu':
 else:
         pop_column = 'pop_total'
 if choice_name !=None:
+    unidades_df['teste'] = unidades_df['name']
     sum_unidade = (
             gdf_unidade[
                 gdf_unidade[name_column_unidade]==choice_name
@@ -103,16 +117,17 @@ if choice_name !=None:
             [pop_column]
             .values[0]
         )
-    pitanga = gdf_operations.intersec_unidades(
-        unidades_df,
-        choice_unidade,
-        gdf_unidade, 
-        name_column_unidade
-        )
 else:
     sum_unidade = gdf_unidade[pop_column].sum()
     if name_gdf_unidade == 'subpref':
         sum_unidade = sum_unidade+2
+
+bullet_list_container.write(functions.columns_bullet_list(
+    title_bullet_list = "Níveis de Desagregação:", 
+    itens=unidades_df,
+    choice_unidade=choice_unidade,
+    choice_name=choice_name
+))
 
 st.subheader(f'{sum_unidade:,} pessoas'.replace(",", "."))
 
@@ -183,21 +198,7 @@ with cols_b2:
         hide_index=True
     )
 
-functions.popover_metodologia(
-    name_popover = "Metodologia Completa de Cálculo de População", 
-    metodologia = ("""
-        Foram utilizadas as malhas disponíveis em duas bases de dados principais, a do Censo Demográfico de 2022, com as informações agregadas por setores censitários disponibilizada pelo IBGE1; e as das malhas das unidades de desagregação, disponibilizadas pelo GeoSampa. 
-        Para a maior parte das unidades, nós selecionamos apenas os setores censitários que correspondessem ao município de São Paulo, mas para as sub bacias hidrográficas, que não se enquadram na precisão das fronteiras municipais, foram selecionados todos os municípios que tivessem ao menos alguma parte de seu território interseccionando com alguma das sub bacias da malha. 
-        Para trabalhar com ambas as malhas, calculamos a similaridade entre elas, e realizamos a intersecção (com o método “overlay intersection” de uma biblioteca do Python chamada GeoPandas). Fizemos o cálculo de cada unidade individualmente, mas o processo permaneceu o mesmo na maioria dos casos. 
-        Primeiro, identificamos as áreas de interseção, ou seja, as regiões onde os polígonos dos setores e das unidades se sobrepõe. e fazemos um recorte disso. Ou seja se há um setor que fica dividido pelo contorno de dois ou mais polígonos da unidade, dividiremos esse setor seguindo o contorno da unidade. Contudo, estabelecemos um tamanho mínimo de  10m para essas intersecções, evitando que uma falsa intersecção permanecesse. 
-        Calculando a área desses setores antes e após a intersecção, para realizarmos para cada polígono da intersecção o cálculo da porcentagem de área que ela representa do setor total (área da intersecção/área total do setor).
-        Para calcular o valor correspondente dos indicadores em cada intersecção, multiplicamos seus valores por sua percentagem da área do setor (valor do indicador total do setor * porcentagem da área do setor que corresponde ao polígono). Assim, é considerado que a variável, seja ela, por exemplo, população ou domicílios, está homogeneamente distribuída no setor e, portanto, a distribuição de seus valores pode ser equivalida à área da intersecção."""),
-    obstaculos = (
-        """Há uma incompatibilidade entre o limite municipal da malha do IBGE e a do GeoSampa, de forma que ao realizar o cálculo das intersecções alguns setores censitários ficaram para fora, enquanto regiões que deveriam ter setores estavam vazias. Para resolver isso, adicionamos os setores que haviam ficado de fora, independente da razão, manualmente. 
-        Nossa metodologia não permite que identifiquemos precisamente a distribuição das variáveis em casos onde elas são distribuídas de forma não homogênea. 
-    """
-    )
-)
+
 
 
 
@@ -206,7 +207,7 @@ functions.title_numbered_blue_dot(num = 2, title_name = "Demanda da População 
 
 functions.columns_bullet_list(
     title_bullet_list = "Desagregado por", 
-    itens=unidades_list
+    itens=unidades_df
 )
 
 with st.container(border=True, key="container_section2"):
