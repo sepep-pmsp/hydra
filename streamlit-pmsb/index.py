@@ -206,6 +206,7 @@ with cols_b2:
 functions.title_numbered_blue_dot(num = 2, title_name = "Demanda da População por água")
 
 #functions.columns_bullet_list(title_bullet_list = "Desagregado por", itens=unidades_df)
+st.text("A partir dos resultados do cálculo da população, calculou-se a estimativa de demanda por água, considerando o consumo médio de 140 L/dia para cada pessoa (informação proveniente de ___).")
 
 with st.container(border=True, key="container_section2"):
     cols_c1, cols_c2, cols_c3 = st.columns([0.45, 0.10 ,0.45], vertical_alignment='top')

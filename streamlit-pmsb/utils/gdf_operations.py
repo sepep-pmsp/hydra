@@ -201,8 +201,8 @@ def get_uniques(overlay_unidade_intersec, cd_unidade):
 #Save gdf
 def save_intersec(
     gdf:gpd.GeoDataFrame, 
-    path,
     file_name,
+    path=join(PATH_ORIGINAL, 'intersec'),
     **kwargs) -> None:
     
     full_path = join(path, file_name)
