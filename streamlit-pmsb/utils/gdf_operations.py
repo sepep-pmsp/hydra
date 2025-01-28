@@ -1,3 +1,5 @@
+#mudar nome para operations_gdf
+
 import geopandas as gpd
 import pandas as pd
 from os.path import join, exists

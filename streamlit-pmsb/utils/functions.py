@@ -37,12 +37,7 @@ def columns_bullet_list(title_bullet_list, itens, choice_unidade, choice_name):
     )
     gdf_unidade= gdf_operations.get_dados(name_column_unidade)
 
-    gdf_intersec = gdf_operations.intersec_unidades(
-                itens,
-                choice_unidade,
-                gdf_unidade,
-                name_column_unidade
-            )
+    #gdf_intersec = gdf_operations.intersec_unidades(itens,choice_unidade,gdf_unidade,name_column_unidade)
 
     st.markdown(f"<h5>{title_bullet_list}</h5>", unsafe_allow_html=True)
     

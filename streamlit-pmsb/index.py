@@ -205,10 +205,7 @@ with cols_b2:
 # 2. Demanda da População por água
 functions.title_numbered_blue_dot(num = 2, title_name = "Demanda da População por água")
 
-functions.columns_bullet_list(
-    title_bullet_list = "Desagregado por", 
-    itens=unidades_df
-)
+#functions.columns_bullet_list(title_bullet_list = "Desagregado por", itens=unidades_df)
 
 with st.container(border=True, key="container_section2"):
     cols_c1, cols_c2, cols_c3 = st.columns([0.45, 0.10 ,0.45], vertical_alignment='top')
