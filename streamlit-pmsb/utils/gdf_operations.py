@@ -214,50 +214,77 @@ def save_intersec(
 
 def intersec_unidades(
     unidades_df,
-    choice_unidade,
-    gdf_unidade,
-    name_column_unidade
-)-> gpd.GeoDataFrame:
-
-    file_name = choice_unidade
-
-    path = join(PATH_ORIGINAL, 'intersecs')
-    full_path = join(path, file_name)
-    if not exists(full_path):
-        gdf_unidade = create_gdf_sorted(gdf=gdf_unidade, name_gdf=choice_unidade)
-
-        index_unidade = (
-            unidades_df[
-                unidades_df['name'] == choice_unidade
-            ].index[0]
-        )
-
-        name_gdf_unidade = functions.find_gdf_info(unidades_df, choice_unidade, 'name', 'gdf_name')
-        cd_unidade = gdf_operations.find_gdf_name(gdf_unidade, choice_unidade, 'cd_')
-        overlay_gdf = gpd.GeoDataFrame()
-        
-        for i, row in unidades_df.iterrows():
-            if i< index_unidade:
-                name_gdf_intersec = row.loc['gdf_name']
-                cd_intersec = row.loc['column_cd']
-                overlay_gdf = gdf_operations.overlay_intersec(
-                    name_gdf_intersec= name_gdf_intersec, 
-                    gdf_unidade = gdf_unidade, 
-                    name_gdf_unidade=name_gdf_unidade
-                )
-                gdf_unidade[cd_unidade] = gdf_unidade[cd_unidade].astype(str)
-                overlay_gdf[cd_intersec] = overlay_gdf[cd_intersec].astype(int).astype(str)
-                overlay_gdf[cd_unidade] = overlay_gdf[cd_unidade].astype(str)
-
-
-                gdf_unidade = pd.merge(gdf_unidade, overlay_gdf[[cd_unidade, cd_intersec]], on=cd_unidade, how='left')
-
-        gdf_operations.save_intersec(gdf_unidade, path, file_name=file_name)
+    gdf_unidade:gpd.GeoDataFrame,
+    name_gdf_unidade:str
     
-    else:
-        gdf_unidade=gpd.read_file(full_path)
+):
+    gdf_sorted = create_gdf_sorted(
+        gdf_unidade, 
+        name_gdf_unidade
+    )
+
+    gdf_unidade= gdf_sorted
+
+    name_column_unidade = find_gdf_name(
+        gdf_unidade, name_gdf_unidade, 'nm_'
+    )
+#    name_column_unidade = functions.find_gdf_info(unidades_df, name_gdf_unidade, 'gdf_name', 'column_name')
+
+    index_unidade = (
+        unidades_df[
+            unidades_df['gdf_name'] == name_gdf_unidade
+        ].index[0]
+    )
+
+  
+
+    cd_unidade = find_gdf_name(
+        gdf_unidade, 
+        name_gdf_unidade, 
+        'cd_'
+    )
+
+    overlay_gdf = gpd.GeoDataFrame()
+
+    for i, row in unidades_df.iterrows():
+        if i< index_unidade:
+            name_gdf_intersec = row.loc['gdf_name']
+            cd_intersec = row.loc['column_cd']
+            
+            overlay_gdf = overlay_intersec(
+                name_gdf_intersec= name_gdf_intersec, 
+                gdf_unidade = gdf_unidade, 
+                name_gdf_unidade=name_gdf_unidade
+            )
+
+            
+            gdf_unidade[cd_unidade] = (
+                gdf_unidade[cd_unidade].astype(str)
+            )
+            overlay_gdf[cd_intersec] = (
+                overlay_gdf[cd_intersec]
+                .astype(int)
+                .astype(str)
+            )
+            overlay_gdf[cd_unidade] = (
+                overlay_gdf[cd_unidade].astype(str)
+            )
+
+    
+
+
+            gdf_unidade = pd.merge(
+                gdf_unidade, 
+                overlay_gdf[[cd_unidade, cd_intersec]], 
+                on=cd_unidade, 
+                how='left'
+            )
+
+    
+    save_intersec(gdf_unidade, name_gdf_unidade)
 
     return gdf_unidade
+            
 
         
 
