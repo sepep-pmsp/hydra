@@ -107,7 +107,11 @@ def find_lat_lon(gdf):
     return gdf
 
 def find_gdf_info(unidades_df, choice_unidade, column_info, return_info):  #passar pra gdf_operations ou trazer find name pra cá  
+    print(column_info)
+    print(choice_unidade)
+    print(return_info)
     unidades_df[unidades_df[column_info]==choice_unidade][return_info].values[0]
+    
 
 
 
