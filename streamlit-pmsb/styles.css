@@ -88,13 +88,13 @@ h5, h6, .st-emotion-cache-1b3332t, a , q, li, ul, ol{
 }
 
 /*select box*/
-.st-dy {
+.st-dy, .st-ev {
     border-bottom-color: #0d04ff;
 }
-.st-dx {
+.st-dx, st-eu {
     border-top-color: #0d04ff;
 }
-.st-dw {
+.st-dw, .st-es, .st-et {
     border-right-color:  #0d04ff;
     border-left-color: #0d04ff;
 }
@@ -119,9 +119,7 @@ h5, h6, .st-emotion-cache-1b3332t, a , q, li, ul, ol{
 
 /*Sidebar*/
 /*ratio*/
-.st-az {
-    background-color: #0d04ff;
-}
+
 
 /*2. Demanda da População por água*/
 .st-key-container_section2, .st-emotion-cache-qcpnpn, .st-emotion-cache-4uzi61{
