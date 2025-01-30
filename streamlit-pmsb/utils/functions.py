@@ -22,52 +22,77 @@ def title_numbered_blue_dot(num, title_name):
     #arrumar essa partezinha
     st.container(height= 2, border=False)
 
-def columns_bullet_list(title_bullet_list, itens, choice_unidade, choice_name):
-    name_column_unidade = find_gdf_info(
-        itens, 
-        choice_unidade, 
-        'name', 
-        'gdf_name'
+def columns_bullet_list(
+    title_bullet_list, 
+    itens, 
+    gdf_unidade, 
+    name_gdf_unidade, 
+    choice_unidade, 
+    choice_name
+    ):
+    
+    cd_column_unidade = gdf_operations.find_gdf_name(
+        gdf_unidade, 
+        name_gdf_unidade, 
+        'cd_'
     )
-    cd_column_unidade = find_gdf_info(
-        itens, 
-        choice_unidade, 
-        'name', 
-        'column_cd'
+    nm_column_unidade = gdf_operations.find_gdf_name(
+        gdf_unidade,
+        name_gdf_unidade,
+        'nm_'
     )
-    gdf_unidade= gdf_operations.get_dados(name_column_unidade)
 
-    #gdf_intersec = gdf_operations.intersec_unidades(itens,choice_unidade,gdf_unidade,name_column_unidade)
+
+    gdf_intersec = gdf_operations.intersec_unidades(
+        itens,
+        gdf_unidade,
+        name_gdf_unidade
+    )
+
+    index_unidade = (
+        itens[
+            itens['gdf_name'] == name_gdf_unidade
+        ].index[0]
+    )
 
     st.markdown(f"<h5>{title_bullet_list}</h5>", unsafe_allow_html=True)
     
-
     cols = st.columns(len(itens))  
-    for a, (index, item) in enumerate(itens.iterrows()):
-        name_column_intersec = item.loc['gdf_name']
-        cd_column_intersec = item.loc['column_cd']
-        nm_column_intersec = item.loc['column_name']
+    for index, item in itens.iterrows():
+        desc= ''
 
-        gdf_outro = gdf_operations.get_dados(name_column_intersec)
-        
-        
-
-        if choice_name != None:
-            desc = 'batata'
-            mapper_name = dict(
-                zip(
-                    gdf_outro[cd_column_intersec], 
-                    gdf_outro[nm_column_intersec]
-                ))
+        if index<= index_unidade:
+            name_intersec = item.loc['gdf_name']
+            cd_column_intersec = item.loc['column_cd']
+            nm_column_intersec = item.loc['column_name']
+            nm_column_intersec
             
-            gdf_intersec[nm_column_intersec] = (
-            gdf_intersec[cd_column_intersec].map(mapper_name)
-            )
-        else: 
-            desc=''
+
+            gdf_outro = gdf_operations.get_dados(name_intersec)
+            
+            if choice_name != None:
+                gdf_outro[cd_column_intersec] = (
+                    gdf_outro[cd_column_intersec]
+                    .astype(int)
+                    .astype(str)
+                )
+
+                mapper_name = dict(
+                    zip(
+                        gdf_outro[cd_column_intersec], 
+                        gdf_outro[nm_column_intersec]
+                    ))
+                
+                gdf_intersec[nm_column_intersec] = (
+                gdf_intersec[cd_column_intersec]
+                .map(mapper_name)
+                )
 
 
-        col = cols[a]  
+                
+                desc = gdf_intersec[gdf_intersec[nm_column_unidade]==choice_name] [nm_column_intersec].iloc[0]
+    
+        col = cols[index]  
 
         with col:
             st.markdown(

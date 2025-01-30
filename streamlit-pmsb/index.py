@@ -7,11 +7,15 @@ from streamlit_folium import st_folium
 from os.path import join
 from utils import (functions, create_sidebar, gdf_operations)
 
+
+
 #page config
+
+favicon = join("img", "logotipo_prefeitura", "LOGO PREFEITURA", "LOGOTIPO_PREFEITURA_CENTRALIZADO_FUNDO_ESCURO.png")
 st.set_page_config(
     page_title="Dados de Saneamento em São Paulo", 
-    page_icon=None,
-    layout= "wide") #ou center
+    page_icon=favicon,
+    layout= "wide") #wide ou centered
 
 #Read css
 with open("styles.css") as f:
@@ -29,7 +33,9 @@ subbac = gdf_operations.get_dados('subbac')
 subpref = gdf_operations.get_dados('subpref')
 fcu = gdf_operations.get_dados('fcu')
 
+
 unidades_df = gdf_operations.listing_unidades(subbac)
+gdf_intersec = gpd.GeoDataFrame()
 
 
 
@@ -73,7 +79,6 @@ functions.popover_metodologia(
 
 bullet_list_container = st.container(border=False)
 
-gdf_intersec = gpd.GeoDataFrame()
 
 
 
@@ -125,6 +130,8 @@ else:
 bullet_list_container.write(functions.columns_bullet_list(
     title_bullet_list = "Níveis de Desagregação:", 
     itens=unidades_df,
+    gdf_unidade=gdf_unidade,
+    name_gdf_unidade = name_gdf_unidade,
     choice_unidade=choice_unidade,
     choice_name=choice_name
 ))
@@ -206,7 +213,7 @@ with cols_b2:
 functions.title_numbered_blue_dot(num = 2, title_name = "Demanda da População por água")
 
 #functions.columns_bullet_list(title_bullet_list = "Desagregado por", itens=unidades_df)
-st.text("A partir dos resultados do cálculo da população, calculou-se a estimativa de demanda por água, considerando o consumo médio de 140 L/dia para cada pessoa (informação proveniente de ___).")
+st.text("A partir dos resultados do cálculo da população, calculou-se a estimativa de demanda por água, considerando o consumo médio de 140 L/dia para cada pessoa.")
 
 with st.container(border=True, key="container_section2"):
     cols_c1, cols_c2, cols_c3 = st.columns([0.45, 0.10 ,0.45], vertical_alignment='top')
@@ -222,7 +229,7 @@ with st.container(border=True, key="container_section2"):
         st.text("Demanda estimada por setor")
         st.markdown("<h3>População <i>α</i> X 140</h3>", unsafe_allow_html=True)
 st.subheader("Consumo Estimado de Água por Distrito")
-container_barchart = st.container(height=500, border=False)
+container_barchart = st.container(height=507, border=False)
 container_barchart.bar_chart(
             data=distrito.sort_values('consumo_di', ascending=True), 
             y='consumo_di', 
@@ -234,19 +241,7 @@ container_barchart.bar_chart(
             stack=True, 
             height=None)
 
-fig = px.bar(distrito,
-            y='nm_distrit',
-            x='consumo_di',
-            color='consumo_di',
-            orientation='h',
-            labels={'consumo_di': 'Consumo Estimado'},  # Renomeia a legenda
-            title="Consumo Estimado de Água por Distrito",
-            color_continuous_scale=px.colors.sequential.Blues)
 
-fig.update_layout(coloraxis_colorbar_title="Consumo em L/dia")
-
-# Exibe o gráfico no Streamlit
-st.plotly_chart(fig)
 
 
 
@@ -255,16 +250,17 @@ st.plotly_chart(fig)
 st.markdown(
     """<p><strong>Acesso aos materiais</strong></p>
     <ol>
-        <li>Notebooks <i class="fa-solid fa-laptop-code"></i></li>
-        <li>Shapefiles <i class="fa-solid fa-folder-open"></i></li>
-        <li>Mapas Interativos <i class="fa-solid fa-globe"></i></li>
+        <li> <a href='https://cloudprodamazhotmail.sharepoint.com/:f:/s/SGM-SEPEP-COSH/EoJ_pB1pOudFjeI_GAlXSDEBHqh-TEqU88wY9d886qdqlQ?e=OL1E8L'>Notebooks <i class="fa-solid fa-laptop-code"></i></li></a>
+        <li><a href='https://github.com/sepep-pmsp/bases-pmsb'> Repositório Git Hub <i class="fa-brands fa-github"></i></a></li>
+        <li><a href="https://cloudprodamazhotmail.sharepoint.com/:f:/s/SGM-SEPEP-COSH/En8cA87L3ZtHrG8cXEaZ5R4Byp7OuBlR8AOkRLPvVoeneg?e=Q7EO4i">Shapefiles <i class="fa-solid fa-folder-open"></i></li></a>
+        <li><a href="https://cloudprodamazhotmail.sharepoint.com/:f:/s/SGM-SEPEP-COSH/EivPwcB0bBRFqs-r_xAwMh0Bz9bTEwTV6NFT_qcvr9NdUg?e=zqsRB8">Mapas Interativos <i class="fa-solid fa-globe"></i></li></a>
     </ol>
     """,
     unsafe_allow_html=True)
 
 st.markdown("""
-    <p><strong>Fontes de Dados</strong></p>
-    <p></p>
+    <!--<p><strong>Fontes de Dados</strong></p>
+    <p></p>-->
     """,
     unsafe_allow_html=True)
 
